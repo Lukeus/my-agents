@@ -284,8 +284,8 @@ sequenceDiagram
 │   └── Shared/             # Cross-cutting concerns
 ├── prompts/                # Agent prompt files
 ├── infrastructure/         # IaC (Bicep/Terraform)
-├── k8s/                   # Kubernetes manifests
-├── tests/                 # Tests
+├── k8s/                   # Kubernetes manifests & monitoring
+├── tests/                 # Unit & integration tests
 └── docs/                  # Documentation
 ```
 
@@ -313,7 +313,9 @@ Toggle between Ollama (development) and Azure OpenAI (production) via `appsettin
 - **REST APIs**: Full Swagger documentation for all endpoints
 - **Health Checks**: Kubernetes-ready liveness/readiness probes
 - **Clean Architecture**: Strict separation of concerns (Domain, Application, Infrastructure, Presentation)
-- **Comprehensive Testing**: Unit tests with 100% pass rate
+- **Comprehensive Testing**: 44 unit tests, 100% pass rate
+- **Production Monitoring**: Prometheus metrics, Grafana dashboards, OpenTelemetry tracing
+- **Event-Driven Publishing**: Azure Event Hub and Service Bus integration
 
 ### Agent Capabilities
 
@@ -339,12 +341,19 @@ Toggle between Ollama (development) and Azure OpenAI (production) via `appsettin
 - **Azure Event Hubs**: High-throughput event streaming
 - **Azure Service Bus**: Reliable message queuing
 - **Azure Kubernetes Service (AKS)**: Container orchestration
+- **Azure Cosmos DB**: NoSQL document database
+- **Azure SQL Database**: Relational data storage
 
-### Development
+### Development & Operations
 - **Ollama**: Local LLM for development
 - **xUnit**: Unit testing framework
 - **Moq 4.20**: Mocking framework
 - **FluentAssertions 8.8**: Assertion library
+- **Testcontainers**: Integration testing with containers
+- **Prometheus**: Metrics collection and storage
+- **Grafana**: Metrics visualization and dashboards
+- **OpenTelemetry**: Distributed tracing
+- **Serilog**: Structured logging
 
 ## 📁 Project Structure
 
@@ -482,8 +491,10 @@ dotnet test tests/Agents.Tests.Integration/Agents.Tests.Integration.csproj
 ```
 
 **Test Coverage:**
-- Unit tests: 24 tests, 100% pass rate
-- Integration tests: 8 tests for SQL Server persistence
+- Unit tests: 44 tests, 100% pass rate
+- Integration tests: 7 tests for SQL Server persistence (requires Docker)
+- Observability tests: 11 tests for metrics and monitoring
+- Event infrastructure tests: 9 tests for Event Hub and Service Bus
 - Technologies: xUnit, Moq, FluentAssertions, Testcontainers
 
 ## 📊 Status
@@ -495,11 +506,11 @@ dotnet test tests/Agents.Tests.Integration/Agents.Tests.Integration.csproj
 | Phase 3 | ✅ Complete | Prompt Management System |
 | Phase 4 | ✅ Complete | Core Agents Implementation |
 | Phase 5 | ✅ Complete | API Layer (REST APIs, Swagger, Health Checks) |
-| Phase 6 | 🚧 In Progress | Persistence Layer (Cosmos DB, Azure SQL) |
-| Phase 7 | ⏳ Planned | Infrastructure as Code (Bicep/Terraform) |
-| Phase 8 | ⏳ Planned | Kubernetes Deployment (Dockerfiles, Helm) |
-| Phase 9 | ⏳ Planned | Observability (Logging, Metrics, Tracing) |
-| Phase 10 | ⏳ Planned | Integration Testing |
+| Phase 6 | ✅ Complete | Persistence Layer (Cosmos DB, Azure SQL) |
+| Phase 7 | ✅ Complete | Persistence Integration (Repositories, Queries) |
+| Phase 8 | ✅ Complete | Infrastructure as Code (Bicep/Terraform) |
+| Phase 9 | ✅ Complete | Kubernetes Deployment (Docker, Helm, CI/CD) |
+| Phase 10 | ✅ Complete | Monitoring & Observability (Prometheus, Grafana, OpenTelemetry) |
 
 ## Contributing
 
