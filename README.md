@@ -462,12 +462,22 @@ curl -X POST https://localhost:5001/api/notification/send \
 
 ## 🧪 Testing
 
+### Unit Tests
 Run all unit tests:
 ```bash
 dotnet test tests/Agents.Tests.Unit/Agents.Tests.Unit.csproj
 ```
 
-Current coverage: 24 tests, 100% pass rate
+### Integration Tests
+Integration tests use Testcontainers (requires Docker):
+```bash
+dotnet test tests/Agents.Tests.Integration/Agents.Tests.Integration.csproj
+```
+
+**Test Coverage:**
+- Unit tests: 24 tests, 100% pass rate
+- Integration tests: 8 tests for SQL Server persistence
+- Technologies: xUnit, Moq, FluentAssertions, Testcontainers
 
 ## 📊 Status
 
