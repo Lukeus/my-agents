@@ -1,36 +1,213 @@
 # AI Orchestration Multi-Agent Framework
 
-Enterprise-grade event-driven microservice framework using C# and Microsoft Semantic Kernel for AI agent orchestration.
+An event-driven microservice framework for AI agent orchestration using C#, Microsoft Semantic Kernel, and Azure services.
 
-## Overview
+## 🎯 Overview
 
-This framework enables multiple specialized AI agents to collaborate on complex workflows through event-driven communication. All agent behavior is driven by versioned prompt files, supporting both local development (Ollama) and production deployment (Azure OpenAI) on Azure Kubernetes Service.
+This framework provides a production-ready, clean architecture implementation of AI agents that can:
+- Process events from Azure Event Grid, Event Hubs, and Service Bus
+- Execute LLM-powered operations via Azure OpenAI or Ollama
+- Communicate via REST APIs with full Swagger documentation
+- Scale independently in Azure Kubernetes Service (AKS)
+- Load and execute versioned prompts from GitHub repositories
 
-## Architecture
+## 🏗️ Architecture
 
-- **Clean Architecture**: Domain, Application, Infrastructure, Presentation layers
-- **Event-Driven**: Azure Event Grid, Event Hubs, Service Bus
-- **Prompt-Driven**: All agent logic defined in versioned prompt files
-- **Cloud Native**: Designed for AKS deployment with full IaC support
+### C4 Context Diagram
 
-## Agents
+```mermaid
+C4Context
+    title System Context - AI Agent Orchestration Framework
+    
+    Person(user, "Developer/User", "Interacts with agents via API")
+    System(agentSystem, "AI Agent Framework", "Multi-agent orchestration system")
+    
+    System_Ext(azureOpenAI, "Azure OpenAI", "Production LLM")
+    System_Ext(ollama, "Ollama", "Development LLM")
+    System_Ext(github, "GitHub", "Prompt repository")
+    System_Ext(eventGrid, "Azure Event Grid", "Event routing")
+    System_Ext(eventHubs, "Azure Event Hubs", "High-throughput events")
+    System_Ext(serviceBus, "Azure Service Bus", "Reliable messaging")
+    
+    Rel(user, agentSystem, "Sends requests", "HTTPS/REST")
+    Rel(agentSystem, azureOpenAI, "Invokes LLM", "HTTPS")
+    Rel(agentSystem, ollama, "Invokes LLM (dev)", "HTTP")
+    Rel(agentSystem, github, "Fetches prompts", "HTTPS")
+    Rel(agentSystem, eventGrid, "Publishes/subscribes", "AMQP")
+    Rel(agentSystem, eventHubs, "Produces/consumes", "AMQP")
+    Rel(agentSystem, serviceBus, "Sends/receives", "AMQP")
+```
 
-1. **Notification Agent**: Email, SMS, Teams, Slack notifications
-2. **DevOps Agent**: GitHub Projects, workflow automation, sprint analytics
-3. **Test Planning Agent**: Test specification and strategy generation
-4. **Implementation Agent**: Code generation from specs and tests
-5. **Prompt Registry Agent**: Centralized prompt management and versioning
-6. **Service Desk Agent**: Ticket triage, solution suggestions, SLA tracking
+### C4 Container Diagram
 
-## Technology Stack
+```mermaid
+C4Container
+    title Container Diagram - Agent Microservices
+    
+    Container(notificationAPI, "Notification API", "ASP.NET Core", "Handles multi-channel notifications")
+    Container(devopsAPI, "DevOps API", "ASP.NET Core", "GitHub automation & analytics")
+    Container(testPlanningAPI, "TestPlanning API", "ASP.NET Core", "Test spec generation")
+    Container(implementationAPI, "Implementation API", "ASP.NET Core", "Code generation & review")
+    Container(serviceDeskAPI, "ServiceDesk API", "ASP.NET Core", "Ticket triage & SLA tracking")
+    
+    ContainerDb(promptRepo, "Prompt Repository", "GitHub", "Versioned prompt files")
+    ContainerDb(eventInfra, "Event Infrastructure", "Azure", "Event Grid, Hubs, Service Bus")
+    Container(llmProvider, "LLM Provider", "Semantic Kernel", "Azure OpenAI / Ollama")
+    
+    Rel(notificationAPI, llmProvider, "Invokes")
+    Rel(devopsAPI, llmProvider, "Invokes")
+    Rel(testPlanningAPI, llmProvider, "Invokes")
+    Rel(implementationAPI, llmProvider, "Invokes")
+    Rel(serviceDeskAPI, llmProvider, "Invokes")
+    
+    Rel(notificationAPI, promptRepo, "Loads prompts")
+    Rel(devopsAPI, promptRepo, "Loads prompts")
+    Rel(testPlanningAPI, promptRepo, "Loads prompts")
+    Rel(implementationAPI, promptRepo, "Loads prompts")
+    Rel(serviceDeskAPI, promptRepo, "Loads prompts")
+    
+    Rel(notificationAPI, eventInfra, "Publishes events")
+    Rel(devopsAPI, eventInfra, "Publishes events")
+    Rel(testPlanningAPI, eventInfra, "Publishes events")
+    Rel(implementationAPI, eventInfra, "Publishes events")
+    Rel(serviceDeskAPI, eventInfra, "Publishes events")
+```
 
-- .NET 9+
-- Microsoft Semantic Kernel
-- Azure OpenAI / Ollama
-- Azure Event Grid, Event Hubs, Service Bus
-- Azure Kubernetes Service (AKS)
-- Cosmos DB / Azure SQL
-- Bicep (IaC)
+### C4 Component Diagram - Agent Structure
+
+```mermaid
+C4Component
+    title Component Diagram - Agent Internal Structure
+    
+    Container_Boundary(agent, "Agent Microservice") {
+        Component(controller, "API Controller", "ASP.NET MVC", "REST endpoints")
+        Component(agentCore, "Agent", "BaseAgent", "Core agent logic")
+        Component(llmProvider, "LLM Provider", "ILLMProvider", "Provider abstraction")
+        Component(promptLoader, "Prompt Loader", "IPromptLoader", "Loads & caches prompts")
+        Component(eventPublisher, "Event Publisher", "IEventPublisher", "Publishes domain events")
+        Component(domainModel, "Domain Model", "Aggregates", "Business logic")
+    }
+    
+    Rel(controller, agentCore, "Calls")
+    Rel(agentCore, llmProvider, "Uses")
+    Rel(agentCore, promptLoader, "Uses")
+    Rel(agentCore, eventPublisher, "Uses")
+    Rel(agentCore, domainModel, "Manages")
+```
+
+## 🔄 Agent Workflows
+
+### Notification Agent Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as Notification API
+    participant Agent as NotificationAgent
+    participant Prompt as PromptLoader
+    participant LLM as Semantic Kernel
+    participant Channel as NotificationChannel
+    participant Events as Event Publisher
+    
+    Client->>API: POST /api/notification/send
+    API->>Agent: ExecuteAsync(request)
+    Agent->>Prompt: LoadPromptAsync("email-formatter")
+    Prompt-->>Agent: Prompt template
+    Agent->>LLM: InvokeKernelAsync(prompt + data)
+    LLM-->>Agent: Formatted content
+    Agent->>Events: Publish(NotificationFormattedEvent)
+    Agent->>Channel: SendAsync(recipient, content)
+    Channel-->>Agent: Success/Failure
+    Agent->>Events: Publish(NotificationSentEvent)
+    Agent-->>API: AgentResult
+    API-->>Client: 200 OK
+```
+
+### DevOps Agent Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as DevOps API
+    participant Agent as DevOpsAgent
+    participant Prompt as PromptLoader
+    participant LLM as Semantic Kernel
+    participant GitHub as GitHub API
+    participant Events as Event Publisher
+    
+    Client->>API: POST /api/devops/execute<br/>{action: "create_issue"}
+    API->>Agent: ExecuteAsync(request)
+    Agent->>Prompt: LoadPromptAsync("issue-creator")
+    Prompt-->>Agent: Prompt template
+    Agent->>LLM: InvokeKernelAsync(prompt + issue data)
+    LLM-->>Agent: Enhanced issue details
+    Agent->>GitHub: Create issue (TODO)
+    GitHub-->>Agent: Issue #123
+    Agent->>Events: Publish(IssueCreatedEvent)
+    Agent-->>API: AgentResult(issueNumber)
+    API-->>Client: 200 OK
+```
+
+### Test Planning Agent Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as TestPlanning API
+    participant Agent as TestPlanningAgent
+    participant Prompt as PromptLoader
+    participant LLM as Semantic Kernel
+    participant Events as Event Publisher
+    
+    Client->>API: POST /api/testplanning/execute<br/>{type: "generate_spec"}
+    API->>Agent: ExecuteAsync(request)
+    Agent->>Prompt: LoadPromptAsync("spec-generator")
+    Prompt-->>Agent: Prompt template
+    Agent->>LLM: InvokeKernelAsync(feature description)
+    LLM-->>Agent: Test specification
+    Agent->>Events: Publish(TestSpecGeneratedEvent)
+    Agent-->>API: AgentResult<TestSpec>
+    API-->>Client: 200 OK + test spec
+```
+
+### Implementation Agent Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as Implementation API
+    participant Agent as ImplementationAgent
+    participant Prompt as PromptLoader
+    participant LLM as Semantic Kernel
+    participant Events as Event Publisher
+    
+    Client->>API: POST /api/implementation/execute<br/>{action: "generate_code"}
+    API->>Agent: ExecuteAsync(request)
+    Agent->>Prompt: LoadPromptAsync("code-generator")
+    Prompt-->>Agent: Prompt template
+    Agent->>LLM: InvokeKernelAsync(specification)
+    LLM-->>Agent: Generated code
+    Agent->>Events: Publish(CodeGeneratedEvent)
+    Agent-->>API: AgentResult<Code>
+    API-->>Client: 200 OK + generated code
+```
+
+### Inter-Agent Event Flow
+
+```mermaid
+sequenceDiagram
+    participant TestAgent as TestPlanning Agent
+    participant EventBus as Azure Event Grid
+    participant ImplAgent as Implementation Agent
+    participant NotifAgent as Notification Agent
+    
+    TestAgent->>EventBus: Publish(TestSpecGeneratedEvent)
+    EventBus->>ImplAgent: Subscribe(TestSpecGeneratedEvent)
+    ImplAgent->>ImplAgent: Generate implementation
+    ImplAgent->>EventBus: Publish(CodeGeneratedEvent)
+    EventBus->>NotifAgent: Subscribe(CodeGeneratedEvent)
+    NotifAgent->>NotifAgent: Send notification to team
+```
 
 ## Getting Started
 
