@@ -36,11 +36,8 @@ public static class DependencyInjection
         });
 
         // Register repositories
-        services.AddScoped<IRepository<Notification, string>>(sp =>
-        {
-            var context = sp.GetRequiredService<AgentsDbContext>();
-            return new SqlServerRepository<Notification, string>(context);
-        });
+        services.AddScoped<IRepository<Notification, string>, NotificationRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
 
         return services;
     }

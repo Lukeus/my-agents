@@ -75,6 +75,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.Infrastructure.Persi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.Infrastructure.Persistence.SqlServer", "src\Infrastructure\Agents.Infrastructure.Persistence.SqlServer\Agents.Infrastructure.Persistence.SqlServer.csproj", "{75514C33-6F29-4811-8873-7A05F35528E4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.Tests.Integration", "tests\Agents.Tests.Integration\Agents.Tests.Integration.csproj", "{13855B02-4F27-4288-B4B6-19A460764702}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -445,6 +447,18 @@ Global
 		{75514C33-6F29-4811-8873-7A05F35528E4}.Release|x64.Build.0 = Release|Any CPU
 		{75514C33-6F29-4811-8873-7A05F35528E4}.Release|x86.ActiveCfg = Release|Any CPU
 		{75514C33-6F29-4811-8873-7A05F35528E4}.Release|x86.Build.0 = Release|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Debug|x64.Build.0 = Debug|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Debug|x86.Build.0 = Debug|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Release|x64.ActiveCfg = Release|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Release|x64.Build.0 = Release|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Release|x86.ActiveCfg = Release|Any CPU
+		{13855B02-4F27-4288-B4B6-19A460764702}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -484,5 +498,6 @@ Global
 		{E77C4032-3BE6-4830-ADF3-12D5868607CA} = {6996BBF7-DB31-59BC-C7DD-9A7CCC6138C4}
 		{6311F331-8857-43CC-9BF5-F86EE440C270} = {9048EB7F-3875-A59E-E36B-5BD4C6F2A282}
 		{75514C33-6F29-4811-8873-7A05F35528E4} = {9048EB7F-3875-A59E-E36B-5BD4C6F2A282}
+		{13855B02-4F27-4288-B4B6-19A460764702} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

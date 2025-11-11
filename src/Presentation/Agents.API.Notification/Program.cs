@@ -4,7 +4,8 @@ using Agents.Application.Notification.Channels;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.LLM;
 using Agents.Infrastructure.Prompts.Services;
-
+using Agents.Infrastructure.Persistence.SqlServer;
+using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
@@ -47,6 +48,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Apply database migrations
+var connectionString = builder.Configuration.GetConnectionString("SqlServer");
+if (!string.IsNullOrEmpty(connectionString))
+{
+    await app.Services.MigrateDatabaseAsync();
+}
 
 // Configure middleware pipeline
 if (app.Environment.IsDevelopment())
