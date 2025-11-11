@@ -48,9 +48,9 @@ public class SqlServerRepository<TAggregate, TId> : IRepository<TAggregate, TId>
     public Task DeleteAsync(TId id, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(id);
-        
+
         var entity = _dbSet.Local.FirstOrDefault(e => EqualityComparer<TId>.Default.Equals(e.Id, id));
-        
+
         if (entity != null)
         {
             _dbSet.Remove(entity);

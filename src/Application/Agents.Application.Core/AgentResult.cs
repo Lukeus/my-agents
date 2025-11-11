@@ -50,7 +50,7 @@ public class AgentResult<T> : AgentResult
         };
     }
 
-    public static AgentResult<T> Failure(string errorMessage, Dictionary<string, object>? metadata = null)
+    public new static AgentResult<T> Failure(string errorMessage, Dictionary<string, object>? metadata = null)
     {
         return new AgentResult<T>
         {

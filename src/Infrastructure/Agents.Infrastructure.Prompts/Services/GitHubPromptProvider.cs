@@ -184,7 +184,7 @@ public class GitHubPromptProvider
     /// <summary>
     /// Watches a GitHub repository for changes using polling.
     /// </summary>
-    public async Task<IDisposable> WatchRepositoryAsync(
+    public Task<IDisposable> WatchRepositoryAsync(
         string owner,
         string repo,
         string path,
@@ -227,7 +227,7 @@ public class GitHubPromptProvider
 
         timer.Start();
 
-        return timer;
+        return Task.FromResult<IDisposable>(timer);
     }
 
     private (PromptMetadata metadata, string content) ParsePromptContent(string fileContent)

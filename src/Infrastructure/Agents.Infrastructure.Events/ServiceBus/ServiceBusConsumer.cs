@@ -32,7 +32,7 @@ public class ServiceBusConsumer : BackgroundService
             ?? throw new InvalidOperationException("ServiceBus:ConnectionString is not configured");
 
         _client = new ServiceBusClient(connectionString);
-        
+
         _processor = _client.CreateProcessor(_topicName, _subscriptionName, new ServiceBusProcessorOptions
         {
             MaxConcurrentCalls = 10,
@@ -73,7 +73,7 @@ public class ServiceBusConsumer : BackgroundService
                 _topicName);
 
             var body = args.Message.Body.ToString();
-            
+
             // Deserialize and process the event
             // This is where you would dispatch to handlers based on event type
             await ProcessEventAsync(body, eventType, args.CancellationToken);
@@ -108,7 +108,7 @@ public class ServiceBusConsumer : BackgroundService
         // 3. Publishing to internal event bus
 
         _logger.LogDebug("Processing event of type {EventType}: {EventJson}", eventType, eventJson);
-        
+
         return Task.CompletedTask;
     }
 

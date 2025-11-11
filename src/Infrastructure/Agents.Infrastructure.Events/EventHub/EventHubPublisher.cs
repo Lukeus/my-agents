@@ -22,10 +22,10 @@ public class EventHubPublisher : IEventPublisher, IAsyncDisposable
         ILogger<EventHubPublisher> logger)
     {
         _logger = logger;
-        
+
         var connectionString = configuration["EventHub:ConnectionString"]
             ?? throw new InvalidOperationException("EventHub:ConnectionString is not configured");
-            
+
         _eventHubName = configuration["EventHub:EventHubName"]
             ?? throw new InvalidOperationException("EventHub:EventHubName is not configured");
 
@@ -39,7 +39,7 @@ public class EventHubPublisher : IEventPublisher, IAsyncDisposable
             using var eventBatch = await _producerClient.CreateBatchAsync(cancellationToken);
 
             var eventData = CreateEventData(domainEvent);
-            
+
             if (!eventBatch.TryAdd(eventData))
             {
                 throw new InvalidOperationException($"Event is too large for the batch and cannot be sent.");
@@ -77,12 +77,12 @@ public class EventHubPublisher : IEventPublisher, IAsyncDisposable
             foreach (var domainEvent in events)
             {
                 var eventData = CreateEventData(domainEvent);
-                
+
                 if (!eventBatch.TryAdd(eventData))
                 {
                     // If we can't fit this event, send what we have and create a new batch
                     await _producerClient.SendAsync(eventBatch, cancellationToken);
-                    
+
                     // Create new batch since we can't clear it
                     using var newBatch = await _producerClient.CreateBatchAsync(cancellationToken);
                     if (!newBatch.TryAdd(eventData))
@@ -123,13 +123,13 @@ public class EventHubPublisher : IEventPublisher, IAsyncDisposable
     {
         var eventJson = JsonSerializer.Serialize(domainEvent, domainEvent.GetType());
         var eventData = new EventData(eventJson);
-        
+
         // Add metadata as properties
         eventData.Properties.Add("EventType", domainEvent.GetType().Name);
         eventData.Properties.Add("EventId", domainEvent.EventId.ToString());
         eventData.Properties.Add("OccurredAt", domainEvent.OccurredAt);
         eventData.ContentType = "application/json";
-        
+
         return eventData;
     }
 

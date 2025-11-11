@@ -137,13 +137,13 @@ public static class ObservabilityExtensions
         {
             options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
             {
-                diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+                diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value ?? "unknown");
                 diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
                 diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].ToString());
-                
+
                 if (httpContext.User.Identity?.IsAuthenticated == true)
                 {
-                    diagnosticContext.Set("UserName", httpContext.User.Identity.Name);
+                    diagnosticContext.Set("UserName", httpContext.User.Identity.Name ?? "Unknown");
                 }
             };
 

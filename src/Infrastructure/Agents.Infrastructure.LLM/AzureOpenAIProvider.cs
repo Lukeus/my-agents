@@ -52,7 +52,7 @@ public class AzureOpenAIProvider : ILLMProvider
             _options.AzureOpenAI.DeploymentName);
 
         var builder = Kernel.CreateBuilder();
-        
+
         builder.AddAzureOpenAIChatCompletion(
             deploymentName: _options.AzureOpenAI.DeploymentName,
             endpoint: _options.AzureOpenAI.Endpoint,

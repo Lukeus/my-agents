@@ -18,7 +18,7 @@ public class PromptLoader : IPromptLoader
     public PromptLoader(ILogger<PromptLoader> logger)
     {
         _logger = logger;
-        
+
         _yamlDeserializer = new DeserializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
             .IgnoreUnmatchedProperties()
@@ -38,9 +38,9 @@ public class PromptLoader : IPromptLoader
         _logger.LogDebug("Loading prompt from {FilePath}", filePath);
 
         var content = await File.ReadAllTextAsync(filePath, cancellationToken);
-        
+
         var (metadata, promptContent) = ParsePromptFile(content);
-        
+
         var prompt = new Prompt
         {
             Metadata = metadata,
@@ -63,7 +63,7 @@ public class PromptLoader : IPromptLoader
     /// Loads all prompts from a directory recursively.
     /// </summary>
     public async Task<List<Prompt>> LoadPromptsFromDirectoryAsync(
-        string directoryPath, 
+        string directoryPath,
         string searchPattern = "*.prompt",
         CancellationToken cancellationToken = default)
     {
@@ -102,7 +102,7 @@ public class PromptLoader : IPromptLoader
     private (PromptMetadata metadata, string content) ParsePromptFile(string fileContent)
     {
         const string yamlDelimiter = "---";
-        
+
         // Check if file starts with YAML frontmatter
         if (!fileContent.TrimStart().StartsWith(yamlDelimiter))
         {

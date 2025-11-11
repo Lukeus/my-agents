@@ -117,7 +117,7 @@ public class ServiceBusPublisher : IEventPublisher, IAsyncDisposable
 
         if (eventType.Contains("Notification"))
             return _configuration["ServiceBus:NotificationTopic"] ?? "notification-events";
-        
+
         if (eventType.Contains("DevOps"))
             return _configuration["ServiceBus:DevOpsTopic"] ?? "devops-events";
 

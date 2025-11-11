@@ -32,11 +32,11 @@ public class LLMProviderFactory
             "azureopenai" => new AzureOpenAIProvider(
                 _options,
                 _loggerFactory.CreateLogger<AzureOpenAIProvider>()),
-            
+
             "ollama" => new OllamaProvider(
                 _options,
                 _loggerFactory.CreateLogger<OllamaProvider>()),
-            
+
             _ => throw new InvalidOperationException(
                 $"Unknown LLM provider type: {providerType}. Supported values: 'AzureOpenAI', 'Ollama'")
         };
