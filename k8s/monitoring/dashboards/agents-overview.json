@@ -1,0 +1,105 @@
+{
+  "dashboard": {
+    "title": "AI Agents Overview",
+    "tags": ["agents", "ai", "microservices"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Agent Operations Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(agent_operations_total[5m])",
+            "legendFormat": "{{agent_name}} - {{operation}}"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}
+      },
+      {
+        "id": 2,
+        "title": "Agent Operation Duration (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(agent_operation_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{agent_name}} - {{operation}}"
+          }
+        ],
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}
+      },
+      {
+        "id": 3,
+        "title": "LLM Calls Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(llm_calls_total[5m])",
+            "legendFormat": "{{agent_name}} - {{model}}"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8}
+      },
+      {
+        "id": 4,
+        "title": "LLM Token Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(llm_tokens_used_total[5m])",
+            "legendFormat": "{{agent_name}} - {{model}}"
+          }
+        ],
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8}
+      },
+      {
+        "id": 5,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(agent_operations_error_total[5m])",
+            "legendFormat": "{{agent_name}} - {{operation}}"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8}
+      },
+      {
+        "id": 6,
+        "title": "Active Requests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "agent_active_requests",
+            "legendFormat": "{{agent_name}}"
+          }
+        ],
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8}
+      },
+      {
+        "id": 7,
+        "title": "Notifications Sent Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(notifications_sent_total[5m])",
+            "legendFormat": "{{channel}}"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8}
+      },
+      {
+        "id": 8,
+        "title": "Event Processing Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(events_processed_total[5m])",
+            "legendFormat": "{{agent_name}} - {{event_type}}"
+          }
+        ],
+        "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8}
+      }
+    ]
+  }
+}
