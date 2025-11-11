@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.Infrastructure.Event
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.Infrastructure.ServiceBus", "src\Infrastructure\Agents.Infrastructure.ServiceBus\Agents.Infrastructure.ServiceBus.csproj", "{490C8E61-92B6-45D0-9CE6-30A913E61250}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agents.Infrastructure.Prompts", "src\Infrastructure\Agents.Infrastructure.Prompts\Agents.Infrastructure.Prompts.csproj", "{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -217,6 +219,18 @@ Global
 		{490C8E61-92B6-45D0-9CE6-30A913E61250}.Release|x64.Build.0 = Release|Any CPU
 		{490C8E61-92B6-45D0-9CE6-30A913E61250}.Release|x86.ActiveCfg = Release|Any CPU
 		{490C8E61-92B6-45D0-9CE6-30A913E61250}.Release|x86.Build.0 = Release|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Debug|x64.Build.0 = Debug|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Debug|x86.Build.0 = Debug|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Release|x64.ActiveCfg = Release|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Release|x64.Build.0 = Release|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Release|x86.ActiveCfg = Release|Any CPU
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -239,5 +253,6 @@ Global
 		{1020CF06-E777-483A-B813-B42B51BAC97A} = {9048EB7F-3875-A59E-E36B-5BD4C6F2A282}
 		{6E1E40D4-8C63-4970-AF80-EF7BF0E7B332} = {9048EB7F-3875-A59E-E36B-5BD4C6F2A282}
 		{490C8E61-92B6-45D0-9CE6-30A913E61250} = {9048EB7F-3875-A59E-E36B-5BD4C6F2A282}
+		{320FBBAE-75E9-4257-BBF2-9EF8769AB3E6} = {9048EB7F-3875-A59E-E36B-5BD4C6F2A282}
 	EndGlobalSection
 EndGlobal
