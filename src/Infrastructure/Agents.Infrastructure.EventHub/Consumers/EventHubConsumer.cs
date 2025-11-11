@@ -95,8 +95,8 @@ public class EventHubConsumer : IAsyncDisposable
                 return;
             }
 
-            var eventTypeName = args.Data.Properties.TryGetValue("EventType", out var type) 
-                ? type.ToString() 
+            var eventTypeName = args.Data.Properties.TryGetValue("EventType", out var type)
+                ? type.ToString()
                 : null;
 
             if (string.IsNullOrEmpty(eventTypeName) || !_eventTypeRegistry.TryGetValue(eventTypeName, out var clrType))
@@ -104,7 +104,7 @@ public class EventHubConsumer : IAsyncDisposable
                 _logger.LogWarning(
                     "No CLR type registered for event type {EventType}. Skipping.",
                     eventTypeName);
-                
+
                 if (_options.EnableAutoCheckpoint)
                 {
                     await args.UpdateCheckpointAsync(args.CancellationToken);
@@ -118,7 +118,7 @@ public class EventHubConsumer : IAsyncDisposable
             if (domainEvent == null)
             {
                 _logger.LogWarning("Failed to deserialize event of type {EventType}", eventTypeName);
-                
+
                 if (_options.EnableAutoCheckpoint)
                 {
                     await args.UpdateCheckpointAsync(args.CancellationToken);
@@ -129,7 +129,7 @@ public class EventHubConsumer : IAsyncDisposable
             if (!_handlers.TryGetValue(clrType, out var handler))
             {
                 _logger.LogWarning("No handler registered for event type {EventType}", clrType.Name);
-                
+
                 if (_options.EnableAutoCheckpoint)
                 {
                     await args.UpdateCheckpointAsync(args.CancellationToken);
@@ -168,7 +168,7 @@ public class EventHubConsumer : IAsyncDisposable
                 ex,
                 "Error processing event from partition {PartitionId}",
                 args.Partition.PartitionId);
-            
+
             // Don't checkpoint on error - event will be reprocessed
         }
     }

@@ -15,13 +15,13 @@ public class EventHubPublisherTests
     public EventHubPublisherTests()
     {
         _loggerMock = new Mock<ILogger<EventHubPublisher>>();
-        
+
         var configDict = new Dictionary<string, string?>
         {
             ["EventHub:ConnectionString"] = "Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=test;SharedAccessKey=testkey",
             ["EventHub:EventHubName"] = "test-events"
         };
-        
+
         _configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(configDict)
             .Build();

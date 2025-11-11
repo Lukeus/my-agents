@@ -39,7 +39,7 @@ public abstract class BaseAgent
     public async Task<AgentResult> ExecuteAsync(string input, AgentContext context)
     {
         var stopwatch = Stopwatch.StartNew();
-        
+
         try
         {
             Logger.LogInformation(
@@ -47,7 +47,7 @@ public abstract class BaseAgent
                 AgentName, context.ExecutionId, context.CorrelationId);
 
             var result = await ExecuteCoreAsync(input, context);
-            
+
             stopwatch.Stop();
             // Update duration in metadata since AgentResult is not a record
             result.Metadata["Duration"] = stopwatch.Elapsed;
@@ -103,7 +103,7 @@ public abstract class BaseAgent
         CancellationToken cancellationToken = default)
     {
         var kernel = LLMProvider.GetKernel();
-        
+
         var result = await kernel.InvokePromptAsync(
             promptText,
             arguments,
@@ -118,7 +118,7 @@ public abstract class BaseAgent
     protected async Task PublishEventAsync(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
     {
         await EventPublisher.PublishAsync(domainEvent, cancellationToken);
-        
+
         Logger.LogInformation(
             "Agent {AgentName} published event {EventType}",
             AgentName, domainEvent.GetType().Name);

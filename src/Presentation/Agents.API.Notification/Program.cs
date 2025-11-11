@@ -13,8 +13,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { 
-        Title = "Notification Agent API", 
+    c.SwaggerDoc("v1", new()
+    {
+        Title = "Notification Agent API",
         Version = "v1",
         Description = "AI-powered notification agent supporting multiple channels (Email, SMS, Teams, Slack)"
     });

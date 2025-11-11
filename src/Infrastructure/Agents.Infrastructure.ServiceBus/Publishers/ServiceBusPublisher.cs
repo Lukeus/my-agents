@@ -31,8 +31,8 @@ public class ServiceBusPublisher : IEventPublisher, IAsyncDisposable
         {
             RetryOptions = new ServiceBusRetryOptions
             {
-                Mode = _options.UseExponentialBackoff 
-                    ? ServiceBusRetryMode.Exponential 
+                Mode = _options.UseExponentialBackoff
+                    ? ServiceBusRetryMode.Exponential
                     : ServiceBusRetryMode.Fixed,
                 MaxRetries = _options.MaxRetryAttempts,
                 Delay = TimeSpan.FromMilliseconds(_options.RetryDelayMilliseconds)
@@ -117,7 +117,7 @@ public class ServiceBusPublisher : IEventPublisher, IAsyncDisposable
         // Add metadata as properties
         message.ApplicationProperties.Add("EventType", domainEvent.GetType().Name);
         message.ApplicationProperties.Add("OccurredAt", domainEvent.OccurredAt.ToString("O"));
-        
+
         if (domainEvent.CausationId.HasValue)
         {
             message.ApplicationProperties.Add("CausationId", domainEvent.CausationId.Value.ToString());

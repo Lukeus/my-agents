@@ -35,7 +35,7 @@ public class Notification : AggregateRoot<string>
     public void MarkAsFormatted(string formattedContent)
     {
         FormattedContent = formattedContent;
-        
+
         AddDomainEvent(new NotificationFormattedEvent
         {
             NotificationId = Id,
@@ -49,7 +49,7 @@ public class Notification : AggregateRoot<string>
     {
         Status = NotificationStatus.Sent;
         SentAt = DateTimeOffset.UtcNow;
-        
+
         AddDomainEvent(new NotificationSentEvent
         {
             NotificationId = Id,
@@ -63,7 +63,7 @@ public class Notification : AggregateRoot<string>
     {
         Status = NotificationStatus.Delivered;
         DeliveredAt = DateTimeOffset.UtcNow;
-        
+
         AddDomainEvent(new NotificationDeliveredEvent
         {
             NotificationId = Id,
@@ -77,7 +77,7 @@ public class Notification : AggregateRoot<string>
         Status = NotificationStatus.Failed;
         ErrorMessage = errorMessage;
         RetryCount++;
-        
+
         AddDomainEvent(new NotificationFailedEvent
         {
             NotificationId = Id,

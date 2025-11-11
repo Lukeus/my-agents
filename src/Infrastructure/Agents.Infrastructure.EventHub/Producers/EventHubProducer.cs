@@ -95,7 +95,7 @@ public class EventHubProducer : IEventPublisher, IAsyncDisposable
         eventData.Properties.Add("EventId", domainEvent.EventId.ToString());
         eventData.Properties.Add("EventType", domainEvent.GetType().Name);
         eventData.Properties.Add("CorrelationId", domainEvent.CorrelationId.ToString());
-        
+
         if (domainEvent.CausationId.HasValue)
         {
             eventData.Properties.Add("CausationId", domainEvent.CausationId.Value.ToString());

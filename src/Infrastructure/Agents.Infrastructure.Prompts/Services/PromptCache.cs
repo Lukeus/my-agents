@@ -43,11 +43,11 @@ public class PromptCache
         _logger.LogDebug("Cache miss for prompt: {Key}", key);
 
         var prompt = await factory();
-        
+
         _cache.Set(key, prompt, _defaultOptions);
 
-        _logger.LogInformation("Cached prompt '{Name}' v{Version} with key: {Key}", 
-            prompt.Metadata.Name, 
+        _logger.LogInformation("Cached prompt '{Name}' v{Version} with key: {Key}",
+            prompt.Metadata.Name,
             prompt.Metadata.Version,
             key);
 
@@ -60,7 +60,7 @@ public class PromptCache
     public Prompt? Get(string name, string? version = null)
     {
         var key = GetCacheKey(name, version);
-        
+
         if (_cache.TryGetValue<Prompt>(key, out var prompt))
         {
             _logger.LogDebug("Retrieved prompt from cache: {Key}", key);
@@ -77,7 +77,7 @@ public class PromptCache
     public void Set(Prompt prompt, TimeSpan? expiration = null)
     {
         var key = GetCacheKey(prompt.Metadata.Name, prompt.Metadata.Version);
-        
+
         var options = expiration.HasValue
             ? new MemoryCacheEntryOptions { AbsoluteExpirationRelativeToNow = expiration.Value }
             : _defaultOptions;
@@ -94,7 +94,7 @@ public class PromptCache
     {
         var key = GetCacheKey(name, version);
         _cache.Remove(key);
-        
+
         _logger.LogInformation("Invalidated prompt from cache: {Key}", key);
     }
 
@@ -144,8 +144,8 @@ public class PromptCache
     /// </summary>
     private static string GetCacheKey(string name, string? version = null)
     {
-        return version != null 
-            ? $"prompt:{name}:{version}" 
+        return version != null
+            ? $"prompt:{name}:{version}"
             : $"prompt:{name}:latest";
     }
 }

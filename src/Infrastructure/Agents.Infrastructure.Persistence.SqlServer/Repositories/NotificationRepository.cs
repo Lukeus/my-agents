@@ -38,7 +38,7 @@ public class NotificationRepository : SqlServerRepository<Notification, string>,
     public async Task<IEnumerable<Notification>> GetRecentAsync(int days = 7, CancellationToken cancellationToken = default)
     {
         var cutoffDate = DateTimeOffset.UtcNow.AddDays(-days);
-        
+
         return await _context.Notifications
             .Where(n => n.SentAt.HasValue && n.SentAt >= cutoffDate)
             .OrderByDescending(n => n.SentAt)

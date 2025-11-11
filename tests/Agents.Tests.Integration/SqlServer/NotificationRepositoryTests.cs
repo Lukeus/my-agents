@@ -110,11 +110,11 @@ public class NotificationRepositoryTests : IAsyncLifetime
     {
         // Arrange
         var repository = _serviceProvider!.GetRequiredService<INotificationRepository>();
-        
+
         var notification1 = new Notification(Guid.NewGuid().ToString(), "email", "user1@test.com", "Sub1", "Content1");
         var notification2 = new Notification(Guid.NewGuid().ToString(), "email", "user2@test.com", "Sub2", "Content2");
         var notification3 = new Notification(Guid.NewGuid().ToString(), "sms", "+123", string.Empty, "SMS");
-        
+
         notification1.MarkAsSent();
         notification3.MarkAsSent();
 
@@ -131,7 +131,7 @@ public class NotificationRepositoryTests : IAsyncLifetime
         sentNotifications.Should().HaveCount(2);
         sentNotifications.Should().Contain(n => n.Id == notification1.Id);
         sentNotifications.Should().Contain(n => n.Id == notification3.Id);
-        
+
         pendingNotifications.Should().HaveCount(1);
         pendingNotifications.Should().Contain(n => n.Id == notification2.Id);
     }
@@ -141,7 +141,7 @@ public class NotificationRepositoryTests : IAsyncLifetime
     {
         // Arrange
         var repository = _serviceProvider!.GetRequiredService<INotificationRepository>();
-        
+
         var emailNotification = new Notification(Guid.NewGuid().ToString(), "email", "user@test.com", "Sub", "Content");
         var smsNotification = new Notification(Guid.NewGuid().ToString(), "sms", "+123", string.Empty, "SMS");
 
@@ -156,7 +156,7 @@ public class NotificationRepositoryTests : IAsyncLifetime
         // Assert
         emailNotifications.Should().HaveCount(1);
         emailNotifications.First().Id.Should().Be(emailNotification.Id);
-        
+
         smsNotifications.Should().HaveCount(1);
         smsNotifications.First().Id.Should().Be(smsNotification.Id);
     }
@@ -166,19 +166,19 @@ public class NotificationRepositoryTests : IAsyncLifetime
     {
         // Arrange
         var repository = _serviceProvider!.GetRequiredService<INotificationRepository>();
-        
+
         var notification1 = new Notification(Guid.NewGuid().ToString(), "email", "user1@test.com", "Sub1", "Content1");
         var notification2 = new Notification(Guid.NewGuid().ToString(), "email", "user2@test.com", "Sub2", "Content2");
         var notification3 = new Notification(Guid.NewGuid().ToString(), "email", "user3@test.com", "Sub3", "Content3");
 
         // Fail notification1 once (retryable)
         notification1.MarkAsFailed("Error 1");
-        
+
         // Fail notification2 three times (not retryable with maxRetries=3)
         notification2.MarkAsFailed("Error 1");
         notification2.MarkAsFailed("Error 2");
         notification2.MarkAsFailed("Error 3");
-        
+
         // notification3 is still pending
 
         await repository.AddAsync(notification1);
@@ -199,7 +199,7 @@ public class NotificationRepositoryTests : IAsyncLifetime
     {
         // Arrange
         var repository = _serviceProvider!.GetRequiredService<INotificationRepository>();
-        
+
         var notification1 = new Notification(Guid.NewGuid().ToString(), "email", "user@test.com", "Sub1", "Content1");
         var notification2 = new Notification(Guid.NewGuid().ToString(), "sms", "user@test.com", "Sub2", "Content2");
         var notification3 = new Notification(Guid.NewGuid().ToString(), "email", "other@test.com", "Sub3", "Content3");
@@ -217,7 +217,7 @@ public class NotificationRepositoryTests : IAsyncLifetime
         userNotifications.Should().HaveCount(2);
         userNotifications.Should().Contain(n => n.Id == notification1.Id);
         userNotifications.Should().Contain(n => n.Id == notification2.Id);
-        
+
         otherNotifications.Should().HaveCount(1);
         otherNotifications.First().Id.Should().Be(notification3.Id);
     }

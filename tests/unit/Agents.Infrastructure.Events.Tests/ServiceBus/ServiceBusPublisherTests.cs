@@ -15,14 +15,14 @@ public class ServiceBusPublisherTests
     public ServiceBusPublisherTests()
     {
         _loggerMock = new Mock<ILogger<ServiceBusPublisher>>();
-        
+
         var configDict = new Dictionary<string, string?>
         {
             ["ServiceBus:ConnectionString"] = "Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=test;SharedAccessKey=testkey",
             ["ServiceBus:NotificationTopic"] = "notification-events",
             ["ServiceBus:DevOpsTopic"] = "devops-events"
         };
-        
+
         _configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(configDict)
             .Build();

@@ -51,7 +51,7 @@ public class OllamaProvider : ILLMProvider
             _options.Ollama.ModelId);
 
         var builder = Kernel.CreateBuilder();
-        
+
         builder.AddOllamaChatCompletion(
             modelId: _options.Ollama.ModelId,
             endpoint: new Uri(_options.Ollama.Endpoint));

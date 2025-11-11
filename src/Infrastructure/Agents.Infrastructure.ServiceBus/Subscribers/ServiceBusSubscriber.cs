@@ -34,8 +34,8 @@ public class ServiceBusSubscriber : IAsyncDisposable
         {
             RetryOptions = new ServiceBusRetryOptions
             {
-                Mode = _options.UseExponentialBackoff 
-                    ? ServiceBusRetryMode.Exponential 
+                Mode = _options.UseExponentialBackoff
+                    ? ServiceBusRetryMode.Exponential
                     : ServiceBusRetryMode.Fixed,
                 MaxRetries = _options.MaxRetryAttempts,
                 Delay = TimeSpan.FromMilliseconds(_options.RetryDelayMilliseconds)
@@ -399,7 +399,7 @@ public class ServiceBusSubscriber : IAsyncDisposable
             await _sessionProcessor.StopProcessingAsync();
             await _sessionProcessor.DisposeAsync();
         }
-        
+
         await _client.DisposeAsync();
         _logger.LogInformation("Service Bus Subscriber disposed");
     }
