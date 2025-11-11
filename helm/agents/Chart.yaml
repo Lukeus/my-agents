@@ -1,0 +1,16 @@
+apiVersion: v2
+name: agents
+description: AI Orchestration Multi-Agent Event-Driven Microservices
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - ai
+  - agents
+  - microservices
+  - semantic-kernel
+maintainers:
+  - name: AI Agents Team
+home: https://github.com/your-org/agents
+sources:
+  - https://github.com/your-org/agents

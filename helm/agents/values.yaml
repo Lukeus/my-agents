@@ -1,0 +1,317 @@
+# Default values for agents chart
+
+# Global settings
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# Common image settings
+image:
+  registry: youracr.azurecr.io
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+# Common service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "agents-sa"
+
+# Notification Agent
+notificationAgent:
+  enabled: true
+  name: notification
+  replicaCount: 2
+  image:
+    repository: agents-notification-api
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Production"
+    - name: DOTNET_EnableDiagnostics
+      value: "0"
+
+# DevOps Agent
+devopsAgent:
+  enabled: true
+  name: devops
+  replicaCount: 2
+  image:
+    repository: agents-devops-api
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Production"
+    - name: DOTNET_EnableDiagnostics
+      value: "0"
+
+# TestPlanning Agent
+testplanningAgent:
+  enabled: true
+  name: testplanning
+  replicaCount: 2
+  image:
+    repository: agents-testplanning-api
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Production"
+    - name: DOTNET_EnableDiagnostics
+      value: "0"
+
+# Implementation Agent
+implementationAgent:
+  enabled: true
+  name: implementation
+  replicaCount: 2
+  image:
+    repository: agents-implementation-api
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Production"
+    - name: DOTNET_EnableDiagnostics
+      value: "0"
+
+# ServiceDesk Agent
+servicedeskAgent:
+  enabled: true
+  name: servicedesk
+  replicaCount: 2
+  image:
+    repository: agents-servicedesk-api
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 5
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: "Production"
+    - name: DOTNET_EnableDiagnostics
+      value: "0"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: agents.example.com
+      paths:
+        - path: /notification
+          pathType: Prefix
+          backend:
+            service:
+              name: notification
+              port: 80
+        - path: /devops
+          pathType: Prefix
+          backend:
+            service:
+              name: devops
+              port: 80
+        - path: /testplanning
+          pathType: Prefix
+          backend:
+            service:
+              name: testplanning
+              port: 80
+        - path: /implementation
+          pathType: Prefix
+          backend:
+            service:
+              name: implementation
+              port: 80
+        - path: /servicedesk
+          pathType: Prefix
+          backend:
+            service:
+              name: servicedesk
+              port: 80
+  tls:
+    - secretName: agents-tls
+      hosts:
+        - agents.example.com
+
+# Network policies
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false
+  capabilities:
+    drop:
+      - ALL
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity rules
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - agents
+          topologyKey: kubernetes.io/hostname

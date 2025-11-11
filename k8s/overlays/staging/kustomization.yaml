@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: agents-staging
+
+namePrefix: staging-
+
+commonLabels:
+  environment: staging
+
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - patches/namespace.yaml
+  - patches/replicas.yaml
+
+configMapGenerator:
+  - name: env-config
+    literals:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - Logging__LogLevel__Default=Information
+
+images:
+  - name: youracr.azurecr.io/agents-notification-api
+    newTag: staging-latest
+  - name: youracr.azurecr.io/agents-devops-api
+    newTag: staging-latest
+  - name: youracr.azurecr.io/agents-testplanning-api
+    newTag: staging-latest
+  - name: youracr.azurecr.io/agents-implementation-api
+    newTag: staging-latest
+  - name: youracr.azurecr.io/agents-servicedesk-api
+    newTag: staging-latest

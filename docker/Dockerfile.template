@@ -1,0 +1,80 @@
+# Multi-stage Dockerfile Template for Agent APIs
+# Usage: Copy and customize for each agent API
+
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+# Copy solution file
+COPY ["Agents.sln", "./"]
+
+# Copy all project files for dependency resolution
+# Note: Adjust paths based on agent dependencies
+COPY ["src/Presentation/Agents.API.{AGENT_NAME}/Agents.API.{AGENT_NAME}.csproj", "src/Presentation/Agents.API.{AGENT_NAME}/"]
+COPY ["src/Application/Agents.Application.{AGENT_NAME}/Agents.Application.{AGENT_NAME}.csproj", "src/Application/Agents.Application.{AGENT_NAME}/"]
+COPY ["src/Application/Agents.Application.Core/Agents.Application.Core.csproj", "src/Application/Agents.Application.Core/"]
+COPY ["src/Domain/Agents.Domain.Core/Agents.Domain.Core.csproj", "src/Domain/Agents.Domain.Core/"]
+COPY ["src/Infrastructure/Agents.Infrastructure.LLM/Agents.Infrastructure.LLM.csproj", "src/Infrastructure/Agents.Infrastructure.LLM/"]
+COPY ["src/Infrastructure/Agents.Infrastructure.Prompts/Agents.Infrastructure.Prompts.csproj", "src/Infrastructure/Agents.Infrastructure.Prompts/"]
+
+# Restore dependencies
+RUN dotnet restore "src/Presentation/Agents.API.{AGENT_NAME}/Agents.API.{AGENT_NAME}.csproj"
+
+# Copy all source code
+COPY . .
+
+# Build application
+WORKDIR "/src/src/Presentation/Agents.API.{AGENT_NAME}"
+RUN dotnet build "Agents.API.{AGENT_NAME}.csproj" \
+    -c $BUILD_CONFIGURATION \
+    -o /app/build \
+    --no-restore
+
+# Publish stage
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "Agents.API.{AGENT_NAME}.csproj" \
+    -c $BUILD_CONFIGURATION \
+    -o /app/publish \
+    --no-restore \
+    /p:UseAppHost=false
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
+WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Create non-root user
+RUN addgroup -S appuser && adduser -S appuser -G appuser
+
+# Copy published application
+COPY --from=publish /app/publish .
+
+# Set ownership
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+# Environment variables
+ENV ASPNETCORE_URLS=http://+:8080 \
+    ASPNETCORE_ENVIRONMENT=Production \
+    DOTNET_EnableDiagnostics=0
+
+# Labels
+LABEL maintainer="AI Agents Team" \
+      version="1.0.0" \
+      description="AI Agent API - {AGENT_NAME}"
+
+# Entry point
+ENTRYPOINT ["dotnet", "Agents.API.{AGENT_NAME}.dll"]

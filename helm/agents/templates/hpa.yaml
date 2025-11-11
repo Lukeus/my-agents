@@ -1,0 +1,37 @@
+{{- range $agent := list "notificationAgent" "devopsAgent" "testplanningAgent" "implementationAgent" "servicedeskAgent" }}
+{{- $agentConfig := index $.Values $agent }}
+{{- if and $agentConfig.enabled $agentConfig.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "agents.fullname" $ }}-{{ $agentConfig.name }}
+  labels:
+    {{- include "agents.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $agentConfig.name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "agents.fullname" $ }}-{{ $agentConfig.name }}
+  minReplicas: {{ $agentConfig.autoscaling.minReplicas }}
+  maxReplicas: {{ $agentConfig.autoscaling.maxReplicas }}
+  metrics:
+  {{- if $agentConfig.autoscaling.targetCPUUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ $agentConfig.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if $agentConfig.autoscaling.targetMemoryUtilizationPercentage }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ $agentConfig.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}
+{{- end }}
