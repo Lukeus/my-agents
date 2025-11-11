@@ -126,9 +126,190 @@ Toggle between Ollama (development) and Azure OpenAI (production) via `appsettin
 }
 ```
 
+## 🚀 Features
+
+### Core Capabilities
+- **5 Specialized Agents**: Notification, DevOps, TestPlanning, Implementation, ServiceDesk
+- **Event-Driven Architecture**: Azure Event Grid, Event Hubs, Service Bus integration
+- **Prompt-Driven**: All agent logic configured via versioned prompt files
+- **Dual LLM Support**: Azure OpenAI (production) and Ollama (development)
+- **REST APIs**: Full Swagger documentation for all endpoints
+- **Health Checks**: Kubernetes-ready liveness/readiness probes
+- **Clean Architecture**: Strict separation of concerns (Domain, Application, Infrastructure, Presentation)
+- **Comprehensive Testing**: Unit tests with 100% pass rate
+
+### Agent Capabilities
+
+| Agent | Purpose | Key Features |
+|-------|---------|-------------|
+| **Notification** | Multi-channel notifications | Email, SMS, Teams, Slack formatters with delivery tracking |
+| **DevOps** | GitHub automation | Issue creation, sprint analytics, workflow triggering |
+| **TestPlanning** | Test generation | Test spec generation, strategy planning, coverage analysis |
+| **Implementation** | Code generation | Code generation, review, refactoring suggestions |
+| **ServiceDesk** | Ticket management | Triage, solution suggestions, SLA tracking, escalation |
+
+## 🛠️ Technology Stack
+
+### Core Technologies
+- **.NET 9**: Latest C# features and performance improvements
+- **Microsoft Semantic Kernel 1.67.1**: LLM orchestration framework
+- **ASP.NET Core**: REST API hosting
+- **Swashbuckle 10.0**: OpenAPI/Swagger documentation
+
+### Azure Services
+- **Azure OpenAI**: Production LLM
+- **Azure Event Grid**: Event routing and delivery
+- **Azure Event Hubs**: High-throughput event streaming
+- **Azure Service Bus**: Reliable message queuing
+- **Azure Kubernetes Service (AKS)**: Container orchestration
+
+### Development
+- **Ollama**: Local LLM for development
+- **xUnit**: Unit testing framework
+- **Moq 4.20**: Mocking framework
+- **FluentAssertions 8.8**: Assertion library
+
+## 📁 Project Structure
+
+```
+my-agents/
+├── src/
+│   ├── Application/           # Application layer (agents, CQRS)
+│   │   ├── Agents.Application.Core/
+│   │   ├── Agents.Application.Notification/
+│   │   ├── Agents.Application.DevOps/
+│   │   ├── Agents.Application.TestPlanning/
+│   │   ├── Agents.Application.Implementation/
+│   │   └── Agents.Application.ServiceDesk/
+│   ├── Domain/                # Domain layer (entities, events)
+│   │   ├── Agents.Domain.Core/
+│   │   └── Agents.Domain.*/
+│   ├── Infrastructure/        # Infrastructure layer
+│   │   ├── Agents.Infrastructure.LLM/
+│   │   ├── Agents.Infrastructure.Prompts/
+│   │   ├── Agents.Infrastructure.EventGrid/
+│   │   ├── Agents.Infrastructure.EventHub/
+│   │   └── Agents.Infrastructure.ServiceBus/
+│   └── Presentation/          # API layer
+│       ├── Agents.API.Notification/
+│       ├── Agents.API.DevOps/
+│       ├── Agents.API.TestPlanning/
+│       ├── Agents.API.Implementation/
+│       └── Agents.API.ServiceDesk/
+├── tests/
+│   └── Agents.Tests.Unit/     # Unit tests (24 tests, 100% pass)
+├── prompts/                   # Versioned prompt files
+└── infrastructure/            # IaC (Bicep/Terraform)
+```
+
+## 🏃 Getting Started
+
+### Prerequisites
+- .NET 9 SDK
+- Ollama (for local development) or Azure OpenAI credentials
+- Docker (optional, for containerization)
+
+### Configuration
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd my-agents
+```
+
+2. **Configure LLM Provider**
+
+Edit `appsettings.json` in any API project:
+
+```json
+{
+  "LLMProvider": {
+    "ProviderType": "Ollama",  // or "AzureOpenAI"
+    "Ollama": {
+      "Endpoint": "http://localhost:11434",
+      "ModelId": "llama3.2"
+    },
+    "AzureOpenAI": {
+      "Endpoint": "https://your-openai.openai.azure.com",
+      "ApiKey": "your-api-key",
+      "DeploymentName": "gpt-4",
+      "ModelId": "gpt-4"
+    }
+  }
+}
+```
+
+3. **Build the solution**
+```bash
+dotnet build
+```
+
+4. **Run tests**
+```bash
+dotnet test
+```
+
+5. **Run an API**
+```bash
+# Run Notification API
+cd src/Presentation/Agents.API.Notification
+dotnet run
+
+# Navigate to https://localhost:5001/swagger
+```
+
+### API Endpoints
+
+Each agent exposes the following endpoints:
+
+| Agent | Base URL | Execute Endpoint | Health Check |
+|-------|----------|------------------|-------------|
+| Notification | `:5001` | `POST /api/notification/send` | `GET /api/notification/health` |
+| DevOps | `:5002` | `POST /api/devops/execute` | `GET /api/devops/health` |
+| TestPlanning | `:5003` | `POST /api/testplanning/execute` | `GET /api/testplanning/health` |
+| Implementation | `:5004` | `POST /api/implementation/execute` | `GET /api/implementation/health` |
+| ServiceDesk | `:5005` | `POST /api/servicedesk/execute` | `GET /api/servicedesk/health` |
+
+### Example Request
+
+```bash
+curl -X POST https://localhost:5001/api/notification/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channel": "email",
+    "recipient": "user@example.com",
+    "subject": "Test Notification",
+    "content": "This is a test message"
+  }'
+```
+
+## 🧪 Testing
+
+Run all unit tests:
+```bash
+dotnet test tests/Agents.Tests.Unit/Agents.Tests.Unit.csproj
+```
+
+Current coverage: 24 tests, 100% pass rate
+
+## 📊 Status
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Phase 1 | ✅ Complete | Foundation (Domain, Entities, Interfaces) |
+| Phase 2 | ✅ Complete | Event Infrastructure (Event Grid, Hubs, Service Bus) |
+| Phase 3 | ✅ Complete | Prompt Management System |
+| Phase 4 | ✅ Complete | Core Agents Implementation |
+| Phase 5 | ✅ Complete | API Layer (REST APIs, Swagger, Health Checks) |
+| Phase 6 | 🚧 In Progress | Persistence Layer (Cosmos DB, Azure SQL) |
+| Phase 7 | ⏳ Planned | Infrastructure as Code (Bicep/Terraform) |
+| Phase 8 | ⏳ Planned | Kubernetes Deployment (Dockerfiles, Helm) |
+| Phase 9 | ⏳ Planned | Observability (Logging, Metrics, Tracing) |
+| Phase 10 | ⏳ Planned | Integration Testing |
+
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this project.
 
 ## Documentation
 
