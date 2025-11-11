@@ -1,0 +1,6 @@
+@Agents.API.ServiceDesk_HostAddress = http://localhost:5031
+
+GET {{Agents.API.ServiceDesk_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
