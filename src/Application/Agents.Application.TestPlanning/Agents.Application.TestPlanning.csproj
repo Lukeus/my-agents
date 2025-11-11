@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Agents.Domain.Core\Agents.Domain.Core.csproj" />
+    <ProjectReference Include="..\..\Domain\Agents.Domain.TestPlanning\Agents.Domain.TestPlanning.csproj" />
+    <ProjectReference Include="..\Agents.Application.Core\Agents.Application.Core.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

@@ -10,7 +10,7 @@ namespace Agents.Infrastructure.Prompts.Services;
 /// <summary>
 /// Loads and parses prompt files from the filesystem.
 /// </summary>
-public class PromptLoader
+public class PromptLoader : IPromptLoader
 {
     private readonly ILogger<PromptLoader> _logger;
     private readonly IDeserializer _yamlDeserializer;

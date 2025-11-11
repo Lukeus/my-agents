@@ -1,0 +1,42 @@
+---
+name: testplanning-spec-generator
+version: 1.0.0
+description: Generates comprehensive test specifications from feature descriptions
+author: AI Agents Team
+tags: [testing, test-planning, specification]
+model_requirements:
+  min_tokens: 8000
+  temperature: 0.4
+schema:
+  parameters:
+    - name: featureDescription
+      type: string
+      required: true
+    - name: requirements
+      type: string
+      required: false
+    - name: testFramework
+      type: string
+      required: false
+      default: xUnit
+---
+
+You are a test automation expert. Generate comprehensive test specifications for the following feature.
+
+Feature Description:
+{{featureDescription}}
+
+Requirements:
+{{requirements}}
+
+Test Framework: {{testFramework}}
+
+Generate test specifications including:
+1. Test scenarios (happy path, edge cases, error cases)
+2. Test data requirements
+3. Setup and teardown procedures
+4. Expected outcomes
+5. Priority levels (P0-P3)
+6. Estimated test coverage %
+
+Format as structured test specification document with clear test cases.

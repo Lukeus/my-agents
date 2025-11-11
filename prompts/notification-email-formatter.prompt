@@ -1,0 +1,36 @@
+---
+name: notification-email-formatter
+version: 1.0.0
+description: Formats notification content for email delivery
+author: AI Agents Team
+tags: [notification, email, formatting]
+model_requirements:
+  min_tokens: 2000
+  temperature: 0.3
+schema:
+  parameters:
+    - name: subject
+      type: string
+      required: true
+      description: Email subject line
+    - name: content
+      type: string
+      required: true
+      description: Raw notification content
+---
+
+You are an expert email formatter. Format the following notification content for professional email delivery.
+
+Subject: {{subject}}
+
+Content:
+{{content}}
+
+Please format this as a professional HTML email body with:
+- Clear structure and headings
+- Professional tone
+- Appropriate spacing and formatting
+- Call-to-action if applicable
+- Professional email signature placeholder
+
+Output only the formatted HTML email body.

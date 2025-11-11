@@ -1,0 +1,46 @@
+---
+name: implementation-code-generator
+version: 1.0.0
+description: Generates production-ready code from specifications
+author: AI Agents Team
+tags: [code-generation, implementation]
+model_requirements:
+  min_tokens: 16000
+  temperature: 0.3
+schema:
+  parameters:
+    - name: specification
+      type: string
+      required: true
+    - name: language
+      type: string
+      required: true
+      default: C#
+    - name: framework
+      type: string
+      required: false
+      default: .NET
+    - name: patterns
+      type: string
+      required: false
+      default: Clean Architecture
+---
+
+You are an expert {{language}} developer. Generate production-ready code based on the following specification.
+
+Specification:
+{{specification}}
+
+Language: {{language}}
+Framework: {{framework}}
+Architecture Pattern: {{patterns}}
+
+Generate code that follows:
+- SOLID principles
+- Clean code practices
+- Proper error handling
+- XML documentation comments
+- Unit testable design
+- Dependency injection where appropriate
+
+Provide complete, compilable code with proper namespaces and using statements.

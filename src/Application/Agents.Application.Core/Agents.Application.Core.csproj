@@ -9,6 +9,14 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.0" />
     <PackageReference Include="MediatR" Version="13.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.67.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Domain\Agents.Domain.Core\Agents.Domain.Core.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Prompts\Agents.Infrastructure.Prompts.csproj" />
   </ItemGroup>
 
 </Project>
