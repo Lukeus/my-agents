@@ -382,9 +382,16 @@ my-agents/
 ## 🏃 Getting Started
 
 ### Prerequisites
-- .NET 9 SDK
-- Ollama (for local development) or Azure OpenAI credentials
-- Docker (optional, for containerization)
+
+**Required:**
+- **.NET 9 SDK** - Latest C# features and performance
+- **Ollama** (local dev) or **Azure OpenAI** (production)
+- **PowerShell 7+** - For deployment scripts
+
+**Optional:**
+- **Docker Desktop** - For integration tests (Testcontainers)
+- **Azure CLI** - For infrastructure deployment (Bicep)
+- **kubectl** - For Kubernetes management
 
 ### Configuration
 

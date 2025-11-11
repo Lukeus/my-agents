@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "agents.fullname" . }}-config
+  labels:
+    {{- include "agents.labels" . | nindent 4 }}
+data:
+  # Azure OpenAI Configuration
+  LLMProvider__ProviderType: "AzureOpenAI"
+  
+  # Cosmos DB Configuration
+  CosmosDb__DatabaseName: "AgentsDB"
+  
+  # Event Hub Configuration
+  EventHub__EventHubName: "agent-events"
+  
+  # Service Bus Configuration
+  ServiceBus__NotificationTopic: "notification-events"
+  ServiceBus__DevOpsTopic: "devops-events"
+  
+  # Logging Configuration
+  Logging__LogLevel__Default: "Information"
+  Logging__LogLevel__Microsoft: "Warning"
+  Logging__LogLevel__System: "Warning"
+  
+  # Application Insights
+  ApplicationInsights__CloudRoleName: "Agents"

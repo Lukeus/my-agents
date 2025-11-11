@@ -1,0 +1,71 @@
+{{- range $agent := list "notificationAgent" "devopsAgent" "testplanningAgent" "implementationAgent" "servicedeskAgent" }}
+{{- $agentConfig := index $.Values $agent }}
+{{- if $agentConfig.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "agents.fullname" $ }}-{{ $agentConfig.name }}
+  labels:
+    {{- include "agents.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $agentConfig.name }}
+spec:
+  {{- if not $agentConfig.autoscaling.enabled }}
+  replicas: {{ $agentConfig.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "agents.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $agentConfig.name }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") $ | sha256sum }}
+      labels:
+        {{- include "agents.selectorLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $agentConfig.name }}
+    spec:
+      {{- with $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "agents.serviceAccountName" $ }}
+      securityContext:
+        {{- toYaml $.Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ $agentConfig.name }}
+        securityContext:
+          {{- toYaml $.Values.securityContext | nindent 12 }}
+        image: "{{ $.Values.image.registry }}/{{ $agentConfig.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ $agentConfig.service.targetPort }}
+          protocol: TCP
+        livenessProbe:
+          {{- toYaml $agentConfig.livenessProbe | nindent 12 }}
+        readinessProbe:
+          {{- toYaml $agentConfig.readinessProbe | nindent 12 }}
+        resources:
+          {{- toYaml $agentConfig.resources | nindent 12 }}
+        env:
+          {{- toYaml $agentConfig.env | nindent 12 }}
+        envFrom:
+        - configMapRef:
+            name: {{ include "agents.fullname" $ }}-config
+        - secretRef:
+            name: {{ include "agents.fullname" $ }}-secrets
+      {{- with $.Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}
