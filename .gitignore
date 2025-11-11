@@ -1,0 +1,170 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww]in32/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio 2015/2017/2019/2022 cache/options directory
+.vs/
+# Uncomment if you have tasks that create the project's static files in wwwroot
+#wwwroot/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NUNIT
+*.VisualState.xml
+TestResult.xml
+
+# Build Results of an ATL Project
+[Dd]ebugPS/
+[Rr]eleasePS/
+dlldata.c
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Publish profiles
+**/Properties/PublishProfiles/
+*.pubxml
+*.publishproj
+
+# Azure
+*.azurePubxml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.local.json
+
+# Secrets
+secrets.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Docker
+**/.dockerignore
+**/docker-compose*
+**/.docker
+
+# Azure Functions localsettings file
+local.settings.json
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+**/*.tfvars
+!**/*.tfvars.example
+.terraform.lock.hcl
+
+# Bicep
+*.bicep.json
+
+# Kubernetes
+**/kustomization.yaml.bak
+
+# macOS
+.DS_Store
+*.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# JetBrains Rider
+*.sln.DotSettings.user
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Node modules (if any frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
+coverage/
+*.coverage
+*.coveragexml
+
+# BenchmarkDotNet artifacts
+BenchmarkDotNet.Artifacts/
+
+# Backup & report files
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+ServiceFabricBackup/
+*.rptproj.bak
+
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+# Business Intelligence projects
+*.rdl.data
+*.bim.layout
+*.bim_*.settings
+*.rptproj.rsuser
+*- [Bb]ackup.rdl
+*- [Bb]ackup ([0-9]).rdl
+*- [Bb]ackup ([0-9][0-9]).rdl
+
+# Microsoft Fakes
+FakesAssemblies/
+
+# GhostDoc plugin
+*.GhostDoc.xml
+
+# Ollama models cache
+.ollama/
+
+# Temp files
+*.tmp
+*.temp
