@@ -100,6 +100,7 @@ jobs:
         context: .
         file: ${{ matrix.service.dockerfile }}
         push: false
+        load: false
         tags: agents-${{ matrix.service.name }}-api:${{ github.sha }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
@@ -107,6 +108,7 @@ jobs:
           
     - name: Run Trivy security scan (ACR)
       if: steps.azure-check.outputs.configured == 'true'
+      id: trivy-scan
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ${{ env.REGISTRY }}/agents-${{ matrix.service.name }}-api:${{ github.sha }}
@@ -117,20 +119,10 @@ jobs:
         TRIVY_USERNAME: ${{ secrets.ACR_NAME }}
         TRIVY_PASSWORD: ${{ steps.acr-token.outputs.token }}
       continue-on-error: true
-      
-    - name: Run Trivy security scan (local)
-      if: steps.azure-check.outputs.configured == 'false'
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: agents-${{ matrix.service.name }}-api:${{ github.sha }}
-        format: 'sarif'
-        output: 'trivy-results-${{ matrix.service.name }}.sarif'
-        severity: 'CRITICAL,HIGH'
-      continue-on-error: true
         
     - name: Upload Trivy results to GitHub Security
       uses: github/codeql-action/upload-sarif@v3
-      if: always() && hashFiles('trivy-results-${{ matrix.service.name }}.sarif') != ''
+      if: always() && steps.trivy-scan.outcome == 'success'
       with:
         sarif_file: 'trivy-results-${{ matrix.service.name }}.sarif'
         category: trivy-${{ matrix.service.name }}
