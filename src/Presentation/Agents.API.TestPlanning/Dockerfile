@@ -7,9 +7,11 @@ COPY ["Agents.sln", "./"]
 COPY ["src/Presentation/Agents.API.TestPlanning/Agents.API.TestPlanning.csproj", "src/Presentation/Agents.API.TestPlanning/"]
 COPY ["src/Application/Agents.Application.TestPlanning/Agents.Application.TestPlanning.csproj", "src/Application/Agents.Application.TestPlanning/"]
 COPY ["src/Application/Agents.Application.Core/Agents.Application.Core.csproj", "src/Application/Agents.Application.Core/"]
+COPY ["src/Domain/Agents.Domain.TestPlanning/Agents.Domain.TestPlanning.csproj", "src/Domain/Agents.Domain.TestPlanning/"]
 COPY ["src/Domain/Agents.Domain.Core/Agents.Domain.Core.csproj", "src/Domain/Agents.Domain.Core/"]
 COPY ["src/Infrastructure/Agents.Infrastructure.LLM/Agents.Infrastructure.LLM.csproj", "src/Infrastructure/Agents.Infrastructure.LLM/"]
 COPY ["src/Infrastructure/Agents.Infrastructure.Prompts/Agents.Infrastructure.Prompts.csproj", "src/Infrastructure/Agents.Infrastructure.Prompts/"]
+COPY ["src/Shared/Agents.Shared.Common/Agents.Shared.Common.csproj", "src/Shared/Agents.Shared.Common/"]
 
 # Restore dependencies
 RUN dotnet restore "src/Presentation/Agents.API.TestPlanning/Agents.API.TestPlanning.csproj"

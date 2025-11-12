@@ -7,9 +7,11 @@ COPY ["Agents.sln", "./"]
 COPY ["src/Presentation/Agents.API.ServiceDesk/Agents.API.ServiceDesk.csproj", "src/Presentation/Agents.API.ServiceDesk/"]
 COPY ["src/Application/Agents.Application.ServiceDesk/Agents.Application.ServiceDesk.csproj", "src/Application/Agents.Application.ServiceDesk/"]
 COPY ["src/Application/Agents.Application.Core/Agents.Application.Core.csproj", "src/Application/Agents.Application.Core/"]
+COPY ["src/Domain/Agents.Domain.ServiceDesk/Agents.Domain.ServiceDesk.csproj", "src/Domain/Agents.Domain.ServiceDesk/"]
 COPY ["src/Domain/Agents.Domain.Core/Agents.Domain.Core.csproj", "src/Domain/Agents.Domain.Core/"]
 COPY ["src/Infrastructure/Agents.Infrastructure.LLM/Agents.Infrastructure.LLM.csproj", "src/Infrastructure/Agents.Infrastructure.LLM/"]
 COPY ["src/Infrastructure/Agents.Infrastructure.Prompts/Agents.Infrastructure.Prompts.csproj", "src/Infrastructure/Agents.Infrastructure.Prompts/"]
+COPY ["src/Shared/Agents.Shared.Common/Agents.Shared.Common.csproj", "src/Shared/Agents.Shared.Common/"]
 
 # Restore dependencies
 RUN dotnet restore "src/Presentation/Agents.API.ServiceDesk/Agents.API.ServiceDesk.csproj"
