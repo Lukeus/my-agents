@@ -12,6 +12,7 @@ COPY ["src/Domain/Agents.Domain.Core/Agents.Domain.Core.csproj", "src/Domain/Age
 COPY ["src/Infrastructure/Agents.Infrastructure.LLM/Agents.Infrastructure.LLM.csproj", "src/Infrastructure/Agents.Infrastructure.LLM/"]
 COPY ["src/Infrastructure/Agents.Infrastructure.Prompts/Agents.Infrastructure.Prompts.csproj", "src/Infrastructure/Agents.Infrastructure.Prompts/"]
 COPY ["src/Infrastructure/Agents.Infrastructure.Persistence.SqlServer/Agents.Infrastructure.Persistence.SqlServer.csproj", "src/Infrastructure/Agents.Infrastructure.Persistence.SqlServer/"]
+COPY ["src/Shared/Agents.Shared.Common/Agents.Shared.Common.csproj", "src/Shared/Agents.Shared.Common/"]
 
 # Restore dependencies
 RUN dotnet restore "src/Presentation/Agents.API.Notification/Agents.API.Notification.csproj"
