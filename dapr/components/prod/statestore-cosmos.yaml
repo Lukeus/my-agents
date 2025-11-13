@@ -1,0 +1,24 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: agents-statestore
+spec:
+  type: state.azure.cosmosdb
+  version: v1
+  metadata:
+  - name: url
+    secretKeyRef:
+      name: azure-cosmos
+      key: endpoint
+  - name: masterKey
+    secretKeyRef:
+      name: azure-cosmos
+      key: masterKey
+  - name: database
+    value: "agents-prod"
+  - name: collection
+    value: "statestore"
+  - name: actorStateStore
+    value: "true"
+  - name: partitionKey
+    value: "partitionKey"

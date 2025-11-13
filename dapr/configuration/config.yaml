@@ -1,0 +1,24 @@
+apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: agents-config
+spec:
+  tracing:
+    samplingRate: "1"
+    otel:
+      endpointAddress: "otel-collector:4317"
+      isSecure: false
+      protocol: grpc
+  metric:
+    enabled: true
+  mtls:
+    enabled: false
+  features:
+    - name: ServiceInvocation
+      enabled: true
+    - name: PubSub
+      enabled: true
+    - name: State
+      enabled: true
+  accessControl:
+    defaultAction: allow

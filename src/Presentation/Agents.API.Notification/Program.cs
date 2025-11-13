@@ -5,7 +5,9 @@ using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.LLM;
 using Agents.Infrastructure.Prompts.Services;
 using Agents.Infrastructure.Persistence.SqlServer;
+using Agents.Infrastructure.Dapr.Extensions;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
@@ -27,8 +29,17 @@ builder.Services.AddLLMProvider(builder.Configuration);
 // Configure Prompts
 builder.Services.AddSingleton<IPromptLoader, PromptLoader>();
 
-// Configure Event Publisher (mock for now)
-builder.Services.AddSingleton<IEventPublisher, MockEventPublisher>();
+// Configure Event Publisher - Dapr or Mock
+var useDapr = builder.Configuration.GetValue<bool>("Dapr:Enabled");
+if (useDapr)
+{
+    builder.Services.AddDaprClient();
+    builder.Services.AddDaprEventPublisher();
+}
+else
+{
+    builder.Services.AddSingleton<IEventPublisher, MockEventPublisher>();
+}
 
 // Configure Notification services
 builder.Services.AddSingleton<INotificationChannelFactory, NotificationChannelFactory>();
@@ -69,6 +80,13 @@ app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
+
+// Map Dapr pub/sub endpoints if enabled
+if (useDapr)
+{
+    app.MapSubscribeHandler();
+    app.UseCloudEvents();
+}
 
 app.Run();
 
