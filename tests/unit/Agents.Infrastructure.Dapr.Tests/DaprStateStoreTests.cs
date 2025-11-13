@@ -99,7 +99,7 @@ public class DaprStateStoreTests
                 null,
                 null,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(null as string);
+            .Returns(Task.FromResult<string?>(null));
 
         // Act
         var result = await _stateStore.GetStateAsync<string>(key, CancellationToken.None);
@@ -307,7 +307,7 @@ public class DaprStateStoreTests
                 null,
                 null,
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(null as object);
+            .Returns(Task.FromResult<object?>(null));
 
         // Act
         var result = await _stateStore.ExistsAsync(key, CancellationToken.None);
