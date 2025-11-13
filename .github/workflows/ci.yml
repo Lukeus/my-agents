@@ -34,10 +34,11 @@ jobs:
     - name: Initialize Dapr
       run: dapr init
         
-    - name: Restore workloads and dependencies
-      run: |
-        dotnet workload restore
-        dotnet restore ${{ env.SOLUTION_PATH }}
+    - name: Restore workloads
+      run: dotnet workload restore ${{ env.SOLUTION_PATH }}
+    
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
       
     - name: Build solution
       run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
@@ -96,7 +97,7 @@ jobs:
       run: dotnet workload install aspire
     
     - name: Restore workloads
-      run: dotnet workload restore
+      run: dotnet workload restore ${{ env.SOLUTION_PATH }}
         
     - name: Run code analysis
       run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release /p:TreatWarningsAsErrors=true
