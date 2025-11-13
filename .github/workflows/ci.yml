@@ -45,8 +45,16 @@ jobs:
       
     - name: Start Docker services for integration tests
       run: |
-        docker run -d -p 6379:6379 redis:7.4
-        docker run -d -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+        # Stop and remove any existing containers on these ports
+        docker ps -q --filter "publish=6379" | xargs -r docker stop || true
+        docker ps -q --filter "publish=1433" | xargs -r docker stop || true
+        
+        # Start fresh containers
+        docker run -d -p 6379:6379 --name redis-test redis:7.4
+        docker run -d -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 --name sqlserver-test mcr.microsoft.com/mssql/server:2022-latest
+        
+        # Wait for services to be ready
+        sleep 10
     
     - name: Run integration tests
       run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal --filter "Category=Integration"
