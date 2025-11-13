@@ -16,14 +16,15 @@ This document provides a comprehensive overview of the AI Orchestration Multi-Ag
 
 ## Core Principles
 
-The framework is built on six fundamental principles:
+The framework is built on seven fundamental principles:
 
 1. **Clean Architecture**: Strict separation of concerns with clear boundaries between Domain, Application, Infrastructure, and Presentation layers
-2. **Event-Driven**: Agents communicate asynchronously via Azure Event Grid, Event Hubs, and Service Bus
-3. **Prompt-Driven**: All agent behavior is defined in versioned prompt files stored in a repository
-4. **Environment Agnostic**: Seamless switching between Ollama (development) and Azure OpenAI (production) via configuration
-5. **Infrastructure as Code**: Complete Azure environment provisioning via Bicep templates
-6. **Cloud Native**: Designed for Kubernetes deployment with horizontal scaling, health checks, and observability
+2. **Event-Driven**: Agents communicate asynchronously via Dapr pub/sub (backed by Redis locally, Azure Service Bus in production)
+3. **Infrastructure Agnostic**: Dapr abstractions enable portability across cloud providers and on-premises
+4. **Prompt-Driven**: All agent behavior is defined in versioned prompt files stored in a repository
+5. **Environment Agnostic**: Seamless switching between Ollama (development) and Azure OpenAI (production) via configuration
+6. **Developer Experience First**: .NET Aspire provides unified local development with integrated observability
+7. **Cloud Native**: Designed for Kubernetes deployment with Dapr sidecars, horizontal scaling, and comprehensive observability
 
 ## Architecture Style
 
@@ -35,12 +36,23 @@ Each agent is deployed as an independent microservice with:
 - Isolated failure domains
 - Service-to-service communication via events
 
-### Event-Driven Architecture
+### Event-Driven Architecture with Dapr
 
-Agents communicate through three Azure messaging services:
-- **Azure Event Grid**: Event routing and schema registry
-- **Azure Event Hubs**: High-throughput event streaming
-- **Azure Service Bus**: Reliable message queuing with ordering guarantees
+Agents communicate through **Dapr pub/sub** which abstracts the underlying messaging infrastructure:
+
+**Local Development:**
+- **Redis Streams**: Pub/sub component for local testing
+- **Redis**: State store for agent state management
+
+**Production:**
+- **Azure Service Bus**: Dapr pub/sub component for production messaging
+- **Azure Cosmos DB**: Dapr state store component for distributed state
+
+**Benefits:**
+- Switch messaging backends without code changes
+- Consistent API across environments
+- Built-in retries, circuit breakers, and observability
+- Cloud-agnostic architecture
 
 ## System Context
 
