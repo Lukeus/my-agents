@@ -22,6 +22,19 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Install Aspire workload
+      run: |
+        dotnet workload install aspire --skip-manifest-update
+        dotnet workload list
+    
+    - name: Setup Dapr CLI
+      uses: dapr/setup-dapr@v1
+      with:
+        version: '1.14.0'
+    
+    - name: Initialize Dapr
+      run: dapr init
         
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
@@ -32,11 +45,25 @@ jobs:
     - name: Run unit tests
       run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal --filter "Category=Unit"
       
+    - name: Start Docker services for integration tests
+      run: |
+        # Stop and remove any existing containers on these ports
+        docker ps -q --filter "publish=6379" | xargs -r docker stop || true
+        docker ps -q --filter "publish=1433" | xargs -r docker stop || true
+        
+        # Start fresh containers
+        docker run -d -p 6379:6379 --name redis-test redis:7.4
+        docker run -d -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 --name sqlserver-test mcr.microsoft.com/mssql/server:2022-latest
+        
+        # Wait for services to be ready
+        sleep 10
+    
     - name: Run integration tests
       run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal --filter "Category=Integration"
       env:
         # Use Docker for integration tests
         DOCKER_HOST: unix:///var/run/docker.sock
+        ConnectionStrings__SqlServer: "Server=localhost,1433;Database=AgentsTest;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true"
         
     - name: Upload test results
       if: always()
@@ -64,6 +91,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Install Aspire workload
+      run: dotnet workload install aspire --skip-manifest-update
         
     - name: Run code analysis
       run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release /p:TreatWarningsAsErrors=true

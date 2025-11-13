@@ -556,17 +556,36 @@ await foreach (var chunk in _llmProvider.StreamCompleteAsync(prompt, inputData))
 
 ## Event Publishing
 
-### Publishing Events
+### Publishing Events with Dapr
+
+The framework uses **Dapr pub/sub** for event-driven communication. The implementation is abstracted through `IEventPublisher`, which can be backed by:
+- **DaprEventPublisher** (when `Dapr:Enabled = true`)
+- **MockEventPublisher** (for local testing)
 
 ```csharp
 // Create domain event
 var domainEvent = new MyAgentTaskCompletedEvent(taskId, result);
 
-// Publish to Event Grid
+// Publish via Dapr (automatically routes to Redis locally, Azure Service Bus in production)
 await _eventPublisher.PublishAsync(domainEvent);
 
 // Publish multiple events
-await _eventPublisher.PublishBatchAsync(new[] { event1, event2, event3 });
+await _eventPublisher.PublishAsync(new[] { event1, event2, event3 });
+```
+
+**How it works:**
+1. Event is published to Dapr sidecar
+2. Dapr routes to configured pub/sub component (Redis/Service Bus)
+3. Topic name is derived from event type (e.g., `MyAgentTaskCompletedEvent` → `myagenttaskcompletedevent`)
+4. Subscribing agents receive the event via Dapr
+
+**Configuration:**
+```json
+{
+  "Dapr": {
+    "Enabled": true  // Set by Aspire AppHost automatically
+  }
+}
 ```
 
 ### Subscribing to Events

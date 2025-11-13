@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="8.2.2" />
+    <PackageReference Include="Aspire.StackExchange.Redis" Version="8.2.2" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
+    <PackageReference Include="Dapr.Client" Version="1.14.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.0" />
   </ItemGroup>
 
@@ -16,6 +20,8 @@
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.LLM\Agents.Infrastructure.LLM.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Prompts\Agents.Infrastructure.Prompts.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Persistence.SqlServer\Agents.Infrastructure.Persistence.SqlServer.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Dapr\Agents.Infrastructure.Dapr.csproj" />
+    <ProjectReference Include="..\..\Shared\Agents.ServiceDefaults\Agents.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

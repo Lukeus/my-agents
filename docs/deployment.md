@@ -53,7 +53,51 @@ The framework supports three deployment targets:
 
 ## Local Development Deployment
 
-### Step 1: Install Ollama
+### 🚀 Quick Start with .NET Aspire (Recommended)
+
+**New!** The fastest way to run the entire system locally:
+
+#### Step 1: Clone Repository
+
+```powershell
+git clone https://github.com/your-org/my-agents.git
+cd my-agents
+```
+
+#### Step 2: Ensure Docker is Running
+
+```powershell
+# Verify Docker is running
+docker ps
+```
+
+#### Step 3: Run Aspire AppHost
+
+```powershell
+# Run the entire system with one command
+dotnet run --project src/AppHost/Agents.AppHost/Agents.AppHost.csproj
+```
+
+#### Step 4: Access Aspire Dashboard
+
+Open your browser to: **http://localhost:15000**
+
+**What You Get:**
+- ✅ All 5 agent APIs with Dapr sidecars
+- ✅ SQL Server, Redis, Ollama containers
+- ✅ Unified dashboard with logs, traces, metrics
+- ✅ Service discovery and health checks
+- ✅ No manual configuration needed
+
+**For detailed testing instructions, see:** [Aspire & Dapr Testing Guide](aspire-dapr-testing-guide.md)
+
+---
+
+### 🔧 Alternative: Manual Setup (Legacy)
+
+If you need to run services individually without Aspire:
+
+#### Step 1: Install Ollama
 
 ```powershell
 # Download and install Ollama from https://ollama.ai
@@ -65,7 +109,7 @@ ollama --version
 ollama pull llama3.2
 ```
 
-### Step 2: Clone Repository
+#### Step 2: Clone Repository
 
 ```powershell
 git clone https://github.com/your-org/my-agents.git

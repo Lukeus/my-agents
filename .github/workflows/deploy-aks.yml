@@ -50,6 +50,15 @@ jobs:
       uses: azure/setup-helm@v4
       with:
         version: 'latest'
+    
+    - name: Install Dapr CLI
+      run: |
+        wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+    
+    - name: Initialize Dapr on AKS
+      run: |
+        dapr init --kubernetes --wait
+        dapr status -k
         
     - name: Setup Kustomize
       uses: imranismail/setup-kustomize@v2
@@ -69,6 +78,48 @@ jobs:
           --docker-password=${{ secrets.ACR_PASSWORD }} \
           --dry-run=client -o yaml | kubectl apply -f -
           
+    - name: Deploy Dapr components
+      run: |
+        # Deploy Dapr pub/sub component (Azure Service Bus)
+        kubectl apply -f - <<EOF
+        apiVersion: dapr.io/v1alpha1
+        kind: Component
+        metadata:
+          name: agents-pubsub
+          namespace: agents-${{ github.event.inputs.environment }}
+        spec:
+          type: pubsub.azure.servicebus.topics
+          version: v1
+          metadata:
+          - name: connectionString
+            secretKeyRef:
+              name: agents-secrets
+              key: ServiceBus__ConnectionString
+        EOF
+        
+        # Deploy Dapr state store component (Azure Cosmos DB)
+        kubectl apply -f - <<EOF
+        apiVersion: dapr.io/v1alpha1
+        kind: Component
+        metadata:
+          name: agents-statestore
+          namespace: agents-${{ github.event.inputs.environment }}
+        spec:
+          type: state.azure.cosmosdb
+          version: v1
+          metadata:
+          - name: url
+            value: "${{ secrets.COSMOS_ENDPOINT }}"
+          - name: masterKey
+            secretKeyRef:
+              name: agents-secrets
+              key: ConnectionStrings__CosmosDb
+          - name: database
+            value: "agents-db"
+          - name: collection
+            value: "agents-state"
+        EOF
+    
     - name: Deploy Azure resources secrets
       run: |
         kubectl create secret generic agents-secrets \

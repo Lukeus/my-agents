@@ -1,0 +1,18 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: agents-pubsub
+spec:
+  type: pubsub.azure.servicebus.topics
+  version: v1
+  metadata:
+  - name: connectionString
+    secretKeyRef:
+      name: azure-servicebus
+      key: connectionString
+  - name: consumerID
+    value: "agents-dev"
+  - name: timeoutInSec
+    value: "60"
+  - name: maxActiveMessages
+    value: "10000"

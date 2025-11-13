@@ -213,13 +213,39 @@ sequenceDiagram
 
 ### Prerequisites
 
-- .NET 8 SDK or later
-- Docker Desktop
-- Azure CLI (for Azure deployment)
-- Ollama (for local development)
-- kubectl (for Kubernetes)
+- **.NET 9 SDK** or later
+- **Docker Desktop** or **Rancher Desktop** (for containers)
+- **Azure CLI** (for Azure deployment)
+- **Ollama** (for local LLM - optional, provided via container)
+- **kubectl** (for Kubernetes - optional)
 
-### Local Development Setup
+### 🚀 Quick Start with .NET Aspire (Recommended)
+
+**New!** Run the entire system with one command using .NET Aspire:
+
+```powershell
+# 1. Ensure Docker is running
+docker ps
+
+# 2. Run the Aspire AppHost
+dotnet run --project src/AppHost/Agents.AppHost/Agents.AppHost.csproj
+
+# 3. Open the Aspire Dashboard
+# Navigate to: http://localhost:15000
+```
+
+**What You Get:**
+- ✅ All 5 agent APIs running with Dapr sidecars
+- ✅ SQL Server, Redis, and Ollama containers
+- ✅ Unified dashboard with logs, traces, and metrics
+- ✅ Service discovery and health checks
+- ✅ Distributed tracing across services
+
+**Learn More:** See [Aspire & Dapr Testing Guide](docs/aspire-dapr-testing-guide.md)
+
+### 🔧 Alternative: Traditional Development Setup
+
+If you prefer to run services individually:
 
 1. **Clone the repository**
    ```powershell
@@ -227,31 +253,25 @@ sequenceDiagram
    cd my-agents
    ```
 
-2. **Install Ollama**
+2. **Install Ollama (if not using Aspire)**
    ```powershell
    # Download from https://ollama.ai
-   ollama pull llama3.1
+   ollama pull llama3.2
    ```
 
-3. **Configure application settings**
-   ```powershell
-   cp src/Presentation/Agents.API.Gateway/appsettings.json src/Presentation/Agents.API.Gateway/appsettings.Development.json
-   # Edit appsettings.Development.json to use Ollama
-   ```
-
-4. **Build the solution**
+3. **Build the solution**
    ```powershell
    dotnet build
    ```
 
-5. **Run tests**
+4. **Run tests**
    ```powershell
    dotnet test
    ```
 
-6. **Run locally**
+5. **Run a specific API**
    ```powershell
-   dotnet run --project src/Presentation/Agents.API.Gateway
+   dotnet run --project src/Presentation/Agents.API.Notification
    ```
 
 ### Azure Deployment
@@ -307,15 +327,18 @@ Toggle between Ollama (development) and Azure OpenAI (production) via `appsettin
 
 ### Core Capabilities
 - **5 Specialized Agents**: Notification, DevOps, TestPlanning, Implementation, ServiceDesk
-- **Event-Driven Architecture**: Azure Event Grid, Event Hubs, Service Bus integration
+- **Event-Driven Architecture**: Dapr pub/sub with Azure Service Bus or Redis backends
+- **Infrastructure Agnostic**: Dapr abstractions for portability across cloud providers
+- **.NET Aspire Orchestration**: Unified local development experience with dashboard
 - **Prompt-Driven**: All agent logic configured via versioned prompt files
 - **Dual LLM Support**: Azure OpenAI (production) and Ollama (development)
 - **REST APIs**: Full Swagger documentation for all endpoints
+- **Service Discovery**: Built-in service discovery with Aspire
+- **Distributed Tracing**: OpenTelemetry integration via Aspire ServiceDefaults
 - **Health Checks**: Kubernetes-ready liveness/readiness probes
 - **Clean Architecture**: Strict separation of concerns (Domain, Application, Infrastructure, Presentation)
-- **Comprehensive Testing**: 44 unit tests, 100% pass rate
-- **Production Monitoring**: Prometheus metrics, Grafana dashboards, OpenTelemetry tracing
-- **Event-Driven Publishing**: Azure Event Hub and Service Bus integration
+- **Comprehensive Testing**: 79 unit tests (including 35 Dapr tests), 100% pass rate
+- **Production Monitoring**: Aspire Dashboard, Prometheus metrics, Grafana dashboards
 
 ### Agent Capabilities
 
@@ -335,24 +358,31 @@ Toggle between Ollama (development) and Azure OpenAI (production) via `appsettin
 - **ASP.NET Core**: REST API hosting
 - **Swashbuckle 10.0**: OpenAPI/Swagger documentation
 
+### Orchestration & Infrastructure
+- **.NET Aspire 8.2.2**: Local development orchestration and observability
+- **Dapr 1.14.0**: Distributed application runtime for microservices
+- **Redis**: State store and pub/sub for local development
+- **Docker/Rancher Desktop**: Container runtime
+
 ### Azure Services
 - **Azure OpenAI**: Production LLM
-- **Azure Event Grid**: Event routing and delivery
-- **Azure Event Hubs**: High-throughput event streaming
-- **Azure Service Bus**: Reliable message queuing
-- **Azure Kubernetes Service (AKS)**: Container orchestration
-- **Azure Cosmos DB**: NoSQL document database
+- **Azure Service Bus**: Production pub/sub via Dapr component
+- **Azure Cosmos DB**: Production state store via Dapr component
+- **Azure Kubernetes Service (AKS)**: Container orchestration with Dapr
 - **Azure SQL Database**: Relational data storage
 
-### Development & Operations
-- **Ollama**: Local LLM for development
-- **xUnit**: Unit testing framework
-- **Moq 4.20**: Mocking framework
-- **FluentAssertions 8.8**: Assertion library
-- **Testcontainers**: Integration testing with containers
+### Development & Testing
+- **Ollama**: Local LLM for development (containerized)
+- **xUnit 2.9.2**: Unit testing framework
+- **Moq 4.20.72**: Mocking framework
+- **FluentAssertions 7.0.0**: Assertion library (Apache 2.0 license)
+- **Testcontainers 4.0**: Integration testing with containers
+
+### Observability
+- **OpenTelemetry**: Distributed tracing and metrics
+- **Aspire Dashboard**: Unified logs, traces, and metrics
 - **Prometheus**: Metrics collection and storage
 - **Grafana**: Metrics visualization and dashboards
-- **OpenTelemetry**: Distributed tracing
 - **Serilog**: Structured logging
 
 ## 📁 Project Structure

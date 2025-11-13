@@ -5,8 +5,13 @@ using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.LLM;
 using Agents.Infrastructure.Prompts.Services;
 using Agents.Infrastructure.Persistence.SqlServer;
+using Agents.Infrastructure.Dapr.Extensions;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Aspire service defaults
+builder.AddServiceDefaults();
 
 // Add services
 builder.Services.AddControllers();
@@ -27,8 +32,17 @@ builder.Services.AddLLMProvider(builder.Configuration);
 // Configure Prompts
 builder.Services.AddSingleton<IPromptLoader, PromptLoader>();
 
-// Configure Event Publisher (mock for now)
-builder.Services.AddSingleton<IEventPublisher, MockEventPublisher>();
+// Configure Event Publisher - Dapr or Mock
+var useDapr = builder.Configuration.GetValue<bool>("Dapr:Enabled");
+if (useDapr)
+{
+    builder.Services.AddDaprClient();
+    builder.Services.AddDaprEventPublisher();
+}
+else
+{
+    builder.Services.AddSingleton<IEventPublisher, MockEventPublisher>();
+}
 
 // Configure Notification services
 builder.Services.AddSingleton<INotificationChannelFactory, NotificationChannelFactory>();
@@ -51,11 +65,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Apply database migrations
-var connectionString = builder.Configuration.GetConnectionString("SqlServer");
-if (!string.IsNullOrEmpty(connectionString))
-{
-    await app.Services.MigrateDatabaseAsync();
-}
+// Temporarily disabled - run migrations manually if needed
+// var connectionString = builder.Configuration.GetConnectionString("SqlServer");
+// if (!string.IsNullOrEmpty(connectionString))
+// {
+//     await app.Services.MigrateDatabaseAsync();
+// }
 
 // Configure middleware pipeline
 if (app.Environment.IsDevelopment())
@@ -68,7 +83,14 @@ app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/health");
+app.MapDefaultEndpoints();
+
+// Map Dapr pub/sub endpoints if enabled
+if (useDapr)
+{
+    app.MapSubscribeHandler();
+    app.UseCloudEvents();
+}
 
 app.Run();
 

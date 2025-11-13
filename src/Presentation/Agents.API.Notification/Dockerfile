@@ -2,6 +2,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
+# Install Aspire workload (required by solution)
+RUN dotnet workload install aspire --skip-manifest-update
+
 # Copy solution and project files
 COPY ["Agents.sln", "./"]
 COPY ["src/Presentation/Agents.API.Notification/Agents.API.Notification.csproj", "src/Presentation/Agents.API.Notification/"]
@@ -13,6 +16,8 @@ COPY ["src/Infrastructure/Agents.Infrastructure.LLM/Agents.Infrastructure.LLM.cs
 COPY ["src/Infrastructure/Agents.Infrastructure.Prompts/Agents.Infrastructure.Prompts.csproj", "src/Infrastructure/Agents.Infrastructure.Prompts/"]
 COPY ["src/Infrastructure/Agents.Infrastructure.Persistence.SqlServer/Agents.Infrastructure.Persistence.SqlServer.csproj", "src/Infrastructure/Agents.Infrastructure.Persistence.SqlServer/"]
 COPY ["src/Shared/Agents.Shared.Common/Agents.Shared.Common.csproj", "src/Shared/Agents.Shared.Common/"]
+COPY ["src/Infrastructure/Agents.Infrastructure.Dapr/Agents.Infrastructure.Dapr.csproj", "src/Infrastructure/Agents.Infrastructure.Dapr/"]
+COPY ["src/Shared/Agents.ServiceDefaults/Agents.ServiceDefaults.csproj", "src/Shared/Agents.ServiceDefaults/"]
 
 # Restore dependencies
 RUN dotnet restore "src/Presentation/Agents.API.Notification/Agents.API.Notification.csproj"
