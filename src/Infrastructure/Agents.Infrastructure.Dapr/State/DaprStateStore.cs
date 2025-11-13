@@ -143,7 +143,7 @@ public class DaprStateStore : IDaprStateStore
         }
 
         var keysList = keys.ToList();
-        
+
         if (!keysList.Any())
         {
             return new Dictionary<string, T?>();
@@ -162,8 +162,8 @@ public class DaprStateStore : IDaprStateStore
             var dictionary = new Dictionary<string, T?>();
             foreach (var item in result)
             {
-                dictionary[item.Key] = item.Value != null && !string.IsNullOrEmpty(item.Value) 
-                    ? System.Text.Json.JsonSerializer.Deserialize<T>(item.Value) 
+                dictionary[item.Key] = item.Value != null && !string.IsNullOrEmpty(item.Value)
+                    ? System.Text.Json.JsonSerializer.Deserialize<T>(item.Value)
                     : default(T);
             }
 

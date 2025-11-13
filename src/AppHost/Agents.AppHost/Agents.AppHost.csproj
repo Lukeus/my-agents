@@ -24,4 +24,8 @@
     <ProjectReference Include="..\..\Presentation\Agents.API.ServiceDesk\Agents.API.ServiceDesk.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="dapr-components\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

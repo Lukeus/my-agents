@@ -74,7 +74,7 @@ public class DaprEventPublisher : IEventPublisher
         }
 
         var eventsList = domainEvents.ToList();
-        
+
         if (!eventsList.Any())
         {
             _logger.LogDebug("No events to publish");

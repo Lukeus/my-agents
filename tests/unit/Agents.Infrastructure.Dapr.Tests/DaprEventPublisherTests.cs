@@ -104,7 +104,7 @@ public class DaprEventPublisherTests
         // Assert
         await act.Should().ThrowAsync<Exception>()
             .WithMessage("Publish failed");
-        
+
         _mockLogger.Verify(
             x => x.Log(
                 LogLevel.Error,
@@ -182,7 +182,7 @@ public class DaprEventPublisherTests
     {
         // Arrange
         var testEvent = new CustomTestEvent { EventId = Guid.NewGuid() };
-        
+
         _mockDaprClient
             .Setup(x => x.PublishEventAsync(
                 "agents-pubsub",

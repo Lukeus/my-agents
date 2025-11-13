@@ -62,25 +62,29 @@ The system interacts with the following external systems:
 
 ```mermaid
 C4Context
-    title System Context - AI Agent Orchestration Framework
+    title System Context - AI Agent Orchestration Framework with Dapr
     
     Person(user, "Developer/User", "Interacts with agents via API")
-    System(agentSystem, "AI Agent Framework", "Multi-agent orchestration system")
+    System(agentSystem, "AI Agent Framework", "Multi-agent orchestration with Dapr")
+    System_Ext(dapr, "Dapr Runtime", "Service mesh and building blocks")
     
     System_Ext(azureOpenAI, "Azure OpenAI", "Production LLM")
     System_Ext(ollama, "Ollama", "Development LLM")
     System_Ext(github, "GitHub", "Prompt repository")
-    System_Ext(eventGrid, "Azure Event Grid", "Event routing")
-    System_Ext(eventHubs, "Azure Event Hubs", "High-throughput events")
-    System_Ext(serviceBus, "Azure Service Bus", "Reliable messaging")
+    System_Ext(serviceBus, "Azure Service Bus", "Production pub/sub via Dapr")
+    System_Ext(cosmosDb, "Azure Cosmos DB", "Production state store via Dapr")
+    System_Ext(redis, "Redis", "Local pub/sub and state via Dapr")
+    System_Ext(appInsights, "Application Insights", "Observability and monitoring")
     
     Rel(user, agentSystem, "Sends requests", "HTTPS/REST")
+    Rel(agentSystem, dapr, "Uses building blocks", "HTTP/gRPC")
+    Rel(dapr, serviceBus, "Pub/sub (prod)", "AMQP")
+    Rel(dapr, redis, "Pub/sub & state (dev)", "Redis Protocol")
+    Rel(dapr, cosmosDb, "State store (prod)", "HTTPS")
     Rel(agentSystem, azureOpenAI, "Invokes LLM", "HTTPS")
     Rel(agentSystem, ollama, "Invokes LLM (dev)", "HTTP")
     Rel(agentSystem, github, "Fetches prompts", "HTTPS")
-    Rel(agentSystem, eventGrid, "Publishes/subscribes", "AMQP")
-    Rel(agentSystem, eventHubs, "Produces/consumes", "AMQP")
-    Rel(agentSystem, serviceBus, "Sends/receives", "AMQP")
+    Rel(agentSystem, appInsights, "Telemetry", "HTTPS")
 ```
 
 ## Layer Structure
@@ -284,18 +288,122 @@ Agents communicate through event subscriptions:
 
 ```mermaid
 sequenceDiagram
-    participant TestAgent as TestPlanning Agent
-    participant EventBus as Azure Event Grid
-    participant ImplAgent as Implementation Agent
-    participant NotifAgent as Notification Agent
+    participant User as User/Client
+    participant TestAPI as TestPlanning API
+    participant TestSidecar as Dapr Sidecar (Test)
+    participant PubSub as Pub/Sub Component<br/>(Redis/Service Bus)
+    participant ImplSidecar as Dapr Sidecar (Impl)
+    participant ImplAPI as Implementation API
+    participant StateStore as State Store<br/>(Redis/Cosmos DB)
+    participant NotifSidecar as Dapr Sidecar (Notif)
+    participant NotifAPI as Notification API
     
-    TestAgent->>EventBus: Publish(TestSpecGeneratedEvent)
-    EventBus->>ImplAgent: Subscribe(TestSpecGeneratedEvent)
-    ImplAgent->>ImplAgent: Generate implementation
-    ImplAgent->>EventBus: Publish(CodeGeneratedEvent)
-    EventBus->>NotifAgent: Subscribe(CodeGeneratedEvent)
-    NotifAgent->>NotifAgent: Send notification to team
+    User->>TestAPI: POST /api/TestPlanning/execute
+    TestAPI->>TestAPI: Generate test specification
+    TestAPI->>TestSidecar: Publish(TestSpecGeneratedEvent)
+    TestSidecar->>PubSub: Publish to agents-pubsub
+    
+    PubSub->>ImplSidecar: Deliver event
+    ImplSidecar->>ImplAPI: POST /testspec-generated
+    ImplAPI->>ImplAPI: Generate code implementation
+    ImplAPI->>ImplSidecar: SaveState(implementation-data)
+    ImplSidecar->>StateStore: Save to agents-statestore
+    ImplAPI->>ImplSidecar: Publish(CodeGeneratedEvent)
+    ImplSidecar->>PubSub: Publish to agents-pubsub
+    
+    PubSub->>NotifSidecar: Deliver event
+    NotifSidecar->>NotifAPI: POST /code-generated
+    NotifAPI->>NotifAPI: Prepare notification
+    NotifAPI->>NotifSidecar: Publish(NotificationSentEvent)
+    NotifSidecar->>PubSub: Publish to agents-pubsub
+    
+    Note over TestAPI,NotifAPI: All service-to-service communication<br/>happens through Dapr sidecars<br/>using pub/sub pattern
 ```
+
+## Local Development with Aspire
+
+### Aspire AppHost Architecture
+
+.NET Aspire provides unified local development orchestration:
+
+```mermaid
+graph TB
+    subgraph "Aspire AppHost"
+        AppHost[Agents.AppHost]
+    end
+    
+    subgraph "Infrastructure Containers"
+        Redis[Redis Container<br/>Port 6379]
+        SQL[SQL Server Container<br/>Port 1433]
+        Ollama[Ollama Container<br/>Port 11434]
+    end
+    
+    subgraph "API Services with Dapr"
+        N1[notification-api<br/>Port 7268]
+        N1D[Dapr Sidecar<br/>Port 51268]
+        D1[devops-api<br/>Port 7108]
+        D1D[Dapr Sidecar<br/>Port 51271]
+        T1[testplanning-api<br/>Port 7010]
+        T1D[Dapr Sidecar<br/>Port 51274]
+        I1[implementation-api<br/>Port 5253]
+        I1D[Dapr Sidecar<br/>Port 51277]
+        S1[servicedesk-api<br/>Port 7145]
+        S1D[Dapr Sidecar<br/>Port 51280]
+    end
+    
+    subgraph "Developer Experience"
+        Dashboard[Aspire Dashboard<br/>Port 17120]
+        Browser[Web Browser]
+    end
+    
+    AppHost-->Redis
+    AppHost-->SQL
+    AppHost-->Ollama
+    AppHost-->N1
+    AppHost-->D1
+    AppHost-->T1
+    AppHost-->I1
+    AppHost-->S1
+    AppHost-->N1D
+    AppHost-->D1D
+    AppHost-->T1D
+    AppHost-->I1D
+    AppHost-->S1D
+    
+    N1<-->N1D
+    D1<-->D1D
+    T1<-->T1D
+    I1<-->I1D
+    S1<-->S1D
+    
+    N1D-->Redis
+    D1D-->Redis
+    T1D-->Redis
+    I1D-->Redis
+    S1D-->Redis
+    
+    N1-->SQL
+    N1-->Ollama
+    D1-->Ollama
+    T1-->Ollama
+    I1-->Ollama
+    S1-->Ollama
+    
+    AppHost-->Dashboard
+    Browser-->Dashboard
+    Browser-->N1
+    Browser-->D1
+    Browser-->T1
+    Browser-->I1
+    Browser-->S1
+```
+
+**Key Benefits:**
+- **One Command Start**: `dotnet run --project src/AppHost/Agents.AppHost/Agents.AppHost.csproj`
+- **Integrated Observability**: Real-time logs, traces, and metrics in Aspire Dashboard
+- **Service Discovery**: Automatic endpoint configuration
+- **Dapr Sidecar Management**: Aspire handles Dapr lifecycle
+- **Health Monitoring**: Visual service health status
 
 ## Agent Architecture
 

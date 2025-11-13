@@ -1,5 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Get absolute path to dapr-components directory
+var componentsPath = Path.Combine(AppContext.BaseDirectory, "dapr-components");
+
 // Add infrastructure resources
 var sqlServer = builder.AddSqlServer("sqlserver")
     .WithDataVolume("agents-sqlserver-data")

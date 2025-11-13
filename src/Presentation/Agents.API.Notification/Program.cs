@@ -65,11 +65,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Apply database migrations
-var connectionString = builder.Configuration.GetConnectionString("SqlServer");
-if (!string.IsNullOrEmpty(connectionString))
-{
-    await app.Services.MigrateDatabaseAsync();
-}
+// Temporarily disabled - run migrations manually if needed
+// var connectionString = builder.Configuration.GetConnectionString("SqlServer");
+// if (!string.IsNullOrEmpty(connectionString))
+// {
+//     await app.Services.MigrateDatabaseAsync();
+// }
 
 // Configure middleware pipeline
 if (app.Environment.IsDevelopment())
