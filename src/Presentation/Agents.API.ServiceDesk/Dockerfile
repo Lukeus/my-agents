@@ -2,6 +2,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
+# Install Aspire workload (required by solution)
+RUN dotnet workload install aspire --skip-manifest-update
+
 # Copy solution and project files
 COPY ["Agents.sln", "./"]
 COPY ["src/Presentation/Agents.API.ServiceDesk/Agents.API.ServiceDesk.csproj", "src/Presentation/Agents.API.ServiceDesk/"]
