@@ -24,7 +24,9 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
     - name: Install Aspire workload
-      run: dotnet workload install aspire --skip-manifest-update
+      run: |
+        dotnet workload install aspire --skip-manifest-update
+        dotnet workload list
     
     - name: Setup Dapr CLI
       uses: dapr/setup-dapr@v1
