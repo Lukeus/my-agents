@@ -23,8 +23,8 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: Install .NET Aspire workload
-      run: dotnet workload install aspire
+    - name: Install Aspire workload
+      run: dotnet workload install aspire --skip-manifest-update
     
     - name: Setup Dapr CLI
       uses: dapr/setup-dapr@v1
@@ -34,9 +34,6 @@ jobs:
     - name: Initialize Dapr
       run: dapr init
         
-    - name: Restore workloads
-      run: dotnet workload restore ${{ env.SOLUTION_PATH }}
-    
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
       
@@ -93,11 +90,8 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: Install .NET Aspire workload
-      run: dotnet workload install aspire
-    
-    - name: Restore workloads
-      run: dotnet workload restore ${{ env.SOLUTION_PATH }}
+    - name: Install Aspire workload
+      run: dotnet workload install aspire --skip-manifest-update
         
     - name: Run code analysis
       run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release /p:TreatWarningsAsErrors=true
