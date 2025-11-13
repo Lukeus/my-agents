@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add Aspire service defaults
+builder.AddServiceDefaults();
+
 // Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -79,7 +82,7 @@ app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/health");
+app.MapDefaultEndpoints();
 
 // Map Dapr pub/sub endpoints if enabled
 if (useDapr)
