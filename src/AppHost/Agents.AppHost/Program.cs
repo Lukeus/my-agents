@@ -17,7 +17,7 @@ var ollama = builder.AddContainer("ollama", "ollama/ollama", "latest")
     .WithBindMount("ollama-data", "/root/.ollama");
 
 // Add Notification Agent API with Dapr sidecar
-var notificationApi = builder.AddProject<Projects.Agents_API_Notification>("notification-api")
+var notificationApi = builder.AddProject("notification-api", "../../Presentation/Agents.API.Notification/Agents.API.Notification.csproj")
     .WithReference(sqlServer)
     .WithReference(redis)
     .WithEnvironment("Dapr__Enabled", "true")
@@ -27,7 +27,7 @@ var notificationApi = builder.AddProject<Projects.Agents_API_Notification>("noti
     .WithDaprSidecar("notification-api");
 
 // Add DevOps Agent API with Dapr sidecar
-var devopsApi = builder.AddProject<Projects.Agents_API_DevOps>("devops-api")
+var devopsApi = builder.AddProject("devops-api", "../../Presentation/Agents.API.DevOps/Agents.API.DevOps.csproj")
     .WithReference(redis)
     .WithEnvironment("Dapr__Enabled", "true")
     .WithEnvironment("LLMProvider__ProviderType", "Ollama")
@@ -35,7 +35,7 @@ var devopsApi = builder.AddProject<Projects.Agents_API_DevOps>("devops-api")
     .WithDaprSidecar("devops-api");
 
 // Add TestPlanning Agent API with Dapr sidecar
-var testplanningApi = builder.AddProject<Projects.Agents_API_TestPlanning>("testplanning-api")
+var testplanningApi = builder.AddProject("testplanning-api", "../../Presentation/Agents.API.TestPlanning/Agents.API.TestPlanning.csproj")
     .WithReference(redis)
     .WithEnvironment("Dapr__Enabled", "true")
     .WithEnvironment("LLMProvider__ProviderType", "Ollama")
@@ -43,7 +43,7 @@ var testplanningApi = builder.AddProject<Projects.Agents_API_TestPlanning>("test
     .WithDaprSidecar("testplanning-api");
 
 // Add Implementation Agent API with Dapr sidecar
-var implementationApi = builder.AddProject<Projects.Agents_API_Implementation>("implementation-api")
+var implementationApi = builder.AddProject("implementation-api", "../../Presentation/Agents.API.Implementation/Agents.API.Implementation.csproj")
     .WithReference(redis)
     .WithEnvironment("Dapr__Enabled", "true")
     .WithEnvironment("LLMProvider__ProviderType", "Ollama")
@@ -51,11 +51,21 @@ var implementationApi = builder.AddProject<Projects.Agents_API_Implementation>("
     .WithDaprSidecar("implementation-api");
 
 // Add ServiceDesk Agent API with Dapr sidecar
-var servicedeskApi = builder.AddProject<Projects.Agents_API_ServiceDesk>("servicedesk-api")
+var servicedeskApi = builder.AddProject("servicedesk-api", "../../Presentation/Agents.API.ServiceDesk/Agents.API.ServiceDesk.csproj")
     .WithReference(redis)
     .WithEnvironment("Dapr__Enabled", "true")
     .WithEnvironment("LLMProvider__ProviderType", "Ollama")
     .WithEnvironment("LLMProvider__Ollama__Endpoint", "http://ollama:11434")
     .WithDaprSidecar("servicedesk-api");
+
+// Add BIM Classification Agent API with Dapr sidecar
+var bimclassificationApi = builder.AddProject("bimclassification-api", "../../Presentation/Agents.API.BimClassification/Agents.API.BimClassification.csproj")
+    .WithReference(sqlServer)
+    .WithReference(redis)
+    .WithEnvironment("Dapr__Enabled", "true")
+    .WithEnvironment("ConnectionStrings__SqlServer", sqlServer)
+    .WithEnvironment("LLMProvider__ProviderType", "Ollama")
+    .WithEnvironment("LLMProvider__Ollama__Endpoint", "http://ollama:11434")
+    .WithDaprSidecar("bimclassification-api");
 
 builder.Build().Run();

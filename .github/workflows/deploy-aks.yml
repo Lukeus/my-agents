@@ -142,7 +142,8 @@ jobs:
           ${{ secrets.ACR_LOGIN_SERVER }}/agents-devops-api=${{ secrets.ACR_LOGIN_SERVER }}/agents-devops-api:${{ github.event.inputs.image_tag }} \
           ${{ secrets.ACR_LOGIN_SERVER }}/agents-testplanning-api=${{ secrets.ACR_LOGIN_SERVER }}/agents-testplanning-api:${{ github.event.inputs.image_tag }} \
           ${{ secrets.ACR_LOGIN_SERVER }}/agents-implementation-api=${{ secrets.ACR_LOGIN_SERVER }}/agents-implementation-api:${{ github.event.inputs.image_tag }} \
-          ${{ secrets.ACR_LOGIN_SERVER }}/agents-servicedesk-api=${{ secrets.ACR_LOGIN_SERVER }}/agents-servicedesk-api:${{ github.event.inputs.image_tag }}
+          ${{ secrets.ACR_LOGIN_SERVER }}/agents-servicedesk-api=${{ secrets.ACR_LOGIN_SERVER }}/agents-servicedesk-api:${{ github.event.inputs.image_tag }} \
+          ${{ secrets.ACR_LOGIN_SERVER }}/agents-bimclassification-api=${{ secrets.ACR_LOGIN_SERVER }}/agents-bimclassification-api:${{ github.event.inputs.image_tag }}
           
     - name: Deploy with Helm via Kustomize
       run: |
@@ -166,7 +167,7 @@ jobs:
         kubectl wait --for=condition=ready pod -n agents-${{ github.event.inputs.environment }} -l app.kubernetes.io/name=agents --timeout=300s
         
         # Get service endpoints and test health
-        for service in notification devops testplanning implementation servicedesk; do
+        for service in notification devops testplanning implementation servicedesk bimclassification; do
           echo "Testing $service health endpoint..."
           kubectl run curl-test-$service --image=curlimages/curl:latest --rm -i --restart=Never \
             --namespace=agents-${{ github.event.inputs.environment }} \

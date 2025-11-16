@@ -1,0 +1,6 @@
+@Agents.API.BimClassification_HostAddress = http://localhost:5193
+
+GET {{Agents.API.BimClassification_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

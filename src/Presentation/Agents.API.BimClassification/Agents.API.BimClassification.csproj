@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.11" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Application\Agents.Application.BimClassification\Agents.Application.BimClassification.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.LLM\Agents.Infrastructure.LLM.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Prompts\Agents.Infrastructure.Prompts.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Dapr\Agents.Infrastructure.Dapr.csproj" />
+    <ProjectReference Include="..\..\Shared\Agents.ServiceDefaults\Agents.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Persistence.SqlServer\Agents.Infrastructure.Persistence.SqlServer.csproj" />
+  </ItemGroup>
+
+</Project>

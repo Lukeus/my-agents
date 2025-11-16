@@ -9,12 +9,12 @@ COPY . .
 RUN dotnet restore
 
 # Build application
-WORKDIR "/src/src/Presentation/Agents.API.Notification"
-RUN dotnet build "Agents.API.Notification.csproj" -c Release -o /app/build --no-restore
+WORKDIR "/src/src/Presentation/Agents.API.BimClassification"
+RUN dotnet build "Agents.API.BimClassification.csproj" -c Release -o /app/build --no-restore
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish "Agents.API.Notification.csproj" -c Release -o /app/publish --no-restore /p:UseAppHost=false
+RUN dotnet publish "Agents.API.BimClassification.csproj" -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
@@ -44,4 +44,4 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Entry point
-ENTRYPOINT ["dotnet", "Agents.API.Notification.dll"]
+ENTRYPOINT ["dotnet", "Agents.API.BimClassification.dll"]

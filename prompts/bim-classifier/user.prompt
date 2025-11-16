@@ -1,0 +1,20 @@
+---
+name: bim-classifier-user
+version: 1.0.0
+description: User prompt for BIM element classification
+---
+You are given a BIM element as JSON:
+
+{{elementJson}}
+
+You are also given the current classification state (may be empty):
+
+{{existingClassificationJson}}
+
+TASK:
+Analyze this data and propose:
+1. Reasonable commodity/pricing codes (if obvious from the data)
+2. Additional derived items that should be generated (e.g., insulation for outdoor ducts, hangers for pipes)
+3. Clear reasoning for your suggestions
+
+Return ONLY JSON as specified in the system instructions. Do not include markdown code blocks or any other text.

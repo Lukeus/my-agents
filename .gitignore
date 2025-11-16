@@ -169,5 +169,7 @@ FakesAssemblies/
 *.tmp
 *.temp
 
+WARP.md
+
 # Ollama data directory (contains runtime data and keys)
 src/AppHost/Agents.AppHost/ollama-data/

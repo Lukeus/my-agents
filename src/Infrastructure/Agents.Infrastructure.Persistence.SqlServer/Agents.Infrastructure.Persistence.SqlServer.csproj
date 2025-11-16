@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\Agents.Domain.Core\Agents.Domain.Core.csproj" />
     <ProjectReference Include="..\..\Domain\Agents.Domain.Notification\Agents.Domain.Notification.csproj" />
+    <ProjectReference Include="..\..\Domain\Agents.Domain.BimClassification\Agents.Domain.BimClassification.csproj" />
   </ItemGroup>
 
 </Project>

@@ -49,6 +49,7 @@ C4Container
     Container(testPlanningAPI, "TestPlanning API", "ASP.NET Core", "Test spec generation")
     Container(implementationAPI, "Implementation API", "ASP.NET Core", "Code generation & review")
     Container(serviceDeskAPI, "ServiceDesk API", "ASP.NET Core", "Ticket triage & SLA tracking")
+    Container(bimClassificationAPI, "BimClassification API", "ASP.NET Core", "BIM element classification suggestions")
     
     ContainerDb(promptRepo, "Prompt Repository", "GitHub", "Versioned prompt files")
     ContainerDb(eventInfra, "Event Infrastructure", "Azure", "Event Grid, Hubs, Service Bus")
@@ -59,18 +60,21 @@ C4Container
     Rel(testPlanningAPI, llmProvider, "Invokes")
     Rel(implementationAPI, llmProvider, "Invokes")
     Rel(serviceDeskAPI, llmProvider, "Invokes")
+    Rel(bimClassificationAPI, llmProvider, "Invokes")
     
     Rel(notificationAPI, promptRepo, "Loads prompts")
     Rel(devopsAPI, promptRepo, "Loads prompts")
     Rel(testPlanningAPI, promptRepo, "Loads prompts")
     Rel(implementationAPI, promptRepo, "Loads prompts")
     Rel(serviceDeskAPI, promptRepo, "Loads prompts")
+    Rel(bimClassificationAPI, promptRepo, "Loads prompts")
     
     Rel(notificationAPI, eventInfra, "Publishes events")
     Rel(devopsAPI, eventInfra, "Publishes events")
     Rel(testPlanningAPI, eventInfra, "Publishes events")
     Rel(implementationAPI, eventInfra, "Publishes events")
     Rel(serviceDeskAPI, eventInfra, "Publishes events")
+    Rel(bimClassificationAPI, eventInfra, "Publishes events")
 ```
 
 ### C4 Component Diagram - Agent Structure
@@ -235,7 +239,7 @@ dotnet run --project src/AppHost/Agents.AppHost/Agents.AppHost.csproj
 ```
 
 **What You Get:**
-- ✅ All 5 agent APIs running with Dapr sidecars
+- ✅ All 6 agent APIs running with Dapr sidecars
 - ✅ SQL Server, Redis, and Ollama containers
 - ✅ Unified dashboard with logs, traces, and metrics
 - ✅ Service discovery and health checks
@@ -326,7 +330,7 @@ Toggle between Ollama (development) and Azure OpenAI (production) via `appsettin
 ## 🚀 Features
 
 ### Core Capabilities
-- **5 Specialized Agents**: Notification, DevOps, TestPlanning, Implementation, ServiceDesk
+- **6 Specialized Agents**: Notification, DevOps, TestPlanning, Implementation, ServiceDesk, BimClassification
 - **Event-Driven Architecture**: Dapr pub/sub with Azure Service Bus or Redis backends
 - **Infrastructure Agnostic**: Dapr abstractions for portability across cloud providers
 - **.NET Aspire Orchestration**: Unified local development experience with dashboard
@@ -349,6 +353,7 @@ Toggle between Ollama (development) and Azure OpenAI (production) via `appsettin
 | **TestPlanning** | Test generation | Test spec generation, strategy planning, coverage analysis |
 | **Implementation** | Code generation | Code generation, review, refactoring suggestions |
 | **ServiceDesk** | Ticket management | Triage, solution suggestions, SLA tracking, escalation |
+| **BimClassification** | BIM element classification | AI-powered classification suggestions for BIM elements with approval workflow |
 
 ## 🛠️ Technology Stack
 
@@ -396,7 +401,8 @@ my-agents/
 │   │   ├── Agents.Application.DevOps/
 │   │   ├── Agents.Application.TestPlanning/
 │   │   ├── Agents.Application.Implementation/
-│   │   └── Agents.Application.ServiceDesk/
+│   │   ├── Agents.Application.ServiceDesk/
+│   │   └── Agents.Application.BimClassification/
 │   ├── Domain/                # Domain layer (entities, events)
 │   │   ├── Agents.Domain.Core/
 │   │   └── Agents.Domain.*/
@@ -411,7 +417,8 @@ my-agents/
 │       ├── Agents.API.DevOps/
 │       ├── Agents.API.TestPlanning/
 │       ├── Agents.API.Implementation/
-│       └── Agents.API.ServiceDesk/
+│       ├── Agents.API.ServiceDesk/
+│       └── Agents.API.BimClassification/
 ├── tests/
 │   └── Agents.Tests.Unit/     # Unit tests (24 tests, 100% pass)
 ├── prompts/                   # Versioned prompt files
@@ -492,6 +499,7 @@ Each agent exposes the following endpoints:
 | TestPlanning | `:5003` | `POST /api/testplanning/execute` | `GET /api/testplanning/health` |
 | Implementation | `:5004` | `POST /api/implementation/execute` | `GET /api/implementation/health` |
 | ServiceDesk | `:5005` | `POST /api/servicedesk/execute` | `GET /api/servicedesk/health` |
+| BimClassification | `:5006` | `POST /api/bimclassification/execute` | `GET /api/bimclassification/health` |
 
 ### Example Request
 

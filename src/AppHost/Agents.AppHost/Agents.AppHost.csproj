@@ -5,15 +5,14 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IsAspireHost>true</IsAspireHost>
     <UserSecretsId>97703a21-12cc-418b-8ed1-554842d5504f</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.2" />
-    <PackageReference Include="Aspire.Hosting.Dapr" Version="8.2.2" />
-    <PackageReference Include="Aspire.Hosting.SqlServer" Version="8.2.2" />
-    <PackageReference Include="Aspire.Hosting.Redis" Version="8.2.2" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
+    <PackageReference Include="Aspire.Hosting.Dapr" Version="9.0.0" />
+    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.0.0" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +21,7 @@
     <ProjectReference Include="..\..\Presentation\Agents.API.TestPlanning\Agents.API.TestPlanning.csproj" />
     <ProjectReference Include="..\..\Presentation\Agents.API.Implementation\Agents.API.Implementation.csproj" />
     <ProjectReference Include="..\..\Presentation\Agents.API.ServiceDesk\Agents.API.ServiceDesk.csproj" />
+    <ProjectReference Include="..\..\Presentation\Agents.API.BimClassification\Agents.API.BimClassification.csproj" />
   </ItemGroup>
 
   <ItemGroup>
