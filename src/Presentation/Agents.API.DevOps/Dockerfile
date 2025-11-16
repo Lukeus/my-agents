@@ -5,7 +5,8 @@ WORKDIR /src
 # Copy entire source tree
 COPY . .
 
-# Restore dependencies
+# Restore workloads and dependencies
+RUN dotnet workload restore
 RUN dotnet restore
 
 # Build application

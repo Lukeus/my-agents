@@ -196,6 +196,56 @@ sequenceDiagram
     API-->>Client: 200 OK + generated code
 ```
 
+### ServiceDesk Agent Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as ServiceDesk API
+    participant Agent as ServiceDeskAgent
+    participant Prompt as PromptLoader
+    participant LLM as Semantic Kernel
+    participant Events as Event Publisher
+    participant DB as Database
+    
+    Client->>API: POST /api/servicedesk/execute<br/>{action: "triage_ticket"}
+    API->>Agent: ExecuteAsync(request)
+    Agent->>Prompt: LoadPromptAsync("ticket-triage")
+    Prompt-->>Agent: Prompt template
+    Agent->>LLM: InvokeKernelAsync(ticket data)
+    LLM-->>Agent: Priority, category, solution
+    Agent->>DB: Save ticket triage
+    Agent->>Events: Publish(TicketTriagedEvent)
+    Agent-->>API: AgentResult<TriageResult>
+    API-->>Client: 200 OK + triage results
+```
+
+### BimClassification Agent Sequence
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as BimClassification API
+    participant Agent as BimClassificationAgent
+    participant Prompt as PromptLoader
+    participant LLM as Semantic Kernel
+    participant Events as Event Publisher
+    participant DB as Database
+    
+    Client->>API: POST /api/bimclassification/execute<br/>{elementId, properties}
+    API->>Agent: ExecuteAsync(request)
+    Agent->>Prompt: LoadPromptAsync("bim-classifier")
+    Prompt-->>Agent: Prompt template
+    Agent->>LLM: InvokeKernelAsync(BIM element data)
+    LLM-->>Agent: Classification suggestions
+    Agent->>DB: Save suggestions (advisory only)
+    Agent->>Events: Publish(ClassificationSuggestedEvent)
+    Agent-->>API: AgentResult<Suggestions>
+    API-->>Client: 200 OK + classification suggestions
+    
+    Note over Agent,DB: Suggestions are advisory only.<br/>User must approve before applying.
+```
+
 ### Inter-Agent Event Flow
 
 ```mermaid

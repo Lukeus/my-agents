@@ -226,7 +226,8 @@ Presentation/
 ├── Agents.API.DevOps/
 ├── Agents.API.TestPlanning/
 ├── Agents.API.Implementation/
-└── Agents.API.ServiceDesk/
+├── Agents.API.ServiceDesk/
+└── Agents.API.BimClassification/
 ```
 
 ## Event-Driven Architecture
@@ -281,6 +282,12 @@ All events follow a standardized schema:
 - `agents.servicedesk.ticket.triaged`
 - `agents.servicedesk.solution.suggested`
 - `agents.servicedesk.ticket.escalated`
+
+**BimClassification Agent**
+- `agents.bimclassification.suggestion.generated`
+- `agents.bimclassification.suggestion.approved`
+- `agents.bimclassification.suggestion.rejected`
+- `agents.bimclassification.classification.applied`
 
 ### Inter-Agent Communication
 
@@ -349,6 +356,8 @@ graph TB
         I1D[Dapr Sidecar<br/>Port 51277]
         S1[servicedesk-api<br/>Port 7145]
         S1D[Dapr Sidecar<br/>Port 51280]
+        B1[bimclassification-api<br/>Port 7220]
+        B1D[Dapr Sidecar<br/>Port 51283]
     end
     
     subgraph "Developer Experience"
@@ -364,23 +373,27 @@ graph TB
     AppHost-->T1
     AppHost-->I1
     AppHost-->S1
+    AppHost-->B1
     AppHost-->N1D
     AppHost-->D1D
     AppHost-->T1D
     AppHost-->I1D
     AppHost-->S1D
+    AppHost-->B1D
     
     N1<-->N1D
     D1<-->D1D
     T1<-->T1D
     I1<-->I1D
     S1<-->S1D
+    B1<-->B1D
     
     N1D-->Redis
     D1D-->Redis
     T1D-->Redis
     I1D-->Redis
     S1D-->Redis
+    B1D-->Redis
     
     N1-->SQL
     N1-->Ollama
@@ -388,7 +401,9 @@ graph TB
     T1-->Ollama
     I1-->Ollama
     S1-->Ollama
-    
+    B1-->SQL
+    B1-->Ollama
+```
     AppHost-->Dashboard
     Browser-->Dashboard
     Browser-->N1
