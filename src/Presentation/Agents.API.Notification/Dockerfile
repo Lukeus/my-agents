@@ -2,28 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Install Aspire workload (required by solution)
-RUN dotnet workload install aspire --skip-manifest-update
-
-# Copy solution and project files
-COPY ["Agents.sln", "./"]
-COPY ["src/Presentation/Agents.API.Notification/Agents.API.Notification.csproj", "src/Presentation/Agents.API.Notification/"]
-COPY ["src/Application/Agents.Application.Notification/Agents.Application.Notification.csproj", "src/Application/Agents.Application.Notification/"]
-COPY ["src/Application/Agents.Application.Core/Agents.Application.Core.csproj", "src/Application/Agents.Application.Core/"]
-COPY ["src/Domain/Agents.Domain.Notification/Agents.Domain.Notification.csproj", "src/Domain/Agents.Domain.Notification/"]
-COPY ["src/Domain/Agents.Domain.Core/Agents.Domain.Core.csproj", "src/Domain/Agents.Domain.Core/"]
-COPY ["src/Infrastructure/Agents.Infrastructure.LLM/Agents.Infrastructure.LLM.csproj", "src/Infrastructure/Agents.Infrastructure.LLM/"]
-COPY ["src/Infrastructure/Agents.Infrastructure.Prompts/Agents.Infrastructure.Prompts.csproj", "src/Infrastructure/Agents.Infrastructure.Prompts/"]
-COPY ["src/Infrastructure/Agents.Infrastructure.Persistence.SqlServer/Agents.Infrastructure.Persistence.SqlServer.csproj", "src/Infrastructure/Agents.Infrastructure.Persistence.SqlServer/"]
-COPY ["src/Shared/Agents.Shared.Common/Agents.Shared.Common.csproj", "src/Shared/Agents.Shared.Common/"]
-COPY ["src/Infrastructure/Agents.Infrastructure.Dapr/Agents.Infrastructure.Dapr.csproj", "src/Infrastructure/Agents.Infrastructure.Dapr/"]
-COPY ["src/Shared/Agents.ServiceDefaults/Agents.ServiceDefaults.csproj", "src/Shared/Agents.ServiceDefaults/"]
+# Copy entire source tree
+COPY . .
 
 # Restore dependencies
 RUN dotnet restore
-
-# Copy source code
-COPY . .
 
 # Build application
 WORKDIR "/src/src/Presentation/Agents.API.Notification"
