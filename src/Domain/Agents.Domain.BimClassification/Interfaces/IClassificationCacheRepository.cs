@@ -14,7 +14,7 @@ public interface IClassificationCacheRepository
     Task<BimClassificationSuggestion?> GetByPatternHashAsync(
         string patternHash,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Caches a classification suggestion for a pattern.
     /// </summary>
@@ -23,21 +23,21 @@ public interface IClassificationCacheRepository
         BimClassificationSuggestion suggestion,
         TimeSpan? expiration = null,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets multiple cached suggestions by pattern hashes.
     /// </summary>
     Task<IDictionary<string, BimClassificationSuggestion>> GetManyByPatternHashesAsync(
         IEnumerable<string> patternHashes,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Invalidates cached suggestion for a pattern.
     /// </summary>
     Task InvalidateByPatternHashAsync(
         string patternHash,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets cache statistics.
     /// </summary>

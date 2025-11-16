@@ -22,19 +22,19 @@ public class BimClassificationServiceTests
     {
         _mockElementRepository = new Mock<IBimElementRepository>();
         _mockCacheRepository = new Mock<IClassificationCacheRepository>();
-        
+
         // Create a concrete agent instance (cannot mock BaseAgent.ExecuteAsync as it's not virtual)
         var mockLLMProvider = new Mock<Agents.Application.Core.ILLMProvider>();
         var mockPromptLoader = new Mock<Agents.Infrastructure.Prompts.Services.IPromptLoader>();
         var mockEventPublisher = new Mock<Agents.Domain.Core.Interfaces.IEventPublisher>();
         var mockAgentLogger = new Mock<ILogger<BimClassificationAgent>>();
-        
+
         _agent = new BimClassificationAgent(
             mockLLMProvider.Object,
             mockPromptLoader.Object,
             mockEventPublisher.Object,
             mockAgentLogger.Object);
-        
+
         _mockLogger = new Mock<ILogger<BimClassificationService>>();
 
         _service = new BimClassificationService(
@@ -49,7 +49,7 @@ public class BimClassificationServiceTests
     {
         // Arrange
         var elementIds = new List<long> { 1, 2, 3, 4, 5 };
-        
+
         var pattern = new BimPattern
         {
             PatternKey = "Ducts_Rectangular_Standard",
@@ -94,7 +94,7 @@ public class BimClassificationServiceTests
         result.CachedPatterns.Should().Be(1);
         result.NewlyClassifiedPatterns.Should().Be(0);
         result.Suggestions.Should().ContainSingle();
-        
+
         // Verify result came from cache (no new classifications)
         // Note: Cannot verify agent calls since ExecuteAsync is not virtual
     }
@@ -104,7 +104,7 @@ public class BimClassificationServiceTests
     {
         // Arrange - Test focuses on pattern aggregation, not LLM classification
         var elementIds = new List<long> { 1, 2, 3 };
-        
+
         var pattern = new BimPattern
         {
             PatternKey = "Pipes_Round_Copper",
@@ -133,7 +133,7 @@ public class BimClassificationServiceTests
         // Act - Will attempt classification but fail gracefully without LLM setup
         // This test verifies pattern aggregation works
         var result = await _service.ClassifyBatchAsync(elementIds, context);
-        
+
         // Assert - Verify aggregation happened correctly
         result.TotalElements.Should().Be(3);
         result.TotalPatterns.Should().Be(1);
@@ -146,7 +146,7 @@ public class BimClassificationServiceTests
     {
         // Arrange
         var elementIds = Enumerable.Range(1, 100).Select(i => (long)i).ToList();
-        
+
         var pattern1 = new BimPattern
         {
             PatternKey = "Ducts_A",
@@ -191,7 +191,7 @@ public class BimClassificationServiceTests
         _mockElementRepository
             .Setup(x => x.GetPatternsByElementIdsAsync(elementIds, 50, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<BimPattern>());
-        
+
         _mockCacheRepository
             .Setup(x => x.GetManyByPatternHashesAsync(
                 It.IsAny<IEnumerable<string>>(),

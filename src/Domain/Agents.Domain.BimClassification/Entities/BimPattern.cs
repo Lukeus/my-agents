@@ -13,18 +13,18 @@ public sealed class BimPattern
     public string? Material { get; init; }
     public string? LocationType { get; init; }
     public long ElementCount { get; init; }
-    
+
     /// <summary>
     /// Representative sample of elements matching this pattern.
     /// Used for LLM analysis instead of all elements.
     /// </summary>
     public IReadOnlyList<BimElementView> SampleElements { get; init; } = Array.Empty<BimElementView>();
-    
+
     /// <summary>
     /// Statistical summary of dimensions across all elements in pattern.
     /// </summary>
     public DimensionStatistics? DimensionStats { get; init; }
-    
+
     /// <summary>
     /// Hash of pattern characteristics for cache keying.
     /// </summary>

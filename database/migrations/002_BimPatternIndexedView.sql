@@ -1,5 +1,29 @@
 -- Migration: Add indexed view for BIM element pattern aggregation
 -- This view dramatically improves performance for pattern-based queries on 100M+ records
+--
+-- PREREQUISITES:
+-- This migration requires the dbo.BimElements table to exist with the following schema:
+--   - Id (bigint/int, primary key)
+--   - ExternalId (nvarchar)
+--   - ProjectId (uniqueidentifier/int)
+--   - Category (nvarchar, NOT NULL)
+--   - Family (nvarchar, nullable)
+--   - Type (nvarchar, nullable)
+--   - Material (nvarchar, nullable)
+--   - LocationType (nvarchar, nullable)
+--   - LengthMm, WidthMm, HeightMm, DiameterMm (decimal, nullable)
+--   - Spec (nvarchar, nullable)
+--   - MetaJson (nvarchar(max), nullable)
+--
+-- If your table has a different name or schema, adjust accordingly.
+
+-- Verify prerequisite table exists
+IF OBJECT_ID('dbo.BimElements', 'U') IS NULL
+BEGIN
+    RAISERROR('Table dbo.BimElements does not exist. Please create it before running this migration.', 16, 1);
+    RETURN;
+END
+GO
 
 -- Drop view if exists (for re-running migration)
 IF OBJECT_ID('dbo.vw_BimElementPatterns', 'V') IS NOT NULL
@@ -25,7 +49,7 @@ SELECT
     DiameterMm,
     Spec,
     MetaJson
-FROM dbo.BimElements  -- Adjust table name if different
+FROM dbo.BimElements
 WHERE 1 = 1;  -- Placeholder for additional filters
 GO
 

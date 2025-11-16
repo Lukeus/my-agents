@@ -191,7 +191,7 @@ public sealed class BatchClassificationResult
     public int CachedPatterns { get; init; }
     public int NewlyClassifiedPatterns { get; init; }
     public IReadOnlyList<BimClassificationSuggestion> Suggestions { get; init; } = Array.Empty<BimClassificationSuggestion>();
-    
+
     /// <summary>
     /// Maps pattern hash to list of element IDs belonging to that pattern.
     /// </summary>

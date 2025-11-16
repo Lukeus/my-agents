@@ -27,7 +27,7 @@ public class BimElementRepository : IBimElementRepository
         CancellationToken cancellationToken = default)
     {
         var ids = elementIds.ToList();
-        
+
         // Query against indexed view for better performance
         var elements = await _context.Set<BimElementView>()
             .Where(e => ids.Contains(e.Id))
@@ -63,19 +63,19 @@ public class BimElementRepository : IBimElementRepository
                 g.Key.Material,
                 g.Key.LocationType,
                 ElementCount = g.Count(),
-                // Compute dimension statistics
-                LengthMin = g.Min(e => e.LengthMm),
-                LengthMax = g.Max(e => e.LengthMm),
-                LengthAvg = g.Average(e => e.LengthMm),
-                WidthMin = g.Min(e => e.WidthMm),
-                WidthMax = g.Max(e => e.WidthMm),
-                WidthAvg = g.Average(e => e.WidthMm),
-                HeightMin = g.Min(e => e.HeightMm),
-                HeightMax = g.Max(e => e.HeightMm),
-                HeightAvg = g.Average(e => e.HeightMm),
-                DiameterMin = g.Min(e => e.DiameterMm),
-                DiameterMax = g.Max(e => e.DiameterMm),
-                DiameterAvg = g.Average(e => e.DiameterMm),
+                // Compute dimension statistics (handle nulls safely)
+                LengthMin = g.Select(e => e.LengthMm).Where(x => x != null).DefaultIfEmpty().Min(),
+                LengthMax = g.Select(e => e.LengthMm).Where(x => x != null).DefaultIfEmpty().Max(),
+                LengthAvg = g.Select(e => e.LengthMm).Where(x => x != null).DefaultIfEmpty().Average(),
+                WidthMin = g.Select(e => e.WidthMm).Where(x => x != null).DefaultIfEmpty().Min(),
+                WidthMax = g.Select(e => e.WidthMm).Where(x => x != null).DefaultIfEmpty().Max(),
+                WidthAvg = g.Select(e => e.WidthMm).Where(x => x != null).DefaultIfEmpty().Average(),
+                HeightMin = g.Select(e => e.HeightMm).Where(x => x != null).DefaultIfEmpty().Min(),
+                HeightMax = g.Select(e => e.HeightMm).Where(x => x != null).DefaultIfEmpty().Max(),
+                HeightAvg = g.Select(e => e.HeightMm).Where(x => x != null).DefaultIfEmpty().Average(),
+                DiameterMin = g.Select(e => e.DiameterMm).Where(x => x != null).DefaultIfEmpty().Min(),
+                DiameterMax = g.Select(e => e.DiameterMm).Where(x => x != null).DefaultIfEmpty().Max(),
+                DiameterAvg = g.Select(e => e.DiameterMm).Where(x => x != null).DefaultIfEmpty().Average(),
                 ElementIds = g.Select(e => e.Id).Take(sampleSize).ToList()
             })
             .AsNoTracking()

@@ -2,6 +2,7 @@ using Agents.Domain.BimClassification.Entities;
 using Agents.Domain.BimClassification.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using System.Text.Json;
 
 namespace Agents.Infrastructure.Persistence.Redis.Repositories;
@@ -13,15 +14,18 @@ namespace Agents.Infrastructure.Persistence.Redis.Repositories;
 public class RedisClassificationCacheRepository : IClassificationCacheRepository
 {
     private readonly IDistributedCache _cache;
+    private readonly IConnectionMultiplexer? _redis;
     private readonly ILogger<RedisClassificationCacheRepository> _logger;
     private const string KeyPrefix = "bim:classification:";
     private const string StatsKey = "bim:classification:stats";
 
     public RedisClassificationCacheRepository(
         IDistributedCache cache,
-        ILogger<RedisClassificationCacheRepository> logger)
+        ILogger<RedisClassificationCacheRepository> logger,
+        IConnectionMultiplexer? redis = null)
     {
         _cache = cache;
+        _redis = redis;
         _logger = logger;
     }
 
@@ -34,8 +38,6 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
 
         if (json == null)
         {
-            // Note: Statistics tracking is best-effort due to IDistributedCache limitations
-            // For accurate stats in production, use StackExchange.Redis directly with HINCRBY
             _ = IncrementMissCountAsync(); // Fire and forget
             _logger.LogDebug("Cache miss for pattern hash: {PatternHash}", patternHash);
             return null;
@@ -70,11 +72,41 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         IEnumerable<string> patternHashes,
         CancellationToken cancellationToken = default)
     {
+        var hashes = patternHashes.ToList();
         var result = new Dictionary<string, BimClassificationSuggestion>();
 
-        // Redis doesn't have a native batch get in IDistributedCache
-        // For production, consider using StackExchange.Redis directly for MGET
-        foreach (var hash in patternHashes)
+        // Use native Redis MGET for efficient batch retrieval
+        if (_redis != null)
+        {
+            try
+            {
+                var db = _redis.GetDatabase();
+                var keys = hashes.Select(h => (RedisKey)GetKey(h)).ToArray();
+                var values = await db.StringGetAsync(keys);
+
+                for (int i = 0; i < hashes.Count; i++)
+                {
+                    if (values[i].HasValue)
+                    {
+                        var suggestion = JsonSerializer.Deserialize<BimClassificationSuggestion>(values[i]!);
+                        if (suggestion != null)
+                        {
+                            result[hashes[i]] = suggestion;
+                        }
+                    }
+                }
+
+                _logger.LogDebug("Batch retrieved {Count} cached items via MGET", result.Count);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to use Redis MGET, falling back to sequential retrieval");
+            }
+        }
+
+        // Fallback: sequential retrieval with IDistributedCache
+        foreach (var hash in hashes)
         {
             var suggestion = await GetByPatternHashAsync(hash, cancellationToken);
             if (suggestion != null)
@@ -97,14 +129,51 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
 
     public async Task<CacheStatistics> GetStatisticsAsync(CancellationToken cancellationToken = default)
     {
+        // Use Redis HGETALL for atomic read if available
+        if (_redis != null)
+        {
+            try
+            {
+                var db = _redis.GetDatabase();
+                var entries = await db.HashGetAllAsync(StatsKey);
+
+                if (entries.Length == 0)
+                {
+                    return new CacheStatistics { HitCount = 0, MissCount = 0, TotalItems = 0 };
+                }
+
+                long hitCount = 0, missCount = 0, totalItems = 0;
+                foreach (var entry in entries)
+                {
+                    if (entry.Name == "HitCount" && entry.Value.HasValue)
+                        hitCount = (long)entry.Value;
+                    else if (entry.Name == "MissCount" && entry.Value.HasValue)
+                        missCount = (long)entry.Value;
+                    else if (entry.Name == "TotalItems" && entry.Value.HasValue)
+                        totalItems = (long)entry.Value;
+                }
+                return new CacheStatistics
+                {
+                    HitCount = hitCount,
+                    MissCount = missCount,
+                    TotalItems = totalItems
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to read stats via HGETALL, falling back to JSON");
+            }
+        }
+
+        // Fallback: JSON-based storage
         var statsJson = await _cache.GetStringAsync(StatsKey, cancellationToken);
-        
+
         if (statsJson == null)
         {
             return new CacheStatistics { HitCount = 0, MissCount = 0, TotalItems = 0 };
         }
 
-        return JsonSerializer.Deserialize<CacheStatistics>(statsJson) 
+        return JsonSerializer.Deserialize<CacheStatistics>(statsJson)
                ?? new CacheStatistics { HitCount = 0, MissCount = 0, TotalItems = 0 };
     }
 
@@ -114,13 +183,21 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
     }
 
     /// <summary>
-    /// Increments hit count. Note: Has race condition with IDistributedCache.
-    /// For production: Use StackExchange.Redis directly with HINCRBY for atomic increments.
+    /// Increments hit count using atomic Redis operation when available.
     /// </summary>
     private async Task IncrementHitCountAsync()
     {
         try
         {
+            // Use atomic HINCRBY if Redis is available
+            if (_redis != null)
+            {
+                var db = _redis.GetDatabase();
+                await db.HashIncrementAsync(StatsKey, "HitCount", 1);
+                return;
+            }
+
+            // Fallback: best-effort with race condition
             var stats = await GetStatisticsAsync();
             var updated = new CacheStatistics
             {
@@ -138,13 +215,21 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
     }
 
     /// <summary>
-    /// Increments miss count. Note: Has race condition with IDistributedCache.
-    /// For production: Use StackExchange.Redis directly with HINCRBY for atomic increments.
+    /// Increments miss count using atomic Redis operation when available.
     /// </summary>
     private async Task IncrementMissCountAsync()
     {
         try
         {
+            // Use atomic HINCRBY if Redis is available
+            if (_redis != null)
+            {
+                var db = _redis.GetDatabase();
+                await db.HashIncrementAsync(StatsKey, "MissCount", 1);
+                return;
+            }
+
+            // Fallback: best-effort with race condition
             var stats = await GetStatisticsAsync();
             var updated = new CacheStatistics
             {

@@ -10,12 +10,12 @@ public sealed class BatchClassifyRequest
     /// List of BIM element IDs to classify.
     /// </summary>
     public List<long> ElementIds { get; init; } = new();
-    
+
     /// <summary>
     /// Optional: Project ID for filtering (if multi-tenant).
     /// </summary>
     public string? ProjectId { get; init; }
-    
+
     /// <summary>
     /// Whether to force re-classification even if cached.
     /// </summary>

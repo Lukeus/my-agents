@@ -29,6 +29,8 @@
     <ProjectReference Include="..\..\src\Application\Agents.Application.ServiceDesk\Agents.Application.ServiceDesk.csproj" />
     <ProjectReference Include="..\..\src\Application\Agents.Application.BimClassification\Agents.Application.BimClassification.csproj" />
     <ProjectReference Include="..\..\src\Domain\Agents.Domain.BimClassification\Agents.Domain.BimClassification.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure\Agents.Infrastructure.Persistence.Redis\Agents.Infrastructure.Persistence.Redis.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure\Agents.Infrastructure.Persistence.SqlServer\Agents.Infrastructure.Persistence.SqlServer.csproj" />
   </ItemGroup>
 
 </Project>
