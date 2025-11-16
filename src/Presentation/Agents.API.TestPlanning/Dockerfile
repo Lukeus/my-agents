@@ -19,7 +19,7 @@ COPY ["src/Shared/Agents.Shared.Common/Agents.Shared.Common.csproj", "src/Shared
 COPY ["src/Shared/Agents.ServiceDefaults/Agents.ServiceDefaults.csproj", "src/Shared/Agents.ServiceDefaults/"]
 
 # Restore dependencies
-RUN dotnet restore "src/Presentation/Agents.API.TestPlanning/Agents.API.TestPlanning.csproj"
+RUN dotnet restore
 
 # Copy source code
 COPY . .

@@ -20,7 +20,7 @@ COPY ["src/Infrastructure/Agents.Infrastructure.Dapr/Agents.Infrastructure.Dapr.
 COPY ["src/Shared/Agents.ServiceDefaults/Agents.ServiceDefaults.csproj", "src/Shared/Agents.ServiceDefaults/"]
 
 # Restore dependencies
-RUN dotnet restore "src/Presentation/Agents.API.Notification/Agents.API.Notification.csproj"
+RUN dotnet restore
 
 # Copy source code
 COPY . .

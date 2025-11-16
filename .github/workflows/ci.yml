@@ -86,9 +86,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
-    
-    - name: Install Aspire workload
-      run: dotnet workload install aspire --skip-manifest-update
         
     - name: Run code analysis
       run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release /p:TreatWarningsAsErrors=true
