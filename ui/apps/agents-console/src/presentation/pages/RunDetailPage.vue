@@ -13,7 +13,7 @@ const goBack = () => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto">
+  <div class="">
     <div class="mb-6">
       <AppButton variant="ghost" @click="goBack">← Back to Runs</AppButton>
     </div>

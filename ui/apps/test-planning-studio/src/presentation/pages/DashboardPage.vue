@@ -27,7 +27,7 @@ const navigateToGenerate = () => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto">
+  <div>
     <div class="mb-8">
       <h1 class="text-4xl font-bold text-[--color-text-primary] mb-2">Test Planning Dashboard</h1>
       <p class="text-[--color-text-secondary]">

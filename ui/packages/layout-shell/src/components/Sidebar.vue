@@ -18,7 +18,7 @@ const emit = defineEmits<{
 
 <template>
   <aside
-    class="flex flex-col border-r border-[--color-border-subtle] bg-[--color-surface-elevated] transition-all duration-200"
+    class="flex flex-shrink-0 flex-col border-r border-[--color-border-subtle] bg-[--color-surface-elevated] transition-all duration-200"
     :class="collapsed ? 'w-16' : 'w-64'"
   >
     <!-- Sidebar header with toggle -->

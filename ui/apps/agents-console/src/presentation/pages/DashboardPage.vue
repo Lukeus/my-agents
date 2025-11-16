@@ -34,7 +34,7 @@ const getStatusVariant = (status: string) => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto">
+  <div>
     <div class="mb-8">
       <h1 class="text-4xl font-bold text-text-primary mb-2">Agents Dashboard</h1>
       <p class="text-text-secondary">Overview of all available agents and their status</p>

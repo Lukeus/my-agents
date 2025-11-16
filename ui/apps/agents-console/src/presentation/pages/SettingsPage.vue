@@ -3,7 +3,7 @@ import { AppCard, AppBadge } from '@agents/design-system';
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto">
+  <div class="">
     <div class="mb-8">
       <h1 class="text-4xl font-bold text-text-primary mb-2">Settings</h1>
       <p class="text-text-secondary">Configure agents and system preferences</p>

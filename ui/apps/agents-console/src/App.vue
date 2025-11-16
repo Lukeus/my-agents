@@ -17,12 +17,12 @@ const availableApps = [
   { name: 'Service Desk', icon: '🎫', href: '/service-desk' },
 ];
 
-const navigationItems = [
+const navigationItems = computed(() => [
   { label: 'Dashboard', icon: '📊', route: '/', isActive: route.path === '/' },
   { label: 'Agents', icon: '🤖', route: '/agents', isActive: route.path.startsWith('/agents') },
   { label: 'Runs', icon: '▶️', route: '/runs', isActive: route.path.startsWith('/runs') },
   { label: 'Settings', icon: '⚙️', route: '/settings', isActive: route.path === '/settings' },
-];
+]);
 
 const healthStatus = computed(() => ({
   status: 'healthy' as const,

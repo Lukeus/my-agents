@@ -46,7 +46,7 @@ const toggleSidebar = () => {
 </script>
 
 <template>
-  <div class="flex h-screen bg-[--color-surface]">
+  <div class="h-screen flex overflow-hidden bg-[--color-surface]">
     <!-- Sidebar -->
     <Sidebar
       v-if="showSidebar"
@@ -56,7 +56,7 @@ const toggleSidebar = () => {
     />
 
     <!-- Main content area -->
-    <div class="flex flex-1 flex-col overflow-hidden">
+    <div class="flex flex-col flex-1 overflow-hidden">
       <!-- Top navigation -->
       <TopNav
         :current-app="currentApp"
@@ -65,8 +65,12 @@ const toggleSidebar = () => {
       />
 
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto bg-[--color-surface] p-6">
-        <slot />
+      <main class="flex-1 overflow-y-auto bg-[--color-surface]">
+        <div class="py-6">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+            <slot />
+          </div>
+        </div>
       </main>
     </div>
   </div>
