@@ -1,3 +1,4 @@
+using Agents.Domain.BimClassification.Entities;
 using Agents.Domain.Notification.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,11 @@ public class AgentsDbContext : DbContext
     /// Gets or sets the Notifications DbSet.
     /// </summary>
     public DbSet<Notification> Notifications => Set<Notification>();
+
+    /// <summary>
+    /// Gets or sets the BIM Classification Suggestions DbSet.
+    /// </summary>
+    public DbSet<BimClassificationSuggestion> BimClassificationSuggestions => Set<BimClassificationSuggestion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

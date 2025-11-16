@@ -9,6 +9,11 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  security-events: write
+  packages: write
+
 env:
   REGISTRY: ${{ secrets.ACR_LOGIN_SERVER }}
   IMAGE_TAG: ${{ github.sha }}
@@ -29,6 +34,8 @@ jobs:
             dockerfile: src/Presentation/Agents.API.Implementation/Dockerfile
           - name: servicedesk
             dockerfile: src/Presentation/Agents.API.ServiceDesk/Dockerfile
+          - name: bimclassification
+            dockerfile: src/Presentation/Agents.API.BimClassification/Dockerfile
     
     steps:
     - name: Checkout code
@@ -121,7 +128,7 @@ jobs:
       continue-on-error: true
         
     - name: Upload Trivy results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       if: always() && steps.trivy-scan.outcome == 'success'
       with:
         sarif_file: 'trivy-results-${{ matrix.service.name }}.sarif'

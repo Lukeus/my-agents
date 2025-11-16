@@ -58,4 +58,14 @@ var servicedeskApi = builder.AddProject<Projects.Agents_API_ServiceDesk>("servic
     .WithEnvironment("LLMProvider__Ollama__Endpoint", "http://ollama:11434")
     .WithDaprSidecar("servicedesk-api");
 
+// Add BIM Classification Agent API with Dapr sidecar
+var bimclassificationApi = builder.AddProject<Projects.Agents_API_BimClassification>("bimclassification-api")
+    .WithReference(sqlServer)
+    .WithReference(redis)
+    .WithEnvironment("Dapr__Enabled", "true")
+    .WithEnvironment("ConnectionStrings__SqlServer", sqlServer)
+    .WithEnvironment("LLMProvider__ProviderType", "Ollama")
+    .WithEnvironment("LLMProvider__Ollama__Endpoint", "http://ollama:11434")
+    .WithDaprSidecar("bimclassification-api");
+
 builder.Build().Run();

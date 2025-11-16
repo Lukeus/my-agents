@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\Presentation\Agents.API.TestPlanning\Agents.API.TestPlanning.csproj" />
     <ProjectReference Include="..\..\Presentation\Agents.API.Implementation\Agents.API.Implementation.csproj" />
     <ProjectReference Include="..\..\Presentation\Agents.API.ServiceDesk\Agents.API.ServiceDesk.csproj" />
+    <ProjectReference Include="..\..\Presentation\Agents.API.BimClassification\Agents.API.BimClassification.csproj" />
   </ItemGroup>
 
   <ItemGroup>

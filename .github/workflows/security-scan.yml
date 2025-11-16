@@ -10,6 +10,10 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   code-scan:
     runs-on: ubuntu-latest
@@ -28,7 +32,7 @@ jobs:
         severity: 'CRITICAL,HIGH,MEDIUM'
         
     - name: Upload Trivy results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       with:
         sarif_file: 'trivy-repo-results.sarif'
         category: trivy-repo
@@ -64,7 +68,13 @@ jobs:
     if: github.event_name != 'pull_request'
     strategy:
       matrix:
-        service: [notification, devops, testplanning, implementation, servicedesk]
+        service:
+          - { name: notification, path: Notification }
+          - { name: devops, path: DevOps }
+          - { name: testplanning, path: TestPlanning }
+          - { name: implementation, path: Implementation }
+          - { name: servicedesk, path: ServiceDesk }
+          - { name: bimclassification, path: BimClassification }
     
     steps:
     - name: Checkout code
@@ -77,24 +87,24 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: src/Presentation/Agents.API.${{ matrix.service }}/Dockerfile
+        file: src/Presentation/Agents.API.${{ matrix.service.path }}/Dockerfile
         push: false
         load: true
-        tags: agents-${{ matrix.service }}-api:scan
+        tags: agents-${{ matrix.service.name }}-api:scan
         
     - name: Run Trivy vulnerability scanner on Docker image
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: agents-${{ matrix.service }}-api:scan
+        image-ref: agents-${{ matrix.service.name }}-api:scan
         format: 'sarif'
-        output: 'trivy-docker-${{ matrix.service }}.sarif'
+        output: 'trivy-docker-${{ matrix.service.name }}.sarif'
         severity: 'CRITICAL,HIGH'
         
     - name: Upload Trivy Docker results
-      uses: github/codeql-action/upload-sarif@v3
+      uses: github/codeql-action/upload-sarif@v4
       with:
-        sarif_file: 'trivy-docker-${{ matrix.service }}.sarif'
-        category: trivy-docker-${{ matrix.service }}
+        sarif_file: 'trivy-docker-${{ matrix.service.name }}.sarif'
+        category: trivy-docker-${{ matrix.service.name }}
         
   secrets-scan:
     runs-on: ubuntu-latest

@@ -27,6 +27,8 @@
     <ProjectReference Include="..\..\src\Application\Agents.Application.TestPlanning\Agents.Application.TestPlanning.csproj" />
     <ProjectReference Include="..\..\src\Application\Agents.Application.Implementation\Agents.Application.Implementation.csproj" />
     <ProjectReference Include="..\..\src\Application\Agents.Application.ServiceDesk\Agents.Application.ServiceDesk.csproj" />
+    <ProjectReference Include="..\..\src\Application\Agents.Application.BimClassification\Agents.Application.BimClassification.csproj" />
+    <ProjectReference Include="..\..\src\Domain\Agents.Domain.BimClassification\Agents.Domain.BimClassification.csproj" />
   </ItemGroup>
 
 </Project>
