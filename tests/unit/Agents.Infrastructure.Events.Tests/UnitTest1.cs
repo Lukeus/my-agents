@@ -1,4 +1,4 @@
-﻿namespace Agents.Infrastructure.Events.Tests;
+namespace Agents.Infrastructure.Events.Tests;
 
 public class UnitTest1
 {

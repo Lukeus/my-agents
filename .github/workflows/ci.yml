@@ -38,7 +38,14 @@ jobs:
       run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
       
     - name: Run unit tests
-      run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal --filter "Category=Unit"
+      run: |
+        echo "Running unit tests (including 21 BIM Classification tests)..."
+        dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal --filter "Category=Unit"
+        
+    - name: Run BIM Classification tests
+      run: |
+        echo "Running BIM Classification pattern aggregation tests..."
+        dotnet test tests/Agents.Tests.Unit/Agents.Tests.Unit.csproj --configuration Release --no-build --verbosity normal --filter "FullyQualifiedName~BimClassification"
       
     - name: Start Docker services for integration tests
       run: |

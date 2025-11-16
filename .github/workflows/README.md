@@ -17,7 +17,7 @@ Builds Docker images for all agent services and pushes them to Azure Container R
 **Features:**
 - ✅ Works without Azure setup (builds locally only)
 - ✅ Automatically detects if Azure is configured
-- ✅ Builds all 5 agent services in parallel
+- ✅ Builds all 6 agent services in parallel (Notification, DevOps, TestPlanning, Implementation, ServiceDesk, BimClassification)
 - ✅ Pushes to ACR when Azure is configured
 - ✅ Security scanning with Trivy
 - ✅ Multi-platform support
@@ -39,9 +39,22 @@ Deploys agent services to AKS using Helm and Kustomize.
 
 Runs tests and code quality checks.
 
+**Features:**
+- ✅ Unit tests for all 6 agents (100+ tests including 21 BIM Classification tests)
+- ✅ Integration tests with Docker containers (Redis, SQL Server)
+- ✅ Code analysis and formatting checks
+- ✅ Code coverage reporting
+
 ### 4. `security-scan.yml` - Security Scanning
 
 Performs security scans on dependencies and code.
+
+**Features:**
+- ✅ Repository vulnerability scanning (Trivy)
+- ✅ .NET package vulnerability detection
+- ✅ Docker image security scans for all 6 agents
+- ✅ Secret scanning (TruffleHog)
+- ✅ Daily automated scans
 
 ## Required Secrets
 

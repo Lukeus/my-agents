@@ -12,8 +12,10 @@
     <PackageReference Include="FluentAssertions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="Testcontainers" Version="4.0.0" />
     <PackageReference Include="Testcontainers.MsSql" Version="4.0.0" />
+    <PackageReference Include="Testcontainers.Redis" Version="4.0.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
@@ -25,7 +27,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Infrastructure\Agents.Infrastructure.Persistence.SqlServer\Agents.Infrastructure.Persistence.SqlServer.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\Agents.Infrastructure.Persistence.CosmosDB\Agents.Infrastructure.Persistence.CosmosDB.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure\Agents.Infrastructure.Persistence.Redis\Agents.Infrastructure.Persistence.Redis.csproj" />
     <ProjectReference Include="..\..\src\Domain\Agents.Domain.Notification\Agents.Domain.Notification.csproj" />
+    <ProjectReference Include="..\..\src\Domain\Agents.Domain.BimClassification\Agents.Domain.BimClassification.csproj" />
   </ItemGroup>
 
 </Project>

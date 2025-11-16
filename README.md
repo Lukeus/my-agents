@@ -49,7 +49,7 @@ C4Container
     Container(testPlanningAPI, "TestPlanning API", "ASP.NET Core", "Test spec generation")
     Container(implementationAPI, "Implementation API", "ASP.NET Core", "Code generation & review")
     Container(serviceDeskAPI, "ServiceDesk API", "ASP.NET Core", "Ticket triage & SLA tracking")
-    Container(bimClassificationAPI, "BimClassification API", "ASP.NET Core", "BIM element classification suggestions")
+    Container(bimClassificationAPI, "BimClassification API", "ASP.NET Core", "BIM classification with pattern aggregation (100M+ records)")
     
     ContainerDb(promptRepo, "Prompt Repository", "GitHub", "Versioned prompt files")
     ContainerDb(eventInfra, "Event Infrastructure", "Azure", "Event Grid, Hubs, Service Bus")
@@ -289,7 +289,7 @@ dotnet run --project src/AppHost/Agents.AppHost/Agents.AppHost.csproj
 ```
 
 **What You Get:**
-- ✅ All 6 agent APIs running with Dapr sidecars
+- ✅ All 6 agent APIs running with Dapr sidecars (Notification, DevOps, TestPlanning, Implementation, ServiceDesk, BimClassification)
 - ✅ SQL Server, Redis, and Ollama containers
 - ✅ Unified dashboard with logs, traces, and metrics
 - ✅ Service discovery and health checks
@@ -391,7 +391,8 @@ Toggle between Ollama (development) and Azure OpenAI (production) via `appsettin
 - **Distributed Tracing**: OpenTelemetry integration via Aspire ServiceDefaults
 - **Health Checks**: Kubernetes-ready liveness/readiness probes
 - **Clean Architecture**: Strict separation of concerns (Domain, Application, Infrastructure, Presentation)
-- **Comprehensive Testing**: 79 unit tests (including 35 Dapr tests), 100% pass rate
+- **Comprehensive Testing**: 100+ unit tests (including 35 Dapr tests, 21 BIM Classification tests), 100% pass rate
+- **Large-Scale Data Processing**: BIM Classification Agent handles 100M+ records via pattern aggregation and multi-level caching
 - **Production Monitoring**: Aspire Dashboard, Prometheus metrics, Grafana dashboards
 
 ### Agent Capabilities
