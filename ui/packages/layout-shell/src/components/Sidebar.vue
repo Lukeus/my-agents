@@ -22,18 +22,18 @@ const emit = defineEmits<{
     :class="collapsed ? 'w-16' : 'w-64'"
   >
     <!-- Sidebar header with toggle -->
-    <div class="flex h-16 items-center justify-between px-4 border-b border-[--color-border-subtle]">
-      <span v-if="!collapsed" class="text-sm font-medium text-[--color-text-secondary]">Navigation</span>
+    <div class="flex h-16 items-center justify-end px-4 border-b border-[--color-border-subtle]">
       <button
         class="rounded-[--radius-md] p-2 hover:bg-[--color-surface-hover] transition-colors"
         @click="emit('toggle')"
+        title="Toggle sidebar"
       >
         <svg class="h-4 w-4 text-[--color-text-secondary]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            :d="collapsed ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7'"
+            :d="collapsed ? 'M13 5l7 7-7 7' : 'M11 19l-7-7 7-7'"
           />
         </svg>
       </button>
