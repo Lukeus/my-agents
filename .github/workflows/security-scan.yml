@@ -47,12 +47,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
-    
-    - name: Install Aspire workload
-      run: |
-        dotnet workload install aspire --skip-manifest-update
-        dotnet workload list
+        dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: Restore dependencies
       run: dotnet restore Agents.sln
