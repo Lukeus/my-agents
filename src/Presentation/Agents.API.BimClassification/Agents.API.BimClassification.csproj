@@ -17,8 +17,9 @@
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.LLM\Agents.Infrastructure.LLM.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Prompts\Agents.Infrastructure.Prompts.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Dapr\Agents.Infrastructure.Dapr.csproj" />
-    <ProjectReference Include="..\..\Shared\Agents.ServiceDefaults\Agents.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Persistence.Redis\Agents.Infrastructure.Persistence.Redis.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Persistence.SqlServer\Agents.Infrastructure.Persistence.SqlServer.csproj" />
+    <ProjectReference Include="..\..\Shared\Agents.ServiceDefaults\Agents.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

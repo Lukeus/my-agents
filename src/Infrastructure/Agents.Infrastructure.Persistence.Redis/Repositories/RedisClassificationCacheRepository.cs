@@ -34,12 +34,14 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
 
         if (json == null)
         {
-            await IncrementMissCountAsync();
+            // Note: Statistics tracking is best-effort due to IDistributedCache limitations
+            // For accurate stats in production, use StackExchange.Redis directly with HINCRBY
+            _ = IncrementMissCountAsync(); // Fire and forget
             _logger.LogDebug("Cache miss for pattern hash: {PatternHash}", patternHash);
             return null;
         }
 
-        await IncrementHitCountAsync();
+        _ = IncrementHitCountAsync(); // Fire and forget
         _logger.LogDebug("Cache hit for pattern hash: {PatternHash}", patternHash);
 
         return JsonSerializer.Deserialize<BimClassificationSuggestion>(json);
@@ -111,28 +113,52 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         return $"{KeyPrefix}{patternHash}";
     }
 
+    /// <summary>
+    /// Increments hit count. Note: Has race condition with IDistributedCache.
+    /// For production: Use StackExchange.Redis directly with HINCRBY for atomic increments.
+    /// </summary>
     private async Task IncrementHitCountAsync()
     {
-        var stats = await GetStatisticsAsync();
-        var updated = new CacheStatistics
+        try
         {
-            HitCount = stats.HitCount + 1,
-            MissCount = stats.MissCount,
-            TotalItems = stats.TotalItems
-        };
-        await SetStatisticsAsync(updated);
+            var stats = await GetStatisticsAsync();
+            var updated = new CacheStatistics
+            {
+                HitCount = stats.HitCount + 1,
+                MissCount = stats.MissCount,
+                TotalItems = stats.TotalItems
+            };
+            await SetStatisticsAsync(updated);
+        }
+        catch (Exception ex)
+        {
+            // Statistics are best-effort, don't fail cache operations
+            _logger.LogWarning(ex, "Failed to increment hit count");
+        }
     }
 
+    /// <summary>
+    /// Increments miss count. Note: Has race condition with IDistributedCache.
+    /// For production: Use StackExchange.Redis directly with HINCRBY for atomic increments.
+    /// </summary>
     private async Task IncrementMissCountAsync()
     {
-        var stats = await GetStatisticsAsync();
-        var updated = new CacheStatistics
+        try
         {
-            HitCount = stats.HitCount,
-            MissCount = stats.MissCount + 1,
-            TotalItems = stats.TotalItems
-        };
-        await SetStatisticsAsync(updated);
+            var stats = await GetStatisticsAsync();
+            var updated = new CacheStatistics
+            {
+                HitCount = stats.HitCount,
+                MissCount = stats.MissCount + 1,
+                TotalItems = stats.TotalItems
+            };
+            await SetStatisticsAsync(updated);
+        }
+        catch (Exception ex)
+        {
+            // Statistics are best-effort, don't fail cache operations
+            _logger.LogWarning(ex, "Failed to increment miss count");
+        }
     }
 
     private async Task SetStatisticsAsync(CacheStatistics stats)
