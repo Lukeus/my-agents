@@ -98,12 +98,34 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
 
         if (json == null)
         {
-            _ = IncrementMissCountAsync(); // Fire and forget
+            // Fire and forget with exception handling
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await IncrementMissCountAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to increment miss count for pattern hash: {PatternHash}", patternHash);
+                }
+            });
             _logger.LogDebug("Cache miss for pattern hash: {PatternHash}", patternHash);
             return null;
         }
 
-        _ = IncrementHitCountAsync(); // Fire and forget
+        // Fire and forget with exception handling
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await IncrementHitCountAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to increment hit count for pattern hash: {PatternHash}", patternHash);
+            }
+        });
         _logger.LogDebug("Cache hit for pattern hash: {PatternHash}", patternHash);
 
         var dto = JsonSerializer.Deserialize<BimClassificationCacheDto>(json, JsonOptions);

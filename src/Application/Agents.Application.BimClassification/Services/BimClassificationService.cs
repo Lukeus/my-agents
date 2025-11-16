@@ -126,7 +126,8 @@ public class BimClassificationService
             PatternJson = System.Text.Json.JsonSerializer.Serialize(patternPrompt)
         };
 
-        var result = await _agent.ExecuteAsync(request, context);
+        var input = System.Text.Json.JsonSerializer.Serialize(request);
+        var result = await _agent.ExecuteAsync(input, context);
 
         if (!result.IsSuccess)
         {
