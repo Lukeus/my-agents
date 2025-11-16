@@ -60,7 +60,6 @@ jobs:
       
   docker-scan:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     strategy:
       matrix:
         service:

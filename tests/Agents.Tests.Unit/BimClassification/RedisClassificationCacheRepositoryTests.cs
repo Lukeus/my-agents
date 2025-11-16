@@ -368,4 +368,126 @@ public class RedisClassificationCacheRepositoryTests
             Times.AtLeastOnce(),
             "Should eventually succeed in setting statistics");
     }
+
+    [Fact]
+    public async Task GetByPatternHashAsync_CacheMiss_LogsErrorWhenIncrementMissCountFails()
+    {
+        // Arrange
+        _mockDatabase
+            .Setup(db => db.StringGetAsync("BimClassification:bim:classification:missing-hash", It.IsAny<CommandFlags>()))
+            .ReturnsAsync(RedisValue.Null);
+
+        _mockDatabase
+            .Setup(db => db.HashIncrementAsync(
+                "BimClassification:bim:classification:stats",
+                "MissCount",
+                1,
+                It.IsAny<CommandFlags>()))
+            .ThrowsAsync(new RedisException("Redis connection failed"));
+
+        // Act
+        var result = await _repository.GetByPatternHashAsync("missing-hash");
+        await Task.Delay(100); // Allow fire-and-forget to complete
+
+        // Assert
+        result.Should().BeNull();
+
+        // Verify warning was logged for the failed increment
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to increment miss count")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once,
+            "Should log warning when IncrementMissCountAsync fails in fire-and-forget task");
+    }
+
+    [Fact]
+    public async Task GetByPatternHashAsync_CacheHit_LogsErrorWhenIncrementHitCountFails()
+    {
+        // Arrange
+        var dto = new { bimElementId = 1, suggestedCommodityCode = "CC-001", suggestedPricingCode = "PC-001", reasoningSummary = "Test", derivedItems = Array.Empty<object>() };
+        var json = System.Text.Json.JsonSerializer.Serialize(dto, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+
+        _mockDatabase
+            .Setup(db => db.StringGetAsync("BimClassification:bim:classification:existing-hash", It.IsAny<CommandFlags>()))
+            .ReturnsAsync(json);
+
+        _mockDatabase
+            .Setup(db => db.HashIncrementAsync(
+                "BimClassification:bim:classification:stats",
+                "HitCount",
+                1,
+                It.IsAny<CommandFlags>()))
+            .ThrowsAsync(new RedisException("Redis timeout"));
+
+        // Act
+        var result = await _repository.GetByPatternHashAsync("existing-hash");
+        await Task.Delay(100); // Allow fire-and-forget to complete
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.SuggestedCommodityCode.Should().Be("CC-001");
+
+        // Verify warning was logged for the failed increment
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to increment hit count")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once,
+            "Should log warning when IncrementHitCountAsync fails in fire-and-forget task");
+    }
+
+    [Fact]
+    public async Task GetByPatternHashAsync_CacheMiss_CorrectlyIncrementsMissCount_WhenSuccessful()
+    {
+        // Arrange
+        _mockDatabase
+            .Setup(db => db.StringGetAsync("BimClassification:bim:classification:missing-hash", It.IsAny<CommandFlags>()))
+            .ReturnsAsync(RedisValue.Null);
+
+        long incrementedValue = 0;
+        _mockDatabase
+            .Setup(db => db.HashIncrementAsync(
+                "BimClassification:bim:classification:stats",
+                "MissCount",
+                1,
+                It.IsAny<CommandFlags>()))
+            .ReturnsAsync(() => ++incrementedValue);
+
+        // Act
+        var result = await _repository.GetByPatternHashAsync("missing-hash");
+        await Task.Delay(100); // Allow fire-and-forget to complete
+
+        // Assert
+        result.Should().BeNull();
+
+        // Verify miss count was incremented exactly once
+        _mockDatabase.Verify(
+            db => db.HashIncrementAsync(
+                "BimClassification:bim:classification:stats",
+                "MissCount",
+                1,
+                It.IsAny<CommandFlags>()),
+            Times.Once,
+            "Should increment miss count once when cache miss occurs");
+
+        incrementedValue.Should().Be(1, "Miss count should be incremented by 1");
+
+        // Verify no error was logged (successful increment)
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to increment")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Never,
+            "Should not log warning when increment succeeds");
+    }
 }
