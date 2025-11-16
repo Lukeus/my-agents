@@ -297,4 +297,75 @@ public class RedisClassificationCacheRepositoryTests
                 It.IsAny<CommandFlags>()),
             Times.Once);
     }
+
+    [Fact]
+    public async Task IncrementHitCountAsync_WithoutRedis_RetriesOnConcurrentModification()
+    {
+        // Arrange
+        var repositoryWithoutRedis = new RedisClassificationCacheRepository(
+            _mockCache.Object,
+            _mockLogger.Object,
+            redis: null);
+
+        var dto = new { bimElementId = 1, suggestedCommodityCode = "CC-001", suggestedPricingCode = "PC-001", reasoningSummary = "Test", derivedItems = Array.Empty<object>() };
+        var json = System.Text.Json.JsonSerializer.Serialize(dto, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+
+        // Mock cache hit that triggers increment
+        _mockCache
+            .Setup(c => c.GetAsync("bim:classification:test-hash", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(System.Text.Encoding.UTF8.GetBytes(json));
+
+        // Mock statistics read - simulate concurrent modification on first attempt
+        // Each retry does 2 reads: one to get stats, one in TrySet to verify
+        int readCount = 0;
+        var initialStats = System.Text.Json.JsonSerializer.Serialize(new Agents.Domain.BimClassification.Interfaces.CacheStatistics
+        {
+            HitCount = 100,
+            MissCount = 50,
+            TotalItems = 10
+        });
+        var modifiedStats = System.Text.Json.JsonSerializer.Serialize(new Agents.Domain.BimClassification.Interfaces.CacheStatistics
+        {
+            HitCount = 105, // Changed by another thread
+            MissCount = 50,
+            TotalItems = 10
+        });
+
+        _mockCache
+            .Setup(c => c.GetAsync("bim:classification:stats", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() =>
+            {
+                readCount++;
+                // Read 1: get initial (100), Read 2: verify (100) - match, set succeeds
+                // But on first attempt, verification will detect change
+                if (readCount == 1)
+                    return System.Text.Encoding.UTF8.GetBytes(initialStats); // First read in attempt 1
+                else if (readCount == 2)
+                    return System.Text.Encoding.UTF8.GetBytes(modifiedStats); // Verification detects change
+                else
+                    return System.Text.Encoding.UTF8.GetBytes(modifiedStats); // Subsequent reads are stable
+            });
+
+        _mockCache
+            .Setup(c => c.SetAsync("bim:classification:stats", It.IsAny<byte[]>(), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await repositoryWithoutRedis.GetByPatternHashAsync("test-hash");
+        await Task.Delay(200); // Allow fire-and-forget increment with retries to complete
+
+        // Assert
+        result.Should().NotBeNull();
+        // Verify multiple reads occurred due to retry (at least 2 reads per attempt, with 1 retry = 4 total)
+        _mockCache.Verify(
+            c => c.GetAsync("bim:classification:stats", It.IsAny<CancellationToken>()),
+            Times.AtLeast(2), // Should read at least twice (initial attempt + retry verification)
+            "Should retry when statistics are modified concurrently");
+
+        // Verify at least one SetAsync was called (successful retry)
+        _mockCache.Verify(
+            c => c.SetAsync("bim:classification:stats", It.IsAny<byte[]>(), It.IsAny<DistributedCacheEntryOptions>(), It.IsAny<CancellationToken>()),
+            Times.AtLeastOnce(),
+            "Should eventually succeed in setting statistics");
+    }
 }

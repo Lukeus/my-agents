@@ -83,7 +83,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         if (_redis != null)
         {
             var db = _redis.GetDatabase();
-            var fullKey = _instanceName + key;
+            var fullKey = GetFullKey(patternHash);
             var value = await db.StringGetAsync(fullKey);
             if (value.HasValue)
             {
@@ -124,7 +124,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         if (_redis != null)
         {
             var db = _redis.GetDatabase();
-            var fullKey = _instanceName + key;
+            var fullKey = GetFullKey(patternHash);
             var expirationTime = expiration ?? TimeSpan.FromHours(24);
             await db.StringSetAsync(fullKey, json, expirationTime);
             _logger.LogInformation("Cached classification for pattern hash: {PatternHash}", patternHash);
@@ -155,8 +155,8 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
             try
             {
                 var db = _redis.GetDatabase();
-                // Include IDistributedCache instance name prefix for key matching
-                var keys = hashes.Select(h => (RedisKey)(_instanceName + GetKey(h))).ToArray();
+                // Include instance name prefix for direct Redis operations
+                var keys = hashes.Select(h => (RedisKey)GetFullKey(h)).ToArray();
 
                 _logger.LogDebug("MGET retrieving {Count} keys. First 3: {Keys}",
                     keys.Length, string.Join(", ", keys.Take(3).Select(k => k.ToString())));
@@ -223,7 +223,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         if (_redis != null)
         {
             var db = _redis.GetDatabase();
-            var fullKey = _instanceName + key;
+            var fullKey = GetFullKey(patternHash);
             await db.KeyDeleteAsync(fullKey);
             _logger.LogInformation("Invalidated cache for pattern hash: {PatternHash}", patternHash);
             return;
@@ -284,9 +284,22 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
                ?? new CacheStatistics { HitCount = 0, MissCount = 0, TotalItems = 0 };
     }
 
+    /// <summary>
+    /// Gets the cache key without instance prefix (used by IDistributedCache).
+    /// IDistributedCache automatically prepends the instance name.
+    /// </summary>
     private static string GetKey(string patternHash)
     {
         return $"{KeyPrefix}{patternHash}";
+    }
+
+    /// <summary>
+    /// Gets the full Redis key including instance prefix (used for direct Redis operations).
+    /// Direct Redis operations require manual instance name prefixing.
+    /// </summary>
+    private string GetFullKey(string patternHash)
+    {
+        return _instanceName + GetKey(patternHash);
     }
 
     /// <summary>
@@ -304,15 +317,32 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
                 return;
             }
 
-            // Fallback: best-effort with race condition
-            var stats = await GetStatisticsAsync();
-            var updated = new CacheStatistics
+            // Fallback: Use retry logic with optimistic concurrency
+            const int maxRetries = 3;
+            for (int attempt = 0; attempt < maxRetries; attempt++)
             {
-                HitCount = stats.HitCount + 1,
-                MissCount = stats.MissCount,
-                TotalItems = stats.TotalItems
-            };
-            await SetStatisticsAsync(updated);
+                var stats = await GetStatisticsAsync();
+                var updated = new CacheStatistics
+                {
+                    HitCount = stats.HitCount + 1,
+                    MissCount = stats.MissCount,
+                    TotalItems = stats.TotalItems
+                };
+
+                // Try to set with a version check using conditional set
+                if (await TrySetStatisticsAsync(updated, stats))
+                {
+                    return;
+                }
+
+                // Wait before retry with exponential backoff
+                if (attempt < maxRetries - 1)
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(10 * Math.Pow(2, attempt)));
+                }
+            }
+
+            _logger.LogWarning("Failed to increment hit count after {MaxRetries} attempts", maxRetries);
         }
         catch (Exception ex)
         {
@@ -336,21 +366,60 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
                 return;
             }
 
-            // Fallback: best-effort with race condition
-            var stats = await GetStatisticsAsync();
-            var updated = new CacheStatistics
+            // Fallback: Use retry logic with optimistic concurrency
+            const int maxRetries = 3;
+            for (int attempt = 0; attempt < maxRetries; attempt++)
             {
-                HitCount = stats.HitCount,
-                MissCount = stats.MissCount + 1,
-                TotalItems = stats.TotalItems
-            };
-            await SetStatisticsAsync(updated);
+                var stats = await GetStatisticsAsync();
+                var updated = new CacheStatistics
+                {
+                    HitCount = stats.HitCount,
+                    MissCount = stats.MissCount + 1,
+                    TotalItems = stats.TotalItems
+                };
+
+                // Try to set with a version check using conditional set
+                if (await TrySetStatisticsAsync(updated, stats))
+                {
+                    return;
+                }
+
+                // Wait before retry with exponential backoff
+                if (attempt < maxRetries - 1)
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(10 * Math.Pow(2, attempt)));
+                }
+            }
+
+            _logger.LogWarning("Failed to increment miss count after {MaxRetries} attempts", maxRetries);
         }
         catch (Exception ex)
         {
             // Statistics are best-effort, don't fail cache operations
             _logger.LogWarning(ex, "Failed to increment miss count");
         }
+    }
+
+    /// <summary>
+    /// Attempts to set statistics with optimistic concurrency control.
+    /// Returns true if successful, false if there was a concurrent modification.
+    /// </summary>
+    private async Task<bool> TrySetStatisticsAsync(CacheStatistics newStats, CacheStatistics expectedStats)
+    {
+        // Read current stats to check if they match expected
+        var currentStats = await GetStatisticsAsync();
+
+        // Check if stats have changed since we read them (optimistic concurrency check)
+        if (currentStats.HitCount != expectedStats.HitCount ||
+            currentStats.MissCount != expectedStats.MissCount ||
+            currentStats.TotalItems != expectedStats.TotalItems)
+        {
+            return false; // Concurrent modification detected
+        }
+
+        // No concurrent modification, safe to update
+        await SetStatisticsAsync(newStats);
+        return true;
     }
 
     private async Task SetStatisticsAsync(CacheStatistics stats)

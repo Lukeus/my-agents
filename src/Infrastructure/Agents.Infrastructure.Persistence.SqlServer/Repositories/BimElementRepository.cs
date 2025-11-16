@@ -184,13 +184,16 @@ public class BimElementRepository : IBimElementRepository
 
     public async Task<long> GetPatternCountAsync(CancellationToken cancellationToken = default)
     {
+        // Use GROUP BY instead of DISTINCT for better performance on indexed view
+        // This leverages the index more efficiently for 100M+ records
         var count = await _context.Database
             .SqlQuery<long>($@"
                 SELECT COUNT(*)
                 FROM (
-                    SELECT DISTINCT Category, Family, Type, Material, LocationType
+                    SELECT Category, Family, Type, Material, LocationType
                     FROM vw_BimElementPatterns
-                ) AS DistinctPatterns
+                    GROUP BY Category, Family, Type, Material, LocationType
+                ) AS GroupedPatterns
             ")
             .FirstAsync(cancellationToken);
 

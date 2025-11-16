@@ -84,7 +84,7 @@ public class RedisClassificationCacheIntegrationTests : IAsyncLifetime
         // Act: Retrieve all 100 in batch
         var hashes = suggestions.Select(s => s.Hash).ToArray();
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        var results = await _repository.GetManyByPatternHashesAsync(hashes);
+        var results = await _repository!.GetManyByPatternHashesAsync(hashes);
         stopwatch.Stop();
 
         // Assert
