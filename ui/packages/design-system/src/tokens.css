@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* Global design tokens for my-agents UI */
+@theme {
+  /* Brand colors - primary blue/purple theme */
+  --color-brand-50: oklch(0.98 0.02 250);
+  --color-brand-100: oklch(0.95 0.04 250);
+  --color-brand-200: oklch(0.90 0.06 250);
+  --color-brand-300: oklch(0.85 0.08 250);
+  --color-brand-400: oklch(0.75 0.10 250);
+  --color-brand-500: oklch(0.70 0.12 250);
+  --color-brand-600: oklch(0.62 0.14 250);
+  --color-brand-700: oklch(0.50 0.12 250);
+  --color-brand-800: oklch(0.35 0.10 250);
+  --color-brand-900: oklch(0.25 0.06 250);
+  --color-brand-950: oklch(0.20 0.05 250);
+
+  /* Surface colors - dark theme */
+  --color-surface: oklch(0.15 0.02 260);
+  --color-surface-elevated: oklch(0.18 0.03 260);
+  --color-surface-overlay: oklch(0.22 0.03 260);
+  --color-surface-hover: oklch(0.25 0.03 260);
+
+  /* Border colors */
+  --color-border-subtle: oklch(0.35 0.02 260);
+  --color-border-strong: oklch(0.45 0.03 260);
+  --color-border-brand: var(--color-brand-500);
+
+  /* Text colors */
+  --color-text-primary: oklch(0.92 0.02 260);
+  --color-text-secondary: oklch(0.75 0.02 260);
+  --color-text-tertiary: oklch(0.60 0.02 260);
+  --color-text-disabled: oklch(0.45 0.02 260);
+  --color-text-inverse: oklch(0.15 0.02 260);
+
+  /* Semantic colors - danger/error */
+  --color-danger-50: oklch(0.98 0.02 24);
+  --color-danger-100: oklch(0.95 0.04 24);
+  --color-danger-500: oklch(0.68 0.20 24);
+  --color-danger-600: oklch(0.60 0.22 24);
+  --color-danger-900: oklch(0.30 0.10 24);
+
+  /* Semantic colors - warning */
+  --color-warning-50: oklch(0.98 0.02 75);
+  --color-warning-100: oklch(0.95 0.04 75);
+  --color-warning-500: oklch(0.78 0.18 75);
+  --color-warning-600: oklch(0.70 0.20 75);
+  --color-warning-900: oklch(0.35 0.08 75);
+
+  /* Semantic colors - success */
+  --color-success-50: oklch(0.98 0.02 145);
+  --color-success-100: oklch(0.95 0.04 145);
+  --color-success-500: oklch(0.73 0.16 145);
+  --color-success-600: oklch(0.65 0.18 145);
+  --color-success-900: oklch(0.30 0.08 145);
+
+  /* Semantic colors - info */
+  --color-info-50: oklch(0.98 0.02 220);
+  --color-info-100: oklch(0.95 0.04 220);
+  --color-info-500: oklch(0.70 0.14 220);
+  --color-info-600: oklch(0.62 0.16 220);
+  --color-info-900: oklch(0.30 0.08 220);
+
+  /* Border radius */
+  --radius-xs: 0.125rem;   /* 2px */
+  --radius-sm: 0.25rem;    /* 4px */
+  --radius-md: 0.5rem;     /* 8px */
+  --radius-lg: 0.75rem;    /* 12px */
+  --radius-xl: 1rem;       /* 16px */
+  --radius-2xl: 1.5rem;    /* 24px */
+  --radius-pill: 9999px;
+
+  /* Spacing multiplier (4px base) */
+  --spacing: 0.25rem;
+
+  /* Font families */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Font sizes */
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+  --font-size-3xl: 1.875rem;   /* 30px */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Z-index layers */
+  --z-dropdown: 1000;
+  --z-modal: 2000;
+  --z-toast: 3000;
+  --z-tooltip: 4000;
+}
+
+/* Root styles */
+:root {
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+body {
+  @apply min-h-screen bg-[--color-surface] text-[--color-text-primary] antialiased;
+}
+
+/* Utility classes */
+@layer components {
+  .page-container {
+    @apply mx-auto max-w-7xl px-6 py-6;
+  }
+
+  .card {
+    @apply rounded-[--radius-lg] bg-[--color-surface-elevated] border border-[--color-border-subtle] p-4;
+  }
+
+  .card-hover {
+    @apply card transition-colors hover:border-[--color-brand-500] hover:bg-[--color-surface-hover];
+  }
+
+  .input-base {
+    @apply w-full rounded-[--radius-md] bg-[--color-surface] px-3 py-2 text-sm 
+           border border-[--color-border-subtle] text-[--color-text-primary]
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-brand-500]
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-base {
+    @apply inline-flex items-center gap-2 rounded-[--radius-lg] font-medium 
+           transition-colors focus-visible:outline-none focus-visible:ring-2 
+           focus-visible:ring-[--color-brand-500] disabled:cursor-not-allowed 
+           disabled:opacity-50;
+  }
+}
