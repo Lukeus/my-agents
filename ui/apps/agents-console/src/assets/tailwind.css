@@ -1,0 +1,39 @@
+@import "@agents/design-system/tokens.css";
+
+@layer components {
+  .page-header {
+    @apply flex items-center justify-between mb-6;
+  }
+
+  .page-title {
+    @apply text-2xl font-semibold text-[--color-text-primary];
+  }
+
+  .page-subtitle {
+    @apply mt-1 text-sm text-[--color-text-secondary];
+  }
+
+  .section {
+    @apply space-y-4;
+  }
+
+  .section-title {
+    @apply text-lg font-medium text-[--color-text-primary];
+  }
+
+  .grid-cards {
+    @apply grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .stat-card {
+    @apply card flex flex-col gap-2;
+  }
+
+  .stat-value {
+    @apply text-3xl font-bold text-[--color-brand-500];
+  }
+
+  .stat-label {
+    @apply text-sm text-[--color-text-secondary];
+  }
+}
