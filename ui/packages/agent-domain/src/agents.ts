@@ -44,7 +44,7 @@ export const AgentResultSchema = z.object({
   isSuccess: z.boolean(),
   output: z.string().optional(),
   errorMessage: z.string().optional(),
-  metadata: z.record(z.unknown()).default({}),
+  metadata: z.record(z.unknown()).optional(),
   duration: z.string(), // ISO duration string from TimeSpan
 });
 

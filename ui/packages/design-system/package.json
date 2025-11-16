@@ -8,8 +8,6 @@
     "./tokens.css": "./src/tokens.css"
   },
   "scripts": {
-    "dev": "vite build --watch",
-    "build": "vite build",
     "lint": "eslint src/**/*.{ts,vue}"
   },
   "dependencies": {
