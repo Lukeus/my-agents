@@ -125,7 +125,7 @@ app.MapPost("/api/bimclassification/batch",
             totalPatterns = result.TotalPatterns,
             cachedPatterns = result.CachedPatterns,
             newlyClassified = result.NewlyClassifiedPatterns,
-            cacheHitRate = result.CachedPatterns / (double)result.TotalPatterns,
+            cacheHitRate = result.TotalPatterns == 0 ? 0.0 : result.CachedPatterns / (double)result.TotalPatterns,
             suggestions = result.Suggestions,
             patternMapping = result.PatternMapping
         });
