@@ -191,7 +191,7 @@ public class BimElementRepository : IBimElementRepository
             .SqlQuery<int>($@"
                 SELECT COUNT(*) as Value
                 FROM (
-                    SELECT 1
+                    SELECT 1 AS PatternGroup
                     FROM vw_BimElementPatterns
                     GROUP BY Category, Family, Type, Material, LocationType
                 ) AS GroupedPatterns
