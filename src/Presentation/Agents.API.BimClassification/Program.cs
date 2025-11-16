@@ -1,9 +1,13 @@
 using Agents.Application.Core;
 using Agents.Application.BimClassification;
 using Agents.Application.BimClassification.Requests;
+using Agents.Application.BimClassification.Services;
 using Agents.Domain.Core.Interfaces;
+using Agents.Domain.BimClassification.Interfaces;
 using Agents.Infrastructure.LLM;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Infrastructure.Persistence.Redis.Repositories;
+using Agents.Infrastructure.Persistence.SqlServer.Repositories;
 using Agents.Infrastructure.Dapr.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,6 +46,20 @@ else
     builder.Services.AddSingleton<IEventPublisher, MockEventPublisher>();
 }
 
+// Configure Redis distributed cache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "BimClassification:";
+});
+
+// Configure repositories
+builder.Services.AddScoped<IBimElementRepository, BimElementRepository>();
+builder.Services.AddScoped<IClassificationCacheRepository, RedisClassificationCacheRepository>();
+
+// Configure application services
+builder.Services.AddScoped<BimClassificationService>();
+
 // Configure BIM Classification Agent
 builder.Services.AddScoped<BimClassificationAgent>();
 
@@ -72,7 +90,7 @@ app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthorization();
 
-// Map agent endpoint
+// Map single element classification endpoint (legacy)
 app.MapPost("/api/bimclassification/execute",
     async (ClassifyBimElementRequest request,
            BimClassificationAgent agent,
@@ -87,6 +105,59 @@ app.MapPost("/api/bimclassification/execute",
             : Results.BadRequest(result);
     })
     .WithName("ClassifyBimElement")
+    .WithOpenApi();
+
+// Map batch classification endpoint (recommended for 100M+ records)
+app.MapPost("/api/bimclassification/batch",
+    async (BatchClassifyRequest request,
+           BimClassificationService service,
+           CancellationToken ct) =>
+    {
+        var context = new AgentContext { CancellationToken = ct };
+        var result = await service.ClassifyBatchAsync(
+            request.ElementIds,
+            context,
+            ct);
+
+        return Results.Ok(new
+        {
+            totalElements = result.TotalElements,
+            totalPatterns = result.TotalPatterns,
+            cachedPatterns = result.CachedPatterns,
+            newlyClassified = result.NewlyClassifiedPatterns,
+            cacheHitRate = result.CachedPatterns / (double)result.TotalPatterns,
+            suggestions = result.Suggestions,
+            patternMapping = result.PatternMapping
+        });
+    })
+    .WithName("ClassifyBatch")
+    .WithOpenApi()
+    .WithDescription("Classifies a batch of BIM elements using pattern aggregation and caching");
+
+// Map cache statistics endpoint
+app.MapGet("/api/bimclassification/cache/stats",
+    async (IClassificationCacheRepository cache, CancellationToken ct) =>
+    {
+        var stats = await cache.GetStatisticsAsync(ct);
+        return Results.Ok(new
+        {
+            hitCount = stats.HitCount,
+            missCount = stats.MissCount,
+            hitRate = stats.HitRate,
+            totalItems = stats.TotalItems
+        });
+    })
+    .WithName("GetCacheStatistics")
+    .WithOpenApi();
+
+// Map cache invalidation endpoint
+app.MapDelete("/api/bimclassification/cache/{patternHash}",
+    async (string patternHash, IClassificationCacheRepository cache, CancellationToken ct) =>
+    {
+        await cache.InvalidateByPatternHashAsync(patternHash, ct);
+        return Results.Ok(new { message = "Cache invalidated", patternHash });
+    })
+    .WithName("InvalidateCache")
     .WithOpenApi();
 
 app.MapGet("/api/bimclassification/health", () =>

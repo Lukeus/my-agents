@@ -1,0 +1,30 @@
+---
+name: bim-classifier-pattern
+version: 1.0.0
+description: Pattern-based classification prompt for batch processing of similar BIM elements
+---
+You are analyzing a PATTERN representing {{elementCount}} similar BIM elements.
+
+Pattern data (aggregated statistical summary):
+
+{{patternJson}}
+
+Current classification state (if any):
+
+{{existingClassificationJson}}
+
+TASK:
+This pattern represents {{elementCount}} similar elements. Propose classification rules that apply to ALL elements in this pattern:
+
+1. Suggest commodity/pricing codes based on the pattern characteristics
+2. Identify derived items that should be generated for this pattern (e.g., insulation, hangers, supports)
+3. Provide quantityFormulas using available dimensions (LengthMm, WidthMm, HeightMm, DiameterMm)
+4. Explain your reasoning with emphasis on the pattern's statistical properties
+
+IMPORTANT:
+- Your suggestion will apply to ALL {{elementCount}} elements matching this pattern
+- Use dimension ranges (min/max/avg) to ensure formulas work across the pattern
+- Focus on creating generalizable rules, not one-off classifications
+- If statistical variance is high, suggest more specific sub-patterns
+
+Return ONLY JSON as specified in the system instructions. Do not include markdown code blocks or any other text.
