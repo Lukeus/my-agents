@@ -1,0 +1,40 @@
+{
+  "name": "@agents/test-planning-studio",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "lint": "eslint . --ext .vue,.ts",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue": "3.5.24",
+    "vue-router": "^4.4.5",
+    "pinia": "^2.2.6",
+    "@agents/design-system": "workspace:*",
+    "@agents/agent-domain": "workspace:*",
+    "@agents/api-client": "workspace:*",
+    "@agents/layout-shell": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.0",
+    "@tailwindcss/vite": "^4.1.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.6.0",
+    "vite": "^6.0.0",
+    "vue-tsc": "^2.1.0",
+    "vitest": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^25.0.1",
+    "@playwright/test": "^1.49.0"
+  }
+}
