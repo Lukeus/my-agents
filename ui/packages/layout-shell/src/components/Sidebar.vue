@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { NavItem } from './AppShell.vue';
 
 export interface SidebarProps {
   collapsed?: boolean;
+  navigationItems: NavItem[];
 }
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -12,13 +14,6 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 const emit = defineEmits<{
   toggle: [];
 }>();
-
-const navItems = [
-  { name: 'Dashboard', icon: '🏠', path: '/' },
-  { name: 'Agents', icon: '🤖', path: '/agents' },
-  { name: 'Runs', icon: '▶️', path: '/runs' },
-  { name: 'Settings', icon: '⚙️', path: '/settings' },
-];
 </script>
 
 <template>
@@ -47,14 +42,14 @@ const navItems = [
     <!-- Navigation items -->
     <nav class="flex-1 space-y-1 p-2">
       <router-link
-        v-for="item in navItems"
-        :key="item.path"
-        :to="item.path"
+        v-for="item in navigationItems"
+        :key="item.route"
+        :to="item.route"
         class="flex items-center gap-3 rounded-[--radius-md] px-3 py-2 text-sm transition-colors hover:bg-[--color-surface-hover]"
         active-class="bg-[--color-brand-500]/20 text-[--color-brand-500]"
       >
         <span class="text-base">{{ item.icon }}</span>
-        <span v-if="!collapsed">{{ item.name }}</span>
+        <span v-if="!collapsed" class="text-[--color-text-primary]">{{ item.label }}</span>
       </router-link>
     </nav>
 

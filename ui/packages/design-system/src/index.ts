@@ -17,7 +17,7 @@ export type { AppInputProps } from './components/AppInput.vue';
 export type { AppBadgeProps } from './components/AppBadge.vue';
 
 // Vue plugin for global registration
-export default {
+export const designSystemPlugin = {
   install(app: App) {
     app.component('AppButton', AppButton);
     app.component('AppCard', AppCard);
@@ -25,3 +25,6 @@ export default {
     app.component('AppBadge', AppBadge);
   },
 };
+
+// Also export as default for convenience
+export default designSystemPlugin;

@@ -108,34 +108,9 @@
 }
 
 body {
-  @apply min-h-screen bg-[--color-surface] text-[--color-text-primary] antialiased;
-}
-
-/* Utility classes */
-@layer components {
-  .page-container {
-    @apply mx-auto max-w-7xl px-6 py-6;
-  }
-
-  .card {
-    @apply rounded-[--radius-lg] bg-[--color-surface-elevated] border border-[--color-border-subtle] p-4;
-  }
-
-  .card-hover {
-    @apply card transition-colors hover:border-[--color-brand-500] hover:bg-[--color-surface-hover];
-  }
-
-  .input-base {
-    @apply w-full rounded-[--radius-md] bg-[--color-surface] px-3 py-2 text-sm 
-           border border-[--color-border-subtle] text-[--color-text-primary]
-           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-brand-500]
-           disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
-  .btn-base {
-    @apply inline-flex items-center gap-2 rounded-[--radius-lg] font-medium 
-           transition-colors focus-visible:outline-none focus-visible:ring-2 
-           focus-visible:ring-[--color-brand-500] disabled:cursor-not-allowed 
-           disabled:opacity-50;
-  }
+  min-height: 100vh;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

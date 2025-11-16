@@ -1,21 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { AppBadge } from '@agents/design-system';
+import type { AppInfo, AppItem, HealthStatus } from './AppShell.vue';
 
 export interface TopNavProps {
-  title?: string;
+  currentApp: AppInfo;
+  availableApps: AppItem[];
+  healthStatus: HealthStatus;
 }
 
-defineProps<TopNavProps>();
-
-const apps = [
-  { name: 'Agents Console', url: 'http://localhost:5173', active: true },
-  { name: 'Test Planning Studio', url: 'http://localhost:5174', active: false },
-  { name: 'DevOps Explorer', url: 'http://localhost:5175', active: false },
-  { name: 'Notification Center', url: 'http://localhost:5176', active: false },
-];
+const props = defineProps<TopNavProps>();
 
 const showAppSwitcher = ref(false);
+
+const healthColor = computed(() => {
+  switch (props.healthStatus.status) {
+    case 'healthy':
+      return 'bg-[--color-success-500]';
+    case 'degraded':
+      return 'bg-[--color-warning-500]';
+    case 'down':
+      return 'bg-[--color-danger-500]';
+    default:
+      return 'bg-[--color-success-500]';
+  }
+});
 </script>
 
 <template>
@@ -26,7 +35,8 @@ const showAppSwitcher = ref(false);
         class="flex items-center gap-2 rounded-[--radius-md] px-3 py-2 hover:bg-[--color-surface-hover] transition-colors"
         @click="showAppSwitcher = !showAppSwitcher"
       >
-        <span class="text-lg font-semibold text-[--color-text-primary]">{{ title }}</span>
+        <span class="text-xl">{{ currentApp.icon }}</span>
+        <span class="text-lg font-semibold text-[--color-text-primary]">{{ currentApp.name }}</span>
         <svg class="h-4 w-4 text-[--color-text-secondary]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
@@ -42,14 +52,13 @@ const showAppSwitcher = ref(false);
             Switch App
           </div>
           <a
-            v-for="app in apps"
+            v-for="app in availableApps"
             :key="app.name"
-            :href="app.url"
-            class="flex items-center justify-between rounded-[--radius-md] px-3 py-2 text-sm hover:bg-[--color-surface-hover] transition-colors"
-            :class="app.active ? 'text-[--color-brand-500]' : 'text-[--color-text-primary]'"
+            :href="app.href"
+            class="flex items-center gap-3 rounded-[--radius-md] px-3 py-2 text-sm hover:bg-[--color-surface-hover] transition-colors text-[--color-text-primary]"
           >
+            <span class="text-lg">{{ app.icon }}</span>
             <span>{{ app.name }}</span>
-            <AppBadge v-if="app.active" variant="brand" size="sm">Active</AppBadge>
           </a>
         </div>
       </div>
@@ -59,8 +68,8 @@ const showAppSwitcher = ref(false);
     <div class="flex items-center gap-4">
       <!-- Health status -->
       <div class="flex items-center gap-2">
-        <div class="h-2 w-2 rounded-full bg-[--color-success-500]"></div>
-        <span class="text-sm text-[--color-text-secondary]">All systems operational</span>
+        <div class="h-2 w-2 rounded-full" :class="healthColor"></div>
+        <span class="text-sm text-[--color-text-secondary]">{{ healthStatus.message }}</span>
       </div>
 
       <!-- User menu placeholder -->
