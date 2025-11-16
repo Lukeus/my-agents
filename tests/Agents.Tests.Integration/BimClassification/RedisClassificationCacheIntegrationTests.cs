@@ -89,7 +89,7 @@ public class RedisClassificationCacheIntegrationTests : IAsyncLifetime
 
         // Assert
         results.Should().HaveCount(100);
-        stopwatch.ElapsedMilliseconds.Should().BeLessThan(100, 
+        stopwatch.ElapsedMilliseconds.Should().BeLessThan(100,
             "Batch MGET should be very fast (<100ms) for 100 items");
 
         // Verify all items retrieved correctly
@@ -150,13 +150,13 @@ public class RedisClassificationCacheIntegrationTests : IAsyncLifetime
         // Act: Simulate concurrent hits and misses
         for (int i = 0; i < hitCount; i++)
         {
-            tasks.Add(Task.Run(async () => 
+            tasks.Add(Task.Run(async () =>
                 await _repository.GetByPatternHashAsync("test-pattern")));
         }
 
         for (int i = 0; i < missCount; i++)
         {
-            tasks.Add(Task.Run(async () => 
+            tasks.Add(Task.Run(async () =>
                 await _repository.GetByPatternHashAsync($"nonexistent-{i}")));
         }
 
@@ -167,7 +167,7 @@ public class RedisClassificationCacheIntegrationTests : IAsyncLifetime
 
         // Assert: Stats should be accurate despite concurrency
         var stats = await _repository.GetStatisticsAsync();
-        stats.HitCount.Should().Be(hitCount, 
+        stats.HitCount.Should().Be(hitCount,
             "Atomic HINCRBY should handle concurrent increments correctly");
         stats.MissCount.Should().Be(missCount,
             "Atomic HINCRBY should handle concurrent increments correctly");
@@ -243,8 +243,8 @@ public class RedisClassificationCacheIntegrationTests : IAsyncLifetime
         // Assert: Batch should be significantly faster
         batchResults.Should().HaveCount(50);
         sequentialResults.Should().HaveCount(50);
-        
-        batchTime.Should().BeLessThan(sequentialTime / 2, 
+
+        batchTime.Should().BeLessThan(sequentialTime / 2,
             "Batch MGET should be at least 2x faster than sequential GET operations");
 
         // Output performance metrics for visibility
@@ -268,7 +268,7 @@ public class RedisClassificationCacheIntegrationTests : IAsyncLifetime
 
         // Act: Store with 2 second expiration
         await _repository!.SetByPatternHashAsync(hash, suggestion, TimeSpan.FromSeconds(2));
-        
+
         var immediate = await _repository.GetByPatternHashAsync(hash);
         await Task.Delay(2500); // Wait for expiration
         var afterExpiration = await _repository.GetByPatternHashAsync(hash);

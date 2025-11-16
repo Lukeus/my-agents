@@ -1,4 +1,4 @@
-﻿namespace Agents.Infrastructure.Observability.Tests;
+namespace Agents.Infrastructure.Observability.Tests;
 
 public class UnitTest1
 {

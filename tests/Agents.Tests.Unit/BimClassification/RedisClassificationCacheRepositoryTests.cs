@@ -52,11 +52,15 @@ public class RedisClassificationCacheRepositoryTests
             reasoningSummary: "Door element classification"
         );
 
+        // Serialize as DTO (matching repository implementation)
+        var dto1 = new { bimElementId = 1, suggestedCommodityCode = "CC-001", suggestedPricingCode = "PC-001", reasoningSummary = "Wall element classification", derivedItems = Array.Empty<object>() };
+        var dto2 = new { bimElementId = 2, suggestedCommodityCode = "CC-002", suggestedPricingCode = "PC-002", reasoningSummary = "Door element classification", derivedItems = Array.Empty<object>() };
+
         var redisValues = new RedisValue[]
         {
-            System.Text.Json.JsonSerializer.Serialize(suggestion1),
+            System.Text.Json.JsonSerializer.Serialize(dto1, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }),
             RedisValue.Null,
-            System.Text.Json.JsonSerializer.Serialize(suggestion2)
+            System.Text.Json.JsonSerializer.Serialize(dto2, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase })
         };
 
         _mockDatabase
@@ -89,17 +93,13 @@ public class RedisClassificationCacheRepositoryTests
             redis: null);
 
         var hashes = new[] { "hash1", "hash2" };
-        var suggestion1 = System.Text.Json.JsonSerializer.Serialize(new BimClassificationSuggestion(
-            bimElementId: 1,
-            commodityCode: "CC-001",
-            pricingCode: "PC-001",
-            derivedItems: Array.Empty<DerivedItemSuggestion>(),
-            reasoningSummary: "Test"
-        ));
+        var dto1 = new { bimElementId = 1, suggestedCommodityCode = "CC-001", suggestedPricingCode = "PC-001", reasoningSummary = "Test", derivedItems = Array.Empty<object>() };
+        var suggestion1Json = System.Text.Json.JsonSerializer.Serialize(dto1, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
 
+        // Mock the underlying GetAsync method (GetStringAsync is an extension)
         _mockCache
             .Setup(c => c.GetAsync("bim:classification:hash1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(System.Text.Encoding.UTF8.GetBytes(suggestion1));
+            .ReturnsAsync(System.Text.Encoding.UTF8.GetBytes(suggestion1Json));
         _mockCache
             .Setup(c => c.GetAsync("bim:classification:hash2", It.IsAny<CancellationToken>()))
             .ReturnsAsync((byte[]?)null);
@@ -147,9 +147,16 @@ public class RedisClassificationCacheRepositoryTests
     public async Task IncrementHitCountAsync_WithRedis_UsesAtomicHINCRBY()
     {
         // Arrange
+        var dto = new { bimElementId = 1, suggestedCommodityCode = "CC-001", suggestedPricingCode = "PC-001", reasoningSummary = "Test", derivedItems = Array.Empty<object>() };
+        var json = System.Text.Json.JsonSerializer.Serialize(dto, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+
+        _mockDatabase
+            .Setup(db => db.StringGetAsync("BimClassification:bim:classification:existing-hash", It.IsAny<CommandFlags>()))
+            .ReturnsAsync(json);
+
         _mockDatabase
             .Setup(db => db.HashIncrementAsync(
-                "bim:classification:stats",
+                "BimClassification:bim:classification:stats",
                 "HitCount",
                 1,
                 It.IsAny<CommandFlags>()))
@@ -164,7 +171,7 @@ public class RedisClassificationCacheRepositoryTests
         // Assert - verify atomic increment was called
         _mockDatabase.Verify(
             db => db.HashIncrementAsync(
-                "bim:classification:stats",
+                "BimClassification:bim:classification:stats",
                 "HitCount",
                 1,
                 It.IsAny<CommandFlags>()),
@@ -184,7 +191,7 @@ public class RedisClassificationCacheRepositoryTests
         };
 
         _mockDatabase
-            .Setup(db => db.HashGetAllAsync("bim:classification:stats", It.IsAny<CommandFlags>()))
+            .Setup(db => db.HashGetAllAsync("BimClassification:bim:classification:stats", It.IsAny<CommandFlags>()))
             .ReturnsAsync(hashEntries);
 
         // Act
@@ -198,7 +205,7 @@ public class RedisClassificationCacheRepositoryTests
 
         // Verify atomic read
         _mockDatabase.Verify(
-            db => db.HashGetAllAsync("bim:classification:stats", It.IsAny<CommandFlags>()),
+            db => db.HashGetAllAsync("BimClassification:bim:classification:stats", It.IsAny<CommandFlags>()),
             Times.Once);
     }
 
@@ -235,32 +242,31 @@ public class RedisClassificationCacheRepositoryTests
     {
         // Arrange
         var hashes = new[] { "hash1", "hash2" };
-        
+
         _mockDatabase
             .Setup(db => db.StringGetAsync(It.IsAny<RedisKey[]>(), It.IsAny<CommandFlags>()))
             .ThrowsAsync(new RedisException("Connection timeout"));
 
-        var suggestion1 = System.Text.Json.JsonSerializer.Serialize(new BimClassificationSuggestion(
-            bimElementId: 1,
-            commodityCode: "CC-001",
-            pricingCode: "PC-001",
-            derivedItems: Array.Empty<DerivedItemSuggestion>(),
-            reasoningSummary: "Test"
-        ));
+        var dto1 = new { bimElementId = 1, suggestedCommodityCode = "CC-001", suggestedPricingCode = "PC-001", reasoningSummary = "Test", derivedItems = Array.Empty<object>() };
+        var suggestion1Json = System.Text.Json.JsonSerializer.Serialize(dto1, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
 
-        _mockCache
-            .Setup(c => c.GetAsync("bim:classification:hash1", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(System.Text.Encoding.UTF8.GetBytes(suggestion1));
+        // Mock fallback to StringGetAsync for individual keys
+        _mockDatabase
+            .Setup(db => db.StringGetAsync("BimClassification:bim:classification:hash1", It.IsAny<CommandFlags>()))
+            .ReturnsAsync(suggestion1Json);
+        _mockDatabase
+            .Setup(db => db.StringGetAsync("BimClassification:bim:classification:hash2", It.IsAny<CommandFlags>()))
+            .ReturnsAsync(RedisValue.Null);
 
         // Act
         var result = await _repository.GetManyByPatternHashesAsync(hashes);
 
         // Assert
         result.Should().HaveCount(1);
-        
-        // Verify fallback to IDistributedCache
-        _mockCache.Verify(
-            c => c.GetAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
+
+        // Verify fallback to sequential StringGetAsync calls
+        _mockDatabase.Verify(
+            db => db.StringGetAsync(It.IsAny<RedisKey>(), It.IsAny<CommandFlags>()),
             Times.AtLeast(1));
     }
 
@@ -280,13 +286,15 @@ public class RedisClassificationCacheRepositoryTests
         // Act
         await _repository.SetByPatternHashAsync(patternHash, suggestion, TimeSpan.FromHours(1));
 
-        // Assert
-        _mockCache.Verify(
-            c => c.SetAsync(
-                "bim:classification:test-hash",
-                It.IsAny<byte[]>(),
-                It.Is<DistributedCacheEntryOptions>(o => o.AbsoluteExpirationRelativeToNow == TimeSpan.FromHours(1)),
-                It.IsAny<CancellationToken>()),
+        // Assert - now stores via Redis StringSetAsync
+        _mockDatabase.Verify(
+            db => db.StringSetAsync(
+                "BimClassification:bim:classification:test-hash",
+                It.IsAny<RedisValue>(),
+                TimeSpan.FromHours(1),
+                It.IsAny<bool>(),
+                It.IsAny<When>(),
+                It.IsAny<CommandFlags>()),
             Times.Once);
     }
 }

@@ -1,9 +1,11 @@
 using Agents.Domain.BimClassification.Entities;
 using Agents.Domain.BimClassification.Interfaces;
+using Agents.Infrastructure.Persistence.Redis.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Agents.Infrastructure.Persistence.Redis.Repositories;
 
@@ -16,17 +18,58 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
     private readonly IDistributedCache _cache;
     private readonly IConnectionMultiplexer? _redis;
     private readonly ILogger<RedisClassificationCacheRepository> _logger;
+    private readonly string _instanceName;
     private const string KeyPrefix = "bim:classification:";
     private const string StatsKey = "bim:classification:stats";
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        WriteIndented = false
+    };
+
+    // Mapping methods between domain entity and cache DTO
+    private static BimClassificationCacheDto ToDto(BimClassificationSuggestion entity) => new()
+    {
+        BimElementId = entity.BimElementId,
+        SuggestedCommodityCode = entity.SuggestedCommodityCode,
+        SuggestedPricingCode = entity.SuggestedPricingCode,
+        ReasoningSummary = entity.ReasoningSummary,
+        DerivedItems = entity.DerivedItems.Select(d => new DerivedItemCacheDto
+        {
+            DerivedCommodityCode = d.DerivedCommodityCode,
+            DerivedPricingCode = d.DerivedPricingCode,
+            QuantityFormula = d.QuantityFormula,
+            QuantityUnit = d.QuantityUnit
+        }).ToList()
+    };
+
+    private static BimClassificationSuggestion FromDto(BimClassificationCacheDto dto) => new(
+        bimElementId: dto.BimElementId,
+        commodityCode: dto.SuggestedCommodityCode,
+        pricingCode: dto.SuggestedPricingCode,
+        derivedItems: dto.DerivedItems.Select(d => new DerivedItemSuggestion
+        {
+            DerivedCommodityCode = d.DerivedCommodityCode,
+            DerivedPricingCode = d.DerivedPricingCode,
+            QuantityFormula = d.QuantityFormula,
+            QuantityUnit = d.QuantityUnit
+        }),
+        reasoningSummary: dto.ReasoningSummary
+    );
 
     public RedisClassificationCacheRepository(
         IDistributedCache cache,
         ILogger<RedisClassificationCacheRepository> logger,
-        IConnectionMultiplexer? redis = null)
+        IConnectionMultiplexer? redis = null,
+        string instanceName = "BimClassification:")
     {
         _cache = cache;
         _redis = redis;
         _logger = logger;
+        _instanceName = instanceName;
     }
 
     public async Task<BimClassificationSuggestion?> GetByPatternHashAsync(
@@ -34,7 +77,24 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         CancellationToken cancellationToken = default)
     {
         var key = GetKey(patternHash);
-        var json = await _cache.GetStringAsync(key, cancellationToken);
+        string? json = null;
+
+        // If Redis connection is available, read directly as string for MGET compatibility
+        if (_redis != null)
+        {
+            var db = _redis.GetDatabase();
+            var fullKey = _instanceName + key;
+            var value = await db.StringGetAsync(fullKey);
+            if (value.HasValue)
+            {
+                json = value.ToString();
+            }
+        }
+        else
+        {
+            // Fallback: use IDistributedCache
+            json = await _cache.GetStringAsync(key, cancellationToken);
+        }
 
         if (json == null)
         {
@@ -46,7 +106,8 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         _ = IncrementHitCountAsync(); // Fire and forget
         _logger.LogDebug("Cache hit for pattern hash: {PatternHash}", patternHash);
 
-        return JsonSerializer.Deserialize<BimClassificationSuggestion>(json);
+        var dto = JsonSerializer.Deserialize<BimClassificationCacheDto>(json, JsonOptions);
+        return dto != null ? FromDto(dto) : null;
     }
 
     public async Task SetByPatternHashAsync(
@@ -56,8 +117,21 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         CancellationToken cancellationToken = default)
     {
         var key = GetKey(patternHash);
-        var json = JsonSerializer.Serialize(suggestion);
+        var dto = ToDto(suggestion);
+        var json = JsonSerializer.Serialize(dto, JsonOptions);
 
+        // If Redis connection is available, store directly as string for MGET compatibility
+        if (_redis != null)
+        {
+            var db = _redis.GetDatabase();
+            var fullKey = _instanceName + key;
+            var expirationTime = expiration ?? TimeSpan.FromHours(24);
+            await db.StringSetAsync(fullKey, json, expirationTime);
+            _logger.LogInformation("Cached classification for pattern hash: {PatternHash}", patternHash);
+            return;
+        }
+
+        // Fallback: use IDistributedCache (stores as Redis HASH)
         var options = new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = expiration ?? TimeSpan.FromHours(24),
@@ -81,18 +155,39 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
             try
             {
                 var db = _redis.GetDatabase();
-                var keys = hashes.Select(h => (RedisKey)GetKey(h)).ToArray();
+                // Include IDistributedCache instance name prefix for key matching
+                var keys = hashes.Select(h => (RedisKey)(_instanceName + GetKey(h))).ToArray();
+
+                _logger.LogDebug("MGET retrieving {Count} keys. First 3: {Keys}",
+                    keys.Length, string.Join(", ", keys.Take(3).Select(k => k.ToString())));
+
                 var values = await db.StringGetAsync(keys);
 
                 for (int i = 0; i < hashes.Count; i++)
                 {
                     if (values[i].HasValue)
                     {
-                        var suggestion = JsonSerializer.Deserialize<BimClassificationSuggestion>(values[i]!);
-                        if (suggestion != null)
+                        try
                         {
-                            result[hashes[i]] = suggestion;
+                            var dto = JsonSerializer.Deserialize<BimClassificationCacheDto>(values[i]!, JsonOptions);
+                            if (dto != null)
+                            {
+                                result[hashes[i]] = FromDto(dto);
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Deserialized null DTO for hash {Hash}", hashes[i]);
+                            }
                         }
+                        catch (JsonException jsonEx)
+                        {
+                            _logger.LogError(jsonEx, "Failed to deserialize cached item for hash {Hash}: {Json}",
+                                hashes[i], values[i].ToString());
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogDebug("No value found for hash {Hash} at index {Index}", hashes[i], i);
                     }
                 }
 
@@ -123,6 +218,18 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         CancellationToken cancellationToken = default)
     {
         var key = GetKey(patternHash);
+
+        // If Redis connection is available, delete directly
+        if (_redis != null)
+        {
+            var db = _redis.GetDatabase();
+            var fullKey = _instanceName + key;
+            await db.KeyDeleteAsync(fullKey);
+            _logger.LogInformation("Invalidated cache for pattern hash: {PatternHash}", patternHash);
+            return;
+        }
+
+        // Fallback: use IDistributedCache
         await _cache.RemoveAsync(key, cancellationToken);
         _logger.LogInformation("Invalidated cache for pattern hash: {PatternHash}", patternHash);
     }
@@ -135,7 +242,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
             try
             {
                 var db = _redis.GetDatabase();
-                var entries = await db.HashGetAllAsync(StatsKey);
+                var entries = await db.HashGetAllAsync(_instanceName + StatsKey);
 
                 if (entries.Length == 0)
                 {
@@ -193,7 +300,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
             if (_redis != null)
             {
                 var db = _redis.GetDatabase();
-                await db.HashIncrementAsync(StatsKey, "HitCount", 1);
+                await db.HashIncrementAsync(_instanceName + StatsKey, "HitCount", 1);
                 return;
             }
 
@@ -225,7 +332,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
             if (_redis != null)
             {
                 var db = _redis.GetDatabase();
-                await db.HashIncrementAsync(StatsKey, "MissCount", 1);
+                await db.HashIncrementAsync(_instanceName + StatsKey, "MissCount", 1);
                 return;
             }
 
