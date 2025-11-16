@@ -11,11 +11,11 @@ public class AgentsDbContextFactory : IDesignTimeDbContextFactory<AgentsDbContex
     public AgentsDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AgentsDbContext>();
-        
+
         // Use a temporary connection string for migrations
         // This is only used at design time, not runtime
         optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=AgentsDb;Trusted_Connection=True;");
-        
+
         return new AgentsDbContext(optionsBuilder.Options);
     }
 }

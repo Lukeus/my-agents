@@ -52,16 +52,16 @@ public class BimClassificationSuggestionConfiguration : IEntityTypeConfiguration
         builder.OwnsMany(s => s.DerivedItems, derivedItem =>
         {
             derivedItem.ToJson();
-            
+
             derivedItem.Property(d => d.DerivedCommodityCode)
                 .IsRequired();
-            
+
             derivedItem.Property(d => d.DerivedPricingCode)
                 .IsRequired(false);
-            
+
             derivedItem.Property(d => d.QuantityFormula)
                 .IsRequired();
-            
+
             derivedItem.Property(d => d.QuantityUnit)
                 .IsRequired();
         });
