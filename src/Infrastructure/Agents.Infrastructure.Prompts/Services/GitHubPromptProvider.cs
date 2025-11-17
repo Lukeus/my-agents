@@ -85,6 +85,7 @@ public class GitHubPromptProvider
         string path,
         CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         try
         {
             _logger.LogDebug("Downloading prompt from GitHub: {Owner}/{Repo}/{Path}", owner, repo, path);

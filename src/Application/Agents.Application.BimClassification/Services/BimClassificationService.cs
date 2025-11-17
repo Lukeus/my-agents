@@ -115,6 +115,7 @@ public class BimClassificationService
         AgentContext context,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         // Convert pattern to prompt-optimized format
         var patternPrompt = ConvertPatternToPrompt(pattern);
 

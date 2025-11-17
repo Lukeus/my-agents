@@ -87,6 +87,7 @@ public class ServiceDeskAgent : BaseAgent
 
     private async Task<AgentResult> CheckSLAAsync(ServiceDeskRequest request, AgentContext context)
     {
+        _ = context; // TODO: Use context when implementing actual SLA calculation
         // TODO: Calculate actual SLA based on ticket priority and creation time
         var slaStatus = new SLAStatus
         {
