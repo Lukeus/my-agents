@@ -43,6 +43,7 @@ export const designSystemPlugin = {
     app.component('AppAlert', AppAlert);
     app.component('AppTable', AppTable);
     app.component('AppEmptyState', AppEmptyState);
+    app.component('AppModal', AppModal);
     app.component('AppTextarea', AppTextarea);
     app.component('AppSelect', AppSelect);
     app.component('AppSwitcher', AppSwitcher);
