@@ -41,7 +41,7 @@ public class ImplementationAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in implementation");
+            _logger.LogError(ex, "Error in implementation");
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }
@@ -58,7 +58,7 @@ public class ImplementationAgent : BaseAgent
 
         var generatedCode = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogInformation("Generated code for: {Spec}", request.Specification);
+        _logger.LogInformation("Generated code for: {Spec}", request.Specification);
 
         return AgentResult<string>.Success(
             generatedCode,

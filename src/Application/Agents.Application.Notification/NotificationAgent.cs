@@ -94,7 +94,7 @@ public class NotificationAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error processing notification");
+            _logger.LogError(ex, "Error processing notification");
             return AgentResult.Failure($"Error processing notification: {ex.Message}");
         }
     }
@@ -119,7 +119,7 @@ public class NotificationAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Failed to format with LLM, using default formatting");
+            _logger.LogWarning(ex, "Failed to format with LLM, using default formatting");
             return $"{subject}\n\n{content}";
         }
     }

@@ -41,7 +41,7 @@ public class TestPlanningAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in test planning");
+            _logger.LogError(ex, "Error in test planning");
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }
@@ -57,7 +57,7 @@ public class TestPlanningAgent : BaseAgent
 
         var testSpec = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogInformation("Generated test specification");
+        _logger.LogInformation("Generated test specification");
 
         return AgentResult<string>.Success(
             testSpec,

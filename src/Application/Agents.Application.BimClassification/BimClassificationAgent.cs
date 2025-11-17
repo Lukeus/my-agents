@@ -116,7 +116,7 @@ public class BimClassificationAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error classifying BIM element");
+            _logger.LogError(ex, "Error classifying BIM element");
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }
@@ -169,7 +169,7 @@ public class BimClassificationAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error classifying BIM pattern {PatternKey}", request.PatternKey);
+            _logger.LogError(ex, "Error classifying BIM pattern {PatternKey}", request.PatternKey);
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }

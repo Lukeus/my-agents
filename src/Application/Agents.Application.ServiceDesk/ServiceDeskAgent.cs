@@ -42,7 +42,7 @@ public class ServiceDeskAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error processing service desk request");
+            _logger.LogError(ex, "Error processing service desk request");
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }
@@ -58,7 +58,7 @@ public class ServiceDeskAgent : BaseAgent
 
         var triage = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogInformation("Triaged ticket: {TicketId}", request.TicketId);
+        _logger.LogInformation("Triaged ticket: {TicketId}", request.TicketId);
 
         return AgentResult<TriageResult>.Success(
             new TriageResult
@@ -111,7 +111,7 @@ public class ServiceDeskAgent : BaseAgent
 
         var escalationNotes = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogWarning("Escalating ticket: {TicketId}", request.TicketId);
+        _logger.LogWarning("Escalating ticket: {TicketId}", request.TicketId);
 
         return AgentResult.Success($"Ticket escalated: {escalationNotes}");
     }
