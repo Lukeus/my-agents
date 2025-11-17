@@ -11,15 +11,15 @@ namespace Agents.Shared.Validation;
 /// <typeparam name="T">The notification request type</typeparam>
 public abstract class NotificationRequestValidatorBase<T> : AbstractValidator<T> where T : INotificationRequest
 {
-    private static readonly string[] AllowedChannels = { "email", "sms", "teams", "slack" };
+    private static readonly string[] _allowedChannels = { "email", "sms", "teams", "slack" };
 
     protected NotificationRequestValidatorBase()
     {
         RuleFor(x => x.Channel)
             .NotEmpty()
             .WithMessage("Channel is required")
-            .Must(channel => AllowedChannels.Contains(channel.ToLower()))
-            .WithMessage($"Channel must be one of: {string.Join(", ", AllowedChannels)}");
+            .Must(channel => _allowedChannels.Contains(channel.ToLower()))
+            .WithMessage($"Channel must be one of: {string.Join(", ", _allowedChannels)}");
 
         RuleFor(x => x.Recipient)
             .NotEmpty()
@@ -53,7 +53,9 @@ public abstract class NotificationRequestValidatorBase<T> : AbstractValidator<T>
     private static bool ContainsInjectionPatterns(string input)
     {
         if (string.IsNullOrEmpty(input))
+        {
             return false;
+        }
 
         var dangerousPatterns = new[]
         {

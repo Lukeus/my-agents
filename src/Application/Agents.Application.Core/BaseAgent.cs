@@ -1,14 +1,14 @@
+using System.Diagnostics;
 using Agents.Domain.Core.Events;
 using Agents.Domain.Core.Interfaces;
-using Agents.Infrastructure.Prompts.Services;
 using Agents.Infrastructure.Prompts.Models;
+using Agents.Infrastructure.Prompts.Services;
 using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Polly;
 using Polly.Retry;
 using Polly.Timeout;
-using System.Diagnostics;
 
 namespace Agents.Application.Core;
 
@@ -17,12 +17,12 @@ namespace Agents.Application.Core;
 /// </summary>
 public abstract class BaseAgent
 {
-    protected readonly ILLMProvider LLMProvider;
-    protected readonly IPromptLoader PromptLoader;
-    protected readonly IEventPublisher EventPublisher;
-    protected readonly ILogger Logger;
-    protected readonly IInputSanitizer InputSanitizer;
-    protected readonly string AgentName;
+    protected readonly ILLMProvider _llmProvider;
+    protected readonly IPromptLoader _promptLoader;
+    protected readonly IEventPublisher _eventPublisher;
+    protected readonly ILogger _logger;
+    protected readonly IInputSanitizer _inputSanitizer;
+    protected readonly string _agentName;
     private readonly ResiliencePipeline _llmResiliencePipeline;
 
     protected BaseAgent(
@@ -33,12 +33,12 @@ public abstract class BaseAgent
         IInputSanitizer inputSanitizer,
         string agentName)
     {
-        LLMProvider = llmProvider ?? throw new ArgumentNullException(nameof(llmProvider));
-        PromptLoader = promptLoader ?? throw new ArgumentNullException(nameof(promptLoader));
-        EventPublisher = eventPublisher ?? throw new ArgumentNullException(nameof(eventPublisher));
-        Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        InputSanitizer = inputSanitizer ?? throw new ArgumentNullException(nameof(inputSanitizer));
-        AgentName = agentName ?? throw new ArgumentNullException(nameof(agentName));
+        _llmProvider = llmProvider ?? throw new ArgumentNullException(nameof(llmProvider));
+        _promptLoader = promptLoader ?? throw new ArgumentNullException(nameof(promptLoader));
+        _eventPublisher = eventPublisher ?? throw new ArgumentNullException(nameof(eventPublisher));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _inputSanitizer = inputSanitizer ?? throw new ArgumentNullException(nameof(inputSanitizer));
+        _agentName = agentName ?? throw new ArgumentNullException(nameof(agentName));
 
         // Configure LLM resilience pipeline with retry and timeout
         _llmResiliencePipeline = new ResiliencePipelineBuilder()
@@ -50,11 +50,11 @@ public abstract class BaseAgent
                 UseJitter = true,
                 OnRetry = args =>
                 {
-                    Logger.LogWarning(
+                    _logger.LogWarning(
                         args.Outcome.Exception,
                         "LLM call retry {RetryCount} for agent {AgentName} after {Delay}ms",
                         args.AttemptNumber,
-                        AgentName,
+                        _agentName,
                         args.RetryDelay.TotalMilliseconds);
                     return ValueTask.CompletedTask;
                 }
@@ -72,9 +72,9 @@ public abstract class BaseAgent
 
         try
         {
-            Logger.LogInformation(
+            _logger.LogInformation(
                 "Agent {AgentName} starting execution. ExecutionId: {ExecutionId}, CorrelationId: {CorrelationId}",
-                AgentName, context.ExecutionId, context.CorrelationId);
+                _agentName, context.ExecutionId, context.CorrelationId);
 
             var result = await ExecuteCoreAsync(input, context);
 
@@ -82,9 +82,9 @@ public abstract class BaseAgent
             // Update duration in metadata since AgentResult is not a record
             result.Metadata["Duration"] = stopwatch.Elapsed;
 
-            Logger.LogInformation(
+            _logger.LogInformation(
                 "Agent {AgentName} completed execution in {Duration}ms. Success: {IsSuccess}",
-                AgentName, stopwatch.ElapsedMilliseconds, result.IsSuccess);
+                _agentName, stopwatch.ElapsedMilliseconds, result.IsSuccess);
 
             return result;
         }
@@ -93,10 +93,10 @@ public abstract class BaseAgent
             stopwatch.Stop();
 
             // Enhanced logging with comprehensive context
-            Logger.LogError(ex,
+            _logger.LogError(ex,
                 "Agent {AgentName} failed. ExecutionId: {ExecutionId}, CorrelationId: {CorrelationId}, " +
                 "InitiatedBy: {InitiatedBy}, Duration: {Duration}ms, Input: {InputPreview}",
-                AgentName,
+                _agentName,
                 context.ExecutionId,
                 context.CorrelationId,
                 context.InitiatedBy ?? "Unknown",
@@ -114,7 +114,7 @@ public abstract class BaseAgent
                     ["Duration"] = stopwatch.Elapsed,
                     ["CorrelationId"] = context.CorrelationId,
                     ["ExecutionId"] = context.ExecutionId,
-                    ["AgentName"] = AgentName
+                    ["AgentName"] = _agentName
                 });
         }
     }
@@ -129,7 +129,7 @@ public abstract class BaseAgent
     /// </summary>
     protected async Task<string> LoadPromptAsync(string promptName, Dictionary<string, object> variables)
     {
-        var prompt = await PromptLoader.LoadPromptAsync(promptName);
+        var prompt = await _promptLoader.LoadPromptAsync(promptName);
         if (prompt == null)
         {
             throw new InvalidOperationException($"Prompt '{promptName}' not found");
@@ -146,7 +146,7 @@ public abstract class BaseAgent
         KernelArguments? arguments = null,
         CancellationToken cancellationToken = default)
     {
-        var kernel = LLMProvider.GetKernel();
+        var kernel = _llmProvider.GetKernel();
 
         // Execute with retry and timeout policies
         var result = await _llmResiliencePipeline.ExecuteAsync(async ct =>
@@ -165,11 +165,11 @@ public abstract class BaseAgent
     /// </summary>
     protected async Task PublishEventAsync(IDomainEvent domainEvent, CancellationToken cancellationToken = default)
     {
-        await EventPublisher.PublishAsync(domainEvent, cancellationToken);
+        await _eventPublisher.PublishAsync(domainEvent, cancellationToken);
 
-        Logger.LogInformation(
+        _logger.LogInformation(
             "Agent {AgentName} published event {EventType}",
-            AgentName, domainEvent.GetType().Name);
+            _agentName, domainEvent.GetType().Name);
     }
 
     /// <summary>
@@ -181,15 +181,15 @@ public abstract class BaseAgent
         foreach (var (key, value) in variables)
         {
             var rawValue = value?.ToString() ?? string.Empty;
-            var sanitizedValue = InputSanitizer.Sanitize(rawValue);
+            var sanitizedValue = _inputSanitizer.Sanitize(rawValue);
 
             // Log warning if injection patterns were detected
-            if (InputSanitizer.ContainsInjectionPatterns(rawValue))
+            if (_inputSanitizer.ContainsInjectionPatterns(rawValue))
             {
-                Logger.LogWarning(
+                _logger.LogWarning(
                     "Potential injection patterns detected in prompt variable '{Key}'. Input has been sanitized. " +
                     "Agent: {AgentName}",
-                    key, AgentName);
+                    key, _agentName);
             }
 
             result = result.Replace($"{{{{{key}}}}}", sanitizedValue);

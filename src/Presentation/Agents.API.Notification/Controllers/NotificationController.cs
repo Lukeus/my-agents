@@ -1,8 +1,8 @@
+using System.Text.Json;
 using Agents.Application.Core;
 using Agents.Application.Notification;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Agents.API.Notification.Controllers;
 

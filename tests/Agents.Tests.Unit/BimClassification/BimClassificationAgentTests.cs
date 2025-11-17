@@ -1,6 +1,7 @@
-using Agents.Application.Core;
+using System.Text.Json;
 using Agents.Application.BimClassification;
 using Agents.Application.BimClassification.Requests;
+using Agents.Application.Core;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Models;
 using Agents.Infrastructure.Prompts.Services;
@@ -12,7 +13,6 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Moq;
-using System.Text.Json;
 using Xunit;
 
 namespace Agents.Tests.Unit.BimClassification;

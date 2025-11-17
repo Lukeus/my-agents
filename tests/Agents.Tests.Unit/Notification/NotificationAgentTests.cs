@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Agents.Application.Core;
 using Agents.Application.Notification;
 using Agents.Application.Notification.Channels;
@@ -8,7 +9,6 @@ using Agents.Tests.Unit.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Text.Json;
 using Xunit;
 
 namespace Agents.Tests.Unit.Notification;

@@ -7,7 +7,7 @@ namespace Agents.Shared.Security;
 /// </summary>
 public class InputSanitizer : IInputSanitizer
 {
-    private static readonly string[] DangerousPatterns = new[]
+    private static readonly string[] _dangerousPatterns = new[]
     {
         // Markdown code blocks that could manipulate LLM context
         "```",
@@ -49,20 +49,22 @@ public class InputSanitizer : IInputSanitizer
         "exec("
     };
 
-    private static readonly Regex ControlCharactersRegex = new(@"[\x00-\x1F\x7F]", RegexOptions.Compiled);
-    private static readonly Regex MultipleNewlinesRegex = new(@"\n{4,}", RegexOptions.Compiled);
+    private static readonly Regex _controlCharactersRegex = new(@"[\x00-\x1F\x7F]", RegexOptions.Compiled);
+    private static readonly Regex _multipleNewlinesRegex = new(@"\n{4,}", RegexOptions.Compiled);
 
     /// <inheritdoc/>
     public string Sanitize(string input)
     {
         if (string.IsNullOrEmpty(input))
+        {
             return input;
+        }
 
         // Remove control characters (except newline, tab, carriage return)
-        var sanitized = ControlCharactersRegex.Replace(input, "");
+        var sanitized = _controlCharactersRegex.Replace(input, "");
 
         // Escape dangerous patterns by adding backslashes
-        foreach (var pattern in DangerousPatterns)
+        foreach (var pattern in _dangerousPatterns)
         {
             if (sanitized.Contains(pattern, StringComparison.OrdinalIgnoreCase))
             {
@@ -73,7 +75,7 @@ public class InputSanitizer : IInputSanitizer
         }
 
         // Limit excessive newlines (potential context manipulation)
-        sanitized = MultipleNewlinesRegex.Replace(sanitized, "\n\n\n");
+        sanitized = _multipleNewlinesRegex.Replace(sanitized, "\n\n\n");
 
         // Trim excessive whitespace
         sanitized = sanitized.Trim();
@@ -85,9 +87,11 @@ public class InputSanitizer : IInputSanitizer
     public bool ContainsInjectionPatterns(string input)
     {
         if (string.IsNullOrEmpty(input))
+        {
             return false;
+        }
 
-        return DangerousPatterns.Any(pattern =>
+        return _dangerousPatterns.Any(pattern =>
             input.Contains(pattern, StringComparison.OrdinalIgnoreCase));
     }
 }

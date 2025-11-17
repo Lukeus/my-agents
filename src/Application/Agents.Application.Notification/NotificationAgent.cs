@@ -1,8 +1,8 @@
 using Agents.Application.Core;
 using Agents.Application.Notification.Channels;
+using Agents.Domain.Core.Interfaces;
 using Agents.Domain.Notification.Entities;
 using Agents.Domain.Notification.Events;
-using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
 using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
@@ -126,13 +126,28 @@ public class NotificationAgent : BaseAgent
 }
 
 /// <summary>
-/// Notification request model
+/// Notification request model.
 /// </summary>
 public record NotificationRequest : Agents.Shared.Validation.INotificationRequest
 {
+    /// <summary>
+    /// Gets the notification delivery channel.
+    /// </summary>
     public required string Channel { get; init; }
+
+    /// <summary>
+    /// Gets the recipient identifier.
+    /// </summary>
     public required string Recipient { get; init; }
+
+    /// <summary>
+    /// Gets the notification subject.
+    /// </summary>
     public required string Subject { get; init; }
+
+    /// <summary>
+    /// Gets the notification content.
+    /// </summary>
     public required string Content { get; init; }
 }
 

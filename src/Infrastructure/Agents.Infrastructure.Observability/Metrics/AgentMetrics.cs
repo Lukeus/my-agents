@@ -7,30 +7,30 @@ namespace Agents.Infrastructure.Observability.Metrics;
 /// </summary>
 public static class AgentMetrics
 {
-    private static readonly string[] AgentNameLabel = { "agent_name" };
-    private static readonly string[] AgentAndOperationLabels = { "agent_name", "operation" };
-    private static readonly string[] AgentOperationStatusLabels = { "agent_name", "operation", "status" };
-    private static readonly string[] ChannelLabels = { "agent_name", "channel" };
-    private static readonly string[] LlmLabels = { "agent_name", "model", "provider" };
+    private static readonly string[] _agentNameLabel = { "agent_name" };
+    private static readonly string[] _agentAndOperationLabels = { "agent_name", "operation" };
+    private static readonly string[] _agentOperationStatusLabels = { "agent_name", "operation", "status" };
+    private static readonly string[] _channelLabels = { "agent_name", "channel" };
+    private static readonly string[] _llmLabels = { "agent_name", "model", "provider" };
 
     // Agent operation counters
     public static readonly Counter AgentOperationsTotal = Prometheus.Metrics
         .CreateCounter(
             "agent_operations_total",
             "Total number of agent operations",
-            AgentAndOperationLabels);
+            _agentAndOperationLabels);
 
     public static readonly Counter AgentOperationsSuccessTotal = Prometheus.Metrics
         .CreateCounter(
             "agent_operations_success_total",
             "Total number of successful agent operations",
-            AgentAndOperationLabels);
+            _agentAndOperationLabels);
 
     public static readonly Counter AgentOperationsErrorTotal = Prometheus.Metrics
         .CreateCounter(
             "agent_operations_error_total",
             "Total number of failed agent operations",
-            AgentOperationStatusLabels);
+            _agentOperationStatusLabels);
 
     // Agent operation duration
     public static readonly Histogram AgentOperationDuration = Prometheus.Metrics
@@ -39,7 +39,7 @@ public static class AgentMetrics
             "Duration of agent operations in seconds",
             new HistogramConfiguration
             {
-                LabelNames = AgentAndOperationLabels,
+                LabelNames = _agentAndOperationLabels,
                 Buckets = Histogram.ExponentialBuckets(0.01, 2, 10) // 10ms to ~10s
             });
 
@@ -48,13 +48,13 @@ public static class AgentMetrics
         .CreateCounter(
             "llm_calls_total",
             "Total number of LLM API calls",
-            LlmLabels);
+            _llmLabels);
 
     public static readonly Counter LlmTokensUsedTotal = Prometheus.Metrics
         .CreateCounter(
             "llm_tokens_used_total",
             "Total number of LLM tokens consumed",
-            LlmLabels);
+            _llmLabels);
 
     public static readonly Histogram LlmCallDuration = Prometheus.Metrics
         .CreateHistogram(
@@ -62,7 +62,7 @@ public static class AgentMetrics
             "Duration of LLM API calls in seconds",
             new HistogramConfiguration
             {
-                LabelNames = LlmLabels,
+                LabelNames = _llmLabels,
                 Buckets = Histogram.ExponentialBuckets(0.1, 2, 10) // 100ms to ~100s
             });
 
@@ -77,7 +77,7 @@ public static class AgentMetrics
         .CreateCounter(
             "notifications_sent_total",
             "Total number of notifications sent",
-            ChannelLabels);
+            _channelLabels);
 
     public static readonly Counter NotificationsFailedTotal = Prometheus.Metrics
         .CreateCounter(
@@ -91,7 +91,7 @@ public static class AgentMetrics
             "Duration of notification send operations",
             new HistogramConfiguration
             {
-                LabelNames = ChannelLabels,
+                LabelNames = _channelLabels,
                 Buckets = Histogram.ExponentialBuckets(0.01, 2, 10)
             });
 
@@ -146,12 +146,12 @@ public static class AgentMetrics
         .CreateGauge(
             "agent_active_requests",
             "Number of active agent requests",
-            AgentNameLabel);
+            _agentNameLabel);
 
     // Memory and performance
     public static readonly Gauge AgentMemoryUsageBytes = Prometheus.Metrics
         .CreateGauge(
             "agent_memory_usage_bytes",
             "Agent memory usage in bytes",
-            AgentNameLabel);
+            _agentNameLabel);
 }

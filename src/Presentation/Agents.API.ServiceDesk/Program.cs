@@ -1,9 +1,9 @@
 using Agents.Application.Core;
 using Agents.Application.ServiceDesk;
 using Agents.Domain.Core.Interfaces;
+using Agents.Infrastructure.Dapr.Extensions;
 using Agents.Infrastructure.LLM;
 using Agents.Infrastructure.Prompts.Services;
-using Agents.Infrastructure.Dapr.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

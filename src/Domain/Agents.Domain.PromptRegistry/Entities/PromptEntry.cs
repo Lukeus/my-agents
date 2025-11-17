@@ -8,15 +8,54 @@ namespace Agents.Domain.PromptRegistry.Entities;
 /// </summary>
 public class PromptEntry : AggregateRoot<Guid>
 {
+    /// <summary>
+    /// Gets the unique name of the prompt.
+    /// </summary>
     public string Name { get; private set; }
+
+    /// <summary>
+    /// Gets the semantic version of the prompt (e.g., "1.0.0").
+    /// </summary>
     public string Version { get; private set; }
+
+    /// <summary>
+    /// Gets the human-readable description of the prompt's purpose.
+    /// </summary>
     public string Description { get; private set; }
+
+    /// <summary>
+    /// Gets the author of the prompt.
+    /// </summary>
     public string? Author { get; private set; }
+
+    /// <summary>
+    /// Gets the SHA-256 hash of the prompt content for change detection.
+    /// </summary>
     public string ContentHash { get; private set; }
+
+    /// <summary>
+    /// Gets the file path where the prompt is stored.
+    /// </summary>
     public string? FilePath { get; private set; }
+
+    /// <summary>
+    /// Gets the tags for categorization and search.
+    /// </summary>
     public List<string> Tags { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether this prompt is deprecated.
+    /// </summary>
     public bool IsDeprecated { get; private set; }
+
+    /// <summary>
+    /// Gets the name of the prompt that replaces this one if deprecated.
+    /// </summary>
     public string? ReplacedBy { get; private set; }
+
+    /// <summary>
+    /// Gets the timestamp when the prompt was published to the registry.
+    /// </summary>
     public DateTime PublishedAt { get; private set; }
 
     private PromptEntry(Guid id) : base(id)

@@ -339,11 +339,17 @@ public class RedisClassificationCacheRepositoryTests
                 // Read 1: get initial (100), Read 2: verify (100) - match, set succeeds
                 // But on first attempt, verification will detect change
                 if (readCount == 1)
+                {
                     return System.Text.Encoding.UTF8.GetBytes(initialStats); // First read in attempt 1
+                }
                 else if (readCount == 2)
+                {
                     return System.Text.Encoding.UTF8.GetBytes(modifiedStats); // Verification detects change
+                }
                 else
+                {
                     return System.Text.Encoding.UTF8.GetBytes(modifiedStats); // Subsequent reads are stable
+                }
             });
 
         _mockCache

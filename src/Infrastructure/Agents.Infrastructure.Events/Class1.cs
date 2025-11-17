@@ -1,4 +1,4 @@
-﻿namespace Agents.Infrastructure.Events;
+namespace Agents.Infrastructure.Events;
 
 public class Class1
 {

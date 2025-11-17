@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Agents.Application.Core;
 using Agents.Application.DevOps;
 using Agents.Domain.Core.Interfaces;
@@ -9,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Moq;
-using System.Text.Json;
 using Xunit;
 
 namespace Agents.Tests.Unit.DevOps;

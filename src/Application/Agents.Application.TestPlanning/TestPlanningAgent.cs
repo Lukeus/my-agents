@@ -92,10 +92,28 @@ public class TestPlanningAgent : BaseAgent
     }
 }
 
+/// <summary>
+/// Test planning request model.
+/// </summary>
 public record TestPlanningRequest
 {
+    /// <summary>
+    /// Gets the request type (e.g., "generate_spec", "create_strategy", "analyze_coverage").
+    /// </summary>
     public required string Type { get; init; }
+
+    /// <summary>
+    /// Gets the feature description.
+    /// </summary>
     public required string FeatureDescription { get; init; }
+
+    /// <summary>
+    /// Gets the optional requirements.
+    /// </summary>
     public string? Requirements { get; init; }
+
+    /// <summary>
+    /// Gets the optional test framework name.
+    /// </summary>
     public string? TestFramework { get; init; }
 }

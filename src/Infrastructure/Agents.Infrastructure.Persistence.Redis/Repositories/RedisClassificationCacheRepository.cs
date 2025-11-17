@@ -1,11 +1,11 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Agents.Domain.BimClassification.Entities;
 using Agents.Domain.BimClassification.Interfaces;
 using Agents.Infrastructure.Persistence.Redis.Models;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Agents.Infrastructure.Persistence.Redis.Repositories;
 
@@ -22,7 +22,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
     private const string KeyPrefix = "bim:classification:";
     private const string StatsKey = "bim:classification:stats";
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -128,7 +128,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
         });
         _logger.LogDebug("Cache hit for pattern hash: {PatternHash}", patternHash);
 
-        var dto = JsonSerializer.Deserialize<BimClassificationCacheDto>(json, JsonOptions);
+        var dto = JsonSerializer.Deserialize<BimClassificationCacheDto>(json, _jsonOptions);
         return dto != null ? FromDto(dto) : null;
     }
 
@@ -140,7 +140,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
     {
         var key = GetKey(patternHash);
         var dto = ToDto(suggestion);
-        var json = JsonSerializer.Serialize(dto, JsonOptions);
+        var json = JsonSerializer.Serialize(dto, _jsonOptions);
 
         // If Redis connection is available, store directly as string for MGET compatibility
         if (_redis != null)
@@ -191,7 +191,7 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
                     {
                         try
                         {
-                            var dto = JsonSerializer.Deserialize<BimClassificationCacheDto>(values[i]!, JsonOptions);
+                            var dto = JsonSerializer.Deserialize<BimClassificationCacheDto>(values[i]!, _jsonOptions);
                             if (dto != null)
                             {
                                 result[hashes[i]] = FromDto(dto);
@@ -275,11 +275,17 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
                 foreach (var entry in entries)
                 {
                     if (entry.Name == "HitCount" && entry.Value.HasValue)
+                    {
                         hitCount = (long)entry.Value;
+                    }
                     else if (entry.Name == "MissCount" && entry.Value.HasValue)
+                    {
                         missCount = (long)entry.Value;
+                    }
                     else if (entry.Name == "TotalItems" && entry.Value.HasValue)
+                    {
                         totalItems = (long)entry.Value;
+                    }
                 }
                 return new CacheStatistics
                 {
@@ -340,8 +346,8 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
             }
 
             // Fallback: Use retry logic with optimistic concurrency
-            const int maxRetries = 3;
-            for (int attempt = 0; attempt < maxRetries; attempt++)
+            const int MaxRetries = 3;
+            for (int attempt = 0; attempt < MaxRetries; attempt++)
             {
                 var stats = await GetStatisticsAsync();
                 var updated = new CacheStatistics
@@ -358,13 +364,13 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
                 }
 
                 // Wait before retry with exponential backoff
-                if (attempt < maxRetries - 1)
+                if (attempt < MaxRetries - 1)
                 {
                     await Task.Delay(TimeSpan.FromMilliseconds(10 * Math.Pow(2, attempt)));
                 }
             }
 
-            _logger.LogWarning("Failed to increment hit count after {MaxRetries} attempts", maxRetries);
+            _logger.LogWarning("Failed to increment hit count after {MaxRetries} attempts", MaxRetries);
         }
         catch (Exception ex)
         {
@@ -389,8 +395,8 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
             }
 
             // Fallback: Use retry logic with optimistic concurrency
-            const int maxRetries = 3;
-            for (int attempt = 0; attempt < maxRetries; attempt++)
+            const int MaxRetries = 3;
+            for (int attempt = 0; attempt < MaxRetries; attempt++)
             {
                 var stats = await GetStatisticsAsync();
                 var updated = new CacheStatistics
@@ -407,13 +413,13 @@ public class RedisClassificationCacheRepository : IClassificationCacheRepository
                 }
 
                 // Wait before retry with exponential backoff
-                if (attempt < maxRetries - 1)
+                if (attempt < MaxRetries - 1)
                 {
                     await Task.Delay(TimeSpan.FromMilliseconds(10 * Math.Pow(2, attempt)));
                 }
             }
 
-            _logger.LogWarning("Failed to increment miss count after {MaxRetries} attempts", maxRetries);
+            _logger.LogWarning("Failed to increment miss count after {MaxRetries} attempts", MaxRetries);
         }
         catch (Exception ex)
         {

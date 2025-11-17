@@ -1,6 +1,6 @@
 using Agents.Shared.Security;
-using Xunit;
 using FluentAssertions;
+using Xunit;
 
 namespace Agents.Tests.Unit.Security;
 

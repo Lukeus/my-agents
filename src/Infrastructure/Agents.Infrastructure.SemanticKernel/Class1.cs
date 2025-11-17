@@ -1,4 +1,4 @@
-﻿namespace Agents.Infrastructure.SemanticKernel;
+namespace Agents.Infrastructure.SemanticKernel;
 
 public class Class1
 {

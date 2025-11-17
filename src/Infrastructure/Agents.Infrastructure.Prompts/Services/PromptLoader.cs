@@ -17,7 +17,7 @@ public class PromptLoader : IPromptLoader
     private readonly IMemoryCache _cache;
     private readonly IDeserializer _yamlDeserializer;
     private readonly SemaphoreSlim _cacheLock = new(1, 1);
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(15);
 
     public PromptLoader(ILogger<PromptLoader> logger, IMemoryCache cache)
     {
@@ -76,7 +76,7 @@ public class PromptLoader : IPromptLoader
             // Cache with sliding expiration
             var cacheOptions = new MemoryCacheEntryOptions
             {
-                SlidingExpiration = CacheDuration,
+                SlidingExpiration = _cacheDuration,
                 Size = 1 // Each prompt counts as 1 unit
             };
 
@@ -142,7 +142,7 @@ public class PromptLoader : IPromptLoader
         // Cache the directory results
         var cacheOptions = new MemoryCacheEntryOptions
         {
-            SlidingExpiration = CacheDuration,
+            SlidingExpiration = _cacheDuration,
             Size = prompts.Count
         };
         _cache.Set(cacheKey, prompts, cacheOptions);
@@ -158,10 +158,10 @@ public class PromptLoader : IPromptLoader
     /// <returns>Tuple of (metadata, content)</returns>
     private (PromptMetadata metadata, string content) ParsePromptFile(string fileContent)
     {
-        const string yamlDelimiter = "---";
+        const string YamlDelimiter = "---";
 
         // Check if file starts with YAML frontmatter
-        if (!fileContent.TrimStart().StartsWith(yamlDelimiter))
+        if (!fileContent.TrimStart().StartsWith(YamlDelimiter))
         {
             throw new InvalidOperationException("Prompt file must start with YAML frontmatter (---)")
 ;
@@ -177,7 +177,7 @@ public class PromptLoader : IPromptLoader
         {
             var trimmedLine = line.Trim();
 
-            if (trimmedLine == yamlDelimiter)
+            if (trimmedLine == YamlDelimiter)
             {
                 yamlBlockCount++;
                 if (yamlBlockCount == 1)

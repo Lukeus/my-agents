@@ -1,4 +1,4 @@
-﻿namespace Agents.Infrastructure.Observability;
+namespace Agents.Infrastructure.Observability;
 
 public class Class1
 {

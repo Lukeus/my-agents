@@ -234,9 +234,9 @@ public class GitHubPromptProvider
     {
         // Reuse the parsing logic from PromptLoader
         // This is a simplified version - in production, should extract to shared utility
-        const string yamlDelimiter = "---";
+        const string YamlDelimiter = "---";
 
-        if (!fileContent.TrimStart().StartsWith(yamlDelimiter))
+        if (!fileContent.TrimStart().StartsWith(YamlDelimiter))
         {
             throw new InvalidOperationException("Prompt file must start with YAML frontmatter (---)");
         }
@@ -251,7 +251,7 @@ public class GitHubPromptProvider
         {
             var trimmedLine = line.Trim();
 
-            if (trimmedLine == yamlDelimiter)
+            if (trimmedLine == YamlDelimiter)
             {
                 yamlBlockCount++;
                 if (yamlBlockCount == 1)

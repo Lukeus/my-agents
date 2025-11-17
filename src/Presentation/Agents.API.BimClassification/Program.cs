@@ -1,14 +1,14 @@
-using Agents.Application.Core;
 using Agents.Application.BimClassification;
 using Agents.Application.BimClassification.Requests;
 using Agents.Application.BimClassification.Services;
-using Agents.Domain.Core.Interfaces;
+using Agents.Application.Core;
 using Agents.Domain.BimClassification.Interfaces;
+using Agents.Domain.Core.Interfaces;
+using Agents.Infrastructure.Dapr.Extensions;
 using Agents.Infrastructure.LLM;
-using Agents.Infrastructure.Prompts.Services;
 using Agents.Infrastructure.Persistence.Redis.Repositories;
 using Agents.Infrastructure.Persistence.SqlServer.Repositories;
-using Agents.Infrastructure.Dapr.Extensions;
+using Agents.Infrastructure.Prompts.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -85,10 +85,16 @@ public class Prompt
         while (true)
         {
             startIndex = content.IndexOf("{{", startIndex, StringComparison.Ordinal);
-            if (startIndex == -1) break;
+            if (startIndex == -1)
+            {
+                break;
+            }
 
             var endIndex = content.IndexOf("}}", startIndex, StringComparison.Ordinal);
-            if (endIndex == -1) break;
+            if (endIndex == -1)
+            {
+                break;
+            }
 
             var variable = content.Substring(startIndex + 2, endIndex - startIndex - 2).Trim();
             if (!variables.Contains(variable))

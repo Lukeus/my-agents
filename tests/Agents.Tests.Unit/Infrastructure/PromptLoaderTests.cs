@@ -30,11 +30,15 @@ public class PromptLoaderTests : IDisposable
         foreach (var file in _tempFiles)
         {
             if (File.Exists(file))
+            {
                 File.Delete(file);
+            }
         }
 
         if (Directory.Exists(_tempDirectory))
+        {
             Directory.Delete(_tempDirectory, true);
+        }
 
         _memoryCache.Dispose();
         GC.SuppressFinalize(this);

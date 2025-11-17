@@ -1,4 +1,4 @@
-﻿namespace Agents.Domain.DevOps;
+namespace Agents.Domain.DevOps;
 
 public class Class1
 {
