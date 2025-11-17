@@ -1,7 +1,7 @@
+using System.Net;
 using Agents.Domain.Core.Entities;
 using Agents.Domain.Core.Interfaces;
 using Microsoft.Azure.Cosmos;
-using System.Net;
 
 namespace Agents.Infrastructure.Persistence.CosmosDB.Repositories;
 

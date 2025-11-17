@@ -1,4 +1,4 @@
-﻿namespace Agents.Domain.Notification;
+namespace Agents.Domain.Notification;
 
 public class Class1
 {

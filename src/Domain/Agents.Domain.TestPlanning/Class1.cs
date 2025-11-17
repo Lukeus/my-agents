@@ -1,4 +1,4 @@
-﻿namespace Agents.Domain.TestPlanning;
+namespace Agents.Domain.TestPlanning;
 
 public class Class1
 {

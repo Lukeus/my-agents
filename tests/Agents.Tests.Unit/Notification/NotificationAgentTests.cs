@@ -1,15 +1,17 @@
+using System.Text.Json;
 using Agents.Application.Core;
 using Agents.Application.Notification;
 using Agents.Application.Notification.Channels;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
+using Agents.Tests.Unit.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Text.Json;
 using Xunit;
 
-namespace Agents.Tests.Unit;
+namespace Agents.Tests.Unit.Notification;
 
 public class NotificationAgentTests
 {
@@ -17,6 +19,7 @@ public class NotificationAgentTests
     private readonly Mock<IPromptLoader> _mockPromptLoader;
     private readonly Mock<IEventPublisher> _mockEventPublisher;
     private readonly Mock<INotificationChannelFactory> _mockChannelFactory;
+    private readonly Mock<IInputSanitizer> _mockInputSanitizer;
     private readonly Mock<ILogger<NotificationAgent>> _mockLogger;
     private readonly NotificationAgent _agent;
 
@@ -26,13 +29,17 @@ public class NotificationAgentTests
         _mockPromptLoader = new Mock<IPromptLoader>();
         _mockEventPublisher = new Mock<IEventPublisher>();
         _mockChannelFactory = new Mock<INotificationChannelFactory>();
+        _mockInputSanitizer = new Mock<IInputSanitizer>();
         _mockLogger = new Mock<ILogger<NotificationAgent>>();
+
+        _mockInputSanitizer.Setup(s => s.Sanitize(It.IsAny<string>())).Returns<string>(input => input);
 
         _agent = new NotificationAgent(
             _mockLLMProvider.Object,
             _mockPromptLoader.Object,
             _mockEventPublisher.Object,
             _mockChannelFactory.Object,
+            _mockInputSanitizer.Object,
             _mockLogger.Object);
     }
 

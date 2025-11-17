@@ -1,6 +1,7 @@
 using Agents.Application.Core;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Agents.Application.DevOps;
@@ -14,8 +15,9 @@ public class DevOpsAgent : BaseAgent
         ILLMProvider llmProvider,
         IPromptLoader promptLoader,
         IEventPublisher eventPublisher,
+        IInputSanitizer inputSanitizer,
         ILogger<DevOpsAgent> logger)
-        : base(llmProvider, promptLoader, eventPublisher, logger, "DevOpsAgent")
+        : base(llmProvider, promptLoader, eventPublisher, logger, inputSanitizer, "DevOpsAgent")
     {
     }
 
@@ -40,7 +42,7 @@ public class DevOpsAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error processing DevOps request");
+            _logger.LogError(ex, "Error processing DevOps request");
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }
@@ -57,7 +59,7 @@ public class DevOpsAgent : BaseAgent
         var result = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
         // TODO: Actually create issue via GitHub API (Octokit)
-        Logger.LogInformation("Created GitHub issue: {Result}", result);
+        _logger.LogInformation("Created GitHub issue: {Result}", result);
 
         return AgentResult.Success(
             $"Issue created successfully",
@@ -74,7 +76,7 @@ public class DevOpsAgent : BaseAgent
 
         var result = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogInformation("Updated GitHub project: {Result}", result);
+        _logger.LogInformation("Updated GitHub project: {Result}", result);
 
         return AgentResult.Success($"Project updated", new Dictionary<string, object> { ["updateSummary"] = result });
     }
@@ -94,7 +96,7 @@ public class DevOpsAgent : BaseAgent
     private async Task<AgentResult> TriggerWorkflowAsync(DevOpsRequest request, AgentContext context)
     {
         // TODO: Trigger GitHub Actions workflow
-        Logger.LogInformation("Triggering workflow: {Workflow}", request.Parameters.GetValueOrDefault("workflowName", string.Empty));
+        _logger.LogInformation("Triggering workflow: {Workflow}", request.Parameters.GetValueOrDefault("workflowName", string.Empty));
 
         await Task.Delay(100, context.CancellationToken);
 

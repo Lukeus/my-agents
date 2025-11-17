@@ -101,6 +101,7 @@ public class ServiceBusConsumer : BackgroundService
 
     private Task ProcessEventAsync(string eventJson, string? eventType, CancellationToken cancellationToken)
     {
+        _ = cancellationToken; // TODO: Use cancellationToken when implementing event dispatching logic
         // TODO: Implement event dispatching logic
         // This would typically involve:
         // 1. Deserializing to the appropriate event type

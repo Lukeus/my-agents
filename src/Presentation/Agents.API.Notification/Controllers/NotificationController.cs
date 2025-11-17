@@ -1,7 +1,8 @@
+using System.Text.Json;
 using Agents.Application.Core;
 using Agents.Application.Notification;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Agents.API.Notification.Controllers;
 
@@ -12,11 +13,16 @@ public class NotificationController : ControllerBase
 {
     private readonly NotificationAgent _agent;
     private readonly ILogger<NotificationController> _logger;
+    private readonly IValidator<NotificationRequest> _validator;
 
-    public NotificationController(NotificationAgent agent, ILogger<NotificationController> logger)
+    public NotificationController(
+        NotificationAgent agent,
+        ILogger<NotificationController> logger,
+        IValidator<NotificationRequest> validator)
     {
         _agent = agent;
         _logger = logger;
+        _validator = validator;
     }
 
     /// <summary>
@@ -30,9 +36,19 @@ public class NotificationController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> SendNotification([FromBody] NotificationRequest request)
     {
-        if (!ModelState.IsValid)
+        // Validate request with FluentValidation
+        var validationResult = await _validator.ValidateAsync(request);
+        if (!validationResult.IsValid)
         {
-            return BadRequest(ModelState);
+            return BadRequest(new
+            {
+                errors = validationResult.Errors.Select(e => new
+                {
+                    property = e.PropertyName,
+                    message = e.ErrorMessage,
+                    attemptedValue = e.AttemptedValue
+                })
+            });
         }
 
         var input = JsonSerializer.Serialize(request);

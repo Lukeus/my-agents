@@ -19,10 +19,9 @@ export { default as Sidebar } from './components/Sidebar.vue';
 export type {
   AppShellProps,
   AppInfo,
-  AppItem,
   NavItem,
-  HealthStatus,
 } from './components/AppShell.vue';
+export type { AppItem } from '@agents/design-system';
 export type { TopNavProps } from './components/TopNav.vue';
 export type { SidebarProps } from './components/Sidebar.vue';
 export type { StackedLayoutProps } from './components/StackedLayout.vue';

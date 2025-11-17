@@ -124,7 +124,10 @@ public class PromptVersionManager
         ModelRequirements? newReqs,
         VersionComparison comparison)
     {
-        if (oldReqs == null && newReqs == null) return;
+        if (oldReqs == null && newReqs == null)
+        {
+            return;
+        }
 
         if (oldReqs == null || newReqs == null)
         {
@@ -148,7 +151,10 @@ public class PromptVersionManager
         List<PromptParameter>? newSchema,
         VersionComparison comparison)
     {
-        if (oldSchema == null && newSchema == null) return;
+        if (oldSchema == null && newSchema == null)
+        {
+            return;
+        }
 
         var oldParams = oldSchema?.Select(p => p.Name).ToHashSet() ?? new HashSet<string>();
         var newParams = newSchema?.Select(p => p.Name).ToHashSet() ?? new HashSet<string>();

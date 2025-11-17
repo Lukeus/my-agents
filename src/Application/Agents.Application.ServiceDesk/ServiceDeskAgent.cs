@@ -1,6 +1,7 @@
 using Agents.Application.Core;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Agents.Application.ServiceDesk;
@@ -14,8 +15,9 @@ public class ServiceDeskAgent : BaseAgent
         ILLMProvider llmProvider,
         IPromptLoader promptLoader,
         IEventPublisher eventPublisher,
+        IInputSanitizer inputSanitizer,
         ILogger<ServiceDeskAgent> logger)
-        : base(llmProvider, promptLoader, eventPublisher, logger, "ServiceDeskAgent")
+        : base(llmProvider, promptLoader, eventPublisher, logger, inputSanitizer, "ServiceDeskAgent")
     {
     }
 
@@ -40,7 +42,7 @@ public class ServiceDeskAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error processing service desk request");
+            _logger.LogError(ex, "Error processing service desk request");
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }
@@ -56,7 +58,7 @@ public class ServiceDeskAgent : BaseAgent
 
         var triage = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogInformation("Triaged ticket: {TicketId}", request.TicketId);
+        _logger.LogInformation("Triaged ticket: {TicketId}", request.TicketId);
 
         return AgentResult<TriageResult>.Success(
             new TriageResult
@@ -85,6 +87,7 @@ public class ServiceDeskAgent : BaseAgent
 
     private async Task<AgentResult> CheckSLAAsync(ServiceDeskRequest request, AgentContext context)
     {
+        _ = context; // TODO: Use context when implementing actual SLA calculation
         // TODO: Calculate actual SLA based on ticket priority and creation time
         var slaStatus = new SLAStatus
         {
@@ -109,7 +112,7 @@ public class ServiceDeskAgent : BaseAgent
 
         var escalationNotes = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogWarning("Escalating ticket: {TicketId}", request.TicketId);
+        _logger.LogWarning("Escalating ticket: {TicketId}", request.TicketId);
 
         return AgentResult.Success($"Ticket escalated: {escalationNotes}");
     }

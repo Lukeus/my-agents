@@ -11,6 +11,10 @@
     <PackageReference Include="Aspire.StackExchange.Redis" Version="8.2.2" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
     <PackageReference Include="Dapr.Client" Version="1.14.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.0" />
   </ItemGroup>
 
@@ -22,6 +26,7 @@
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Persistence.SqlServer\Agents.Infrastructure.Persistence.SqlServer.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Agents.Infrastructure.Dapr\Agents.Infrastructure.Dapr.csproj" />
     <ProjectReference Include="..\..\Shared\Agents.ServiceDefaults\Agents.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\Shared\Agents.Shared.Validation\Agents.Shared.Validation.csproj" />
   </ItemGroup>
 
 </Project>

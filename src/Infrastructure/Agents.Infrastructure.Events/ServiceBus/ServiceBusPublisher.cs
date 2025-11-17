@@ -62,7 +62,9 @@ public class ServiceBusPublisher : IEventPublisher, IAsyncDisposable
     {
         var events = domainEvents.ToList();
         if (!events.Any())
+        {
             return;
+        }
 
         try
         {
@@ -116,10 +118,14 @@ public class ServiceBusPublisher : IEventPublisher, IAsyncDisposable
         var eventType = domainEvent.GetType().Name;
 
         if (eventType.Contains("Notification"))
+        {
             return _configuration["ServiceBus:NotificationTopic"] ?? "notification-events";
+        }
 
         if (eventType.Contains("DevOps"))
+        {
             return _configuration["ServiceBus:DevOpsTopic"] ?? "devops-events";
+        }
 
         // Default topic
         return "agent-events";

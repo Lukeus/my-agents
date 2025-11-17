@@ -2,6 +2,8 @@ using Agents.Domain.Core.Events;
 using Agents.Domain.Core.Interfaces;
 using Dapr.Client;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
 
 namespace Agents.Infrastructure.Dapr.PubSub;
 
@@ -12,12 +14,34 @@ public class DaprEventPublisher : IEventPublisher
 {
     private readonly DaprClient _daprClient;
     private readonly ILogger<DaprEventPublisher> _logger;
+    private readonly ResiliencePipeline _retryPipeline;
     private const string PubSubName = "agents-pubsub";
 
     public DaprEventPublisher(DaprClient daprClient, ILogger<DaprEventPublisher> logger)
     {
         _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+        // Configure retry policy with exponential backoff
+        _retryPipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential,
+                UseJitter = true,
+                OnRetry = args =>
+                {
+                    _logger.LogWarning(
+                        args.Outcome.Exception,
+                        "Event publish retry {RetryCount} after {Delay}ms. Exception: {ExceptionType}",
+                        args.AttemptNumber,
+                        args.RetryDelay.TotalMilliseconds,
+                        args.Outcome.Exception?.GetType().Name ?? "None");
+                    return ValueTask.CompletedTask;
+                }
+            })
+            .Build();
     }
 
     /// <summary>
@@ -40,11 +64,15 @@ public class DaprEventPublisher : IEventPublisher
                 domainEvent.EventId,
                 topicName);
 
-            await _daprClient.PublishEventAsync(
-                PubSubName,
-                topicName,
-                domainEvent,
-                cancellationToken);
+            // Execute with retry policy
+            await _retryPipeline.ExecuteAsync(async ct =>
+            {
+                await _daprClient.PublishEventAsync(
+                    PubSubName,
+                    topicName,
+                    domainEvent,
+                    ct);
+            }, cancellationToken);
 
             _logger.LogInformation(
                 "Successfully published event {EventType} with ID {EventId}",
@@ -55,7 +83,7 @@ public class DaprEventPublisher : IEventPublisher
         {
             _logger.LogError(
                 ex,
-                "Failed to publish event {EventType} with ID {EventId} to topic {TopicName}",
+                "Failed to publish event {EventType} with ID {EventId} to topic {TopicName} after all retries",
                 domainEvent.GetType().Name,
                 domainEvent.EventId,
                 topicName);
@@ -84,10 +112,30 @@ public class DaprEventPublisher : IEventPublisher
         _logger.LogInformation("Publishing batch of {Count} events", eventsList.Count);
 
         // Publish events in parallel for better performance
+        // Handle partial failures gracefully - some events may succeed
         var publishTasks = eventsList.Select(evt => PublishAsync(evt, cancellationToken));
-        await Task.WhenAll(publishTasks);
 
-        _logger.LogInformation("Successfully published batch of {Count} events", eventsList.Count);
+        try
+        {
+            await Task.WhenAll(publishTasks);
+            _logger.LogInformation("Successfully published all {Count} events", eventsList.Count);
+        }
+        catch (Exception ex)
+        {
+            // Determine how many succeeded vs failed
+            var successCount = publishTasks.Count(t => t.IsCompletedSuccessfully);
+            var failedCount = eventsList.Count - successCount;
+
+            _logger.LogError(
+                ex,
+                "Batch publish partially failed: {SuccessCount}/{TotalCount} succeeded, {FailedCount} failed",
+                successCount,
+                eventsList.Count,
+                failedCount);
+
+            // Don't throw - some events may have succeeded
+            // Caller can check individual task results if needed
+        }
     }
 
     /// <summary>

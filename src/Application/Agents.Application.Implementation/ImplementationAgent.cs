@@ -1,6 +1,7 @@
 using Agents.Application.Core;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Agents.Application.Implementation;
@@ -14,8 +15,9 @@ public class ImplementationAgent : BaseAgent
         ILLMProvider llmProvider,
         IPromptLoader promptLoader,
         IEventPublisher eventPublisher,
+        IInputSanitizer inputSanitizer,
         ILogger<ImplementationAgent> logger)
-        : base(llmProvider, promptLoader, eventPublisher, logger, "ImplementationAgent")
+        : base(llmProvider, promptLoader, eventPublisher, logger, inputSanitizer, "ImplementationAgent")
     {
     }
 
@@ -39,7 +41,7 @@ public class ImplementationAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in implementation");
+            _logger.LogError(ex, "Error in implementation");
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }
@@ -56,7 +58,7 @@ public class ImplementationAgent : BaseAgent
 
         var generatedCode = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogInformation("Generated code for: {Spec}", request.Specification);
+        _logger.LogInformation("Generated code for: {Spec}", request.Specification);
 
         return AgentResult<string>.Success(
             generatedCode,

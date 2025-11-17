@@ -42,6 +42,7 @@ public class PromptCache
 
         _logger.LogDebug("Cache miss for prompt: {Key}", key);
 
+        cancellationToken.ThrowIfCancellationRequested();
         var prompt = await factory();
 
         _cache.Set(key, prompt, _defaultOptions);

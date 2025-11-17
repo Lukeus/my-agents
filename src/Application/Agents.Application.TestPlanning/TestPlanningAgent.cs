@@ -1,6 +1,7 @@
 using Agents.Application.Core;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Agents.Application.TestPlanning;
@@ -14,8 +15,9 @@ public class TestPlanningAgent : BaseAgent
         ILLMProvider llmProvider,
         IPromptLoader promptLoader,
         IEventPublisher eventPublisher,
+        IInputSanitizer inputSanitizer,
         ILogger<TestPlanningAgent> logger)
-        : base(llmProvider, promptLoader, eventPublisher, logger, "TestPlanningAgent")
+        : base(llmProvider, promptLoader, eventPublisher, logger, inputSanitizer, "TestPlanningAgent")
     {
     }
 
@@ -39,7 +41,7 @@ public class TestPlanningAgent : BaseAgent
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error in test planning");
+            _logger.LogError(ex, "Error in test planning");
             return AgentResult.Failure($"Error: {ex.Message}");
         }
     }
@@ -55,7 +57,7 @@ public class TestPlanningAgent : BaseAgent
 
         var testSpec = await InvokeKernelAsync(promptText, cancellationToken: context.CancellationToken);
 
-        Logger.LogInformation("Generated test specification");
+        _logger.LogInformation("Generated test specification");
 
         return AgentResult<string>.Success(
             testSpec,
@@ -90,10 +92,28 @@ public class TestPlanningAgent : BaseAgent
     }
 }
 
+/// <summary>
+/// Test planning request model.
+/// </summary>
 public record TestPlanningRequest
 {
+    /// <summary>
+    /// Gets the request type (e.g., "generate_spec", "create_strategy", "analyze_coverage").
+    /// </summary>
     public required string Type { get; init; }
+
+    /// <summary>
+    /// Gets the feature description.
+    /// </summary>
     public required string FeatureDescription { get; init; }
+
+    /// <summary>
+    /// Gets the optional requirements.
+    /// </summary>
     public string? Requirements { get; init; }
+
+    /// <summary>
+    /// Gets the optional test framework name.
+    /// </summary>
     public string? TestFramework { get; init; }
 }

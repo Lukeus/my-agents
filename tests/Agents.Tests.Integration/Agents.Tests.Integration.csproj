@@ -9,10 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Dapr.Client" Version="1.14.0" />
     <PackageReference Include="FluentAssertions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="Polly" Version="8.6.4" />
     <PackageReference Include="Testcontainers" Version="4.0.0" />
     <PackageReference Include="Testcontainers.MsSql" Version="4.0.0" />
     <PackageReference Include="Testcontainers.Redis" Version="4.0.0" />
@@ -30,6 +32,7 @@
     <ProjectReference Include="..\..\src\Infrastructure\Agents.Infrastructure.Persistence.Redis\Agents.Infrastructure.Persistence.Redis.csproj" />
     <ProjectReference Include="..\..\src\Domain\Agents.Domain.Notification\Agents.Domain.Notification.csproj" />
     <ProjectReference Include="..\..\src\Domain\Agents.Domain.BimClassification\Agents.Domain.BimClassification.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure\Agents.Infrastructure.Dapr\Agents.Infrastructure.Dapr.csproj" />
   </ItemGroup>
 
 </Project>

@@ -31,24 +31,53 @@ public sealed class BimElementPromptModel
         sb.AppendLine($"Category: {Category}");
 
         if (!string.IsNullOrWhiteSpace(Spec))
+        {
             sb.AppendLine($"Spec: {Spec}");
+        }
+
         if (!string.IsNullOrWhiteSpace(LocationType))
+        {
             sb.AppendLine($"LocationType: {LocationType}");
+        }
+
         if (!string.IsNullOrWhiteSpace(Material))
+        {
             sb.AppendLine($"Material: {Material}");
+        }
+
         if (!string.IsNullOrWhiteSpace(Family))
+        {
             sb.AppendLine($"Family: {Family}");
+        }
+
         if (!string.IsNullOrWhiteSpace(Type))
+        {
             sb.AppendLine($"Type: {Type}");
+        }
 
         if (LengthMm is not null || WidthMm is not null ||
             HeightMm is not null || DiameterMm is not null)
         {
             sb.AppendLine("Dimensions (mm):");
-            if (LengthMm is not null) sb.AppendLine($"  Length: {LengthMm}");
-            if (WidthMm is not null) sb.AppendLine($"  Width: {WidthMm}");
-            if (HeightMm is not null) sb.AppendLine($"  Height: {HeightMm}");
-            if (DiameterMm is not null) sb.AppendLine($"  Diameter: {DiameterMm}");
+            if (LengthMm is not null)
+            {
+                sb.AppendLine($"  Length: {LengthMm}");
+            }
+
+            if (WidthMm is not null)
+            {
+                sb.AppendLine($"  Width: {WidthMm}");
+            }
+
+            if (HeightMm is not null)
+            {
+                sb.AppendLine($"  Height: {HeightMm}");
+            }
+
+            if (DiameterMm is not null)
+            {
+                sb.AppendLine($"  Diameter: {DiameterMm}");
+            }
         }
 
         if (Meta.Count > 0)

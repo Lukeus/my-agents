@@ -149,10 +149,26 @@ public static class ObservabilityExtensions
 
             options.GetLevel = (httpContext, elapsed, ex) =>
             {
-                if (ex != null) return LogEventLevel.Error;
-                if (httpContext.Response.StatusCode >= 500) return LogEventLevel.Error;
-                if (httpContext.Response.StatusCode >= 400) return LogEventLevel.Warning;
-                if (elapsed > 1000) return LogEventLevel.Warning;
+                if (ex != null)
+                {
+                    return LogEventLevel.Error;
+                }
+
+                if (httpContext.Response.StatusCode >= 500)
+                {
+                    return LogEventLevel.Error;
+                }
+
+                if (httpContext.Response.StatusCode >= 400)
+                {
+                    return LogEventLevel.Warning;
+                }
+
+                if (elapsed > 1000)
+                {
+                    return LogEventLevel.Warning;
+                }
+
                 return LogEventLevel.Information;
             };
         });

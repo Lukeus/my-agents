@@ -9,11 +9,16 @@ public class NotificationChannelFactory : INotificationChannelFactory
 {
     private readonly ILoggerFactory _loggerFactory;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NotificationChannelFactory"/> class.
+    /// </summary>
+    /// <param name="loggerFactory">The logger factory for creating channel loggers.</param>
     public NotificationChannelFactory(ILoggerFactory loggerFactory)
     {
         _loggerFactory = loggerFactory;
     }
 
+    /// <inheritdoc/>
     public INotificationChannel CreateChannel(string channelName)
     {
         return channelName.ToLowerInvariant() switch

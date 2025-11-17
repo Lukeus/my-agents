@@ -1,4 +1,4 @@
-﻿namespace Agents.Domain.Implementation;
+namespace Agents.Domain.Implementation;
 
 public class Class1
 {

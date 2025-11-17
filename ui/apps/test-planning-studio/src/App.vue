@@ -2,6 +2,7 @@
 import { AppShell } from '@agents/layout-shell';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { appConfig } from '@agents/shared';
 
 const route = useRoute();
 
@@ -10,12 +11,7 @@ const currentApp = {
   icon: '🧪',
 };
 
-const availableApps = [
-  { name: 'Agents Console', icon: '🤖', href: 'http://localhost:5173' },
-  { name: 'Test Planning Studio', icon: '🧪', href: 'http://localhost:5174' },
-  { name: 'DevOps Hub', icon: '⚙️', href: '/devops' },
-  { name: 'Service Desk', icon: '🎫', href: '/service-desk' },
-];
+const availableApps = appConfig.apps;
 
 const navigationItems = computed(() => [
   { label: 'Dashboard', icon: '📊', route: '/', isActive: route.path === '/' },

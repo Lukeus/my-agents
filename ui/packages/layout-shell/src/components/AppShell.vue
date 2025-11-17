@@ -1,17 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import Sidebar from './Sidebar.vue';
+import { AppSwitcher } from '@agents/design-system';
+import type { AppItem } from '@agents/design-system';
 
 export interface AppInfo {
   name: string;
   icon: string;
 }
 
-export interface AppItem {
-  name: string;
-  icon: string;
-  href: string;
-}
 
 export interface NavItem {
   label: string;
@@ -29,7 +26,10 @@ export interface AppShellProps {
 
 const props = withDefaults(defineProps<AppShellProps>(), {
   showSidebar: true,
+  availableApps: () => [],
 });
+
+const showAppSwitcher = computed(() => props.availableApps && props.availableApps.length > 0);
 
 const sidebarOpen = ref(false);
 
@@ -102,7 +102,7 @@ onBeforeUnmount(() => {
     <!-- Content wrapper with sidebar offset -->
     <div v-if="showSidebar" class="lg:pl-[18rem]">
       
-      <!-- Mobile header (menu button + title) -->
+      <!-- Mobile header (menu button + app switcher/title) -->
       <div class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-[--color-border-subtle] bg-[--color-surface-elevated] px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:hidden">
         <button 
           type="button" 
@@ -114,14 +114,26 @@ onBeforeUnmount(() => {
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
         </button>
-        <h1 class="flex-1 text-sm font-semibold leading-6 text-[--color-text-primary]">
-          {{ currentApp.name }}
-        </h1>
+        <div class="flex-1">
+          <AppSwitcher
+            v-if="showAppSwitcher"
+            :current-app="currentApp.name"
+            :apps="availableApps"
+          />
+          <h1 v-else class="text-sm font-semibold leading-6 text-[--color-text-primary]">
+            {{ currentApp.name }}
+          </h1>
+        </div>
       </div>
 
-      <!-- Desktop header (app title) -->
-      <div class="hidden lg:flex lg:h-16 lg:items-center lg:border-b lg:border-[--color-border-subtle] lg:bg-[--color-surface-elevated] lg:px-8">
-        <h1 class="text-lg font-semibold text-[--color-text-primary]">
+      <!-- Desktop header (app switcher + title) -->
+      <div class="hidden lg:flex lg:h-16 lg:items-center lg:justify-between lg:border-b lg:border-[--color-border-subtle] lg:bg-[--color-surface-elevated] lg:px-8">
+        <AppSwitcher
+          v-if="showAppSwitcher"
+          :current-app="currentApp.name"
+          :apps="availableApps"
+        />
+        <h1 v-else class="text-lg font-semibold text-[--color-text-primary]">
           {{ currentApp.name }}
         </h1>
       </div>

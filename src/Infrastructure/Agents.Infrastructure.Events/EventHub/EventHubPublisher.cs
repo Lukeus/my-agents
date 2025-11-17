@@ -68,7 +68,9 @@ public class EventHubPublisher : IEventPublisher, IAsyncDisposable
     {
         var events = domainEvents.ToList();
         if (!events.Any())
+        {
             return;
+        }
 
         try
         {

@@ -603,7 +603,7 @@ ui/
 
 **Create per-app Dockerfile** (`ui/apps/agents-console/Dockerfile`):
 ```dockerfile
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /src
 
 # Copy workspace files

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Agents.Infrastructure.Prompts.Models;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -13,11 +14,15 @@ namespace Agents.Infrastructure.Prompts.Services;
 public class PromptLoader : IPromptLoader
 {
     private readonly ILogger<PromptLoader> _logger;
+    private readonly IMemoryCache _cache;
     private readonly IDeserializer _yamlDeserializer;
+    private readonly SemaphoreSlim _cacheLock = new(1, 1);
+    private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(15);
 
-    public PromptLoader(ILogger<PromptLoader> logger)
+    public PromptLoader(ILogger<PromptLoader> logger, IMemoryCache cache)
     {
         _logger = logger;
+        _cache = cache;
 
         _yamlDeserializer = new DeserializerBuilder()
             .WithNamingConvention(UnderscoredNamingConvention.Instance)
@@ -26,7 +31,7 @@ public class PromptLoader : IPromptLoader
     }
 
     /// <summary>
-    /// Loads a single prompt from a file path.
+    /// Loads a single prompt from a file path with caching.
     /// </summary>
     public async Task<Prompt> LoadPromptAsync(string filePath, CancellationToken cancellationToken = default)
     {
@@ -35,32 +40,64 @@ public class PromptLoader : IPromptLoader
             throw new FileNotFoundException($"Prompt file not found: {filePath}");
         }
 
-        _logger.LogDebug("Loading prompt from {FilePath}", filePath);
+        var cacheKey = $"prompt:{filePath}";
 
-        var content = await File.ReadAllTextAsync(filePath, cancellationToken);
-
-        var (metadata, promptContent) = ParsePromptFile(content);
-
-        var prompt = new Prompt
+        // Try to get from cache first
+        if (_cache.TryGetValue<Prompt>(cacheKey, out var cachedPrompt) && cachedPrompt != null)
         {
-            Metadata = metadata,
-            Content = promptContent,
-            FilePath = filePath,
-            ContentHash = ComputeHash(content),
-            LoadedAt = DateTime.UtcNow
-        };
+            _logger.LogDebug("Prompt loaded from cache: {FilePath}", filePath);
+            return cachedPrompt;
+        }
 
-        _logger.LogInformation(
-            "Loaded prompt '{Name}' v{Version} from {FilePath}",
-            prompt.Metadata.Name,
-            prompt.Metadata.Version,
-            filePath);
+        // Lock to prevent multiple simultaneous loads of the same file
+        await _cacheLock.WaitAsync(cancellationToken);
+        try
+        {
+            // Double-check cache after acquiring lock
+            if (_cache.TryGetValue<Prompt>(cacheKey, out cachedPrompt) && cachedPrompt != null)
+            {
+                return cachedPrompt;
+            }
 
-        return prompt;
+            _logger.LogDebug("Loading prompt from file: {FilePath}", filePath);
+
+            var content = await File.ReadAllTextAsync(filePath, cancellationToken);
+            var (metadata, promptContent) = ParsePromptFile(content);
+
+            var prompt = new Prompt
+            {
+                Metadata = metadata,
+                Content = promptContent,
+                FilePath = filePath,
+                ContentHash = ComputeHash(content),
+                LoadedAt = DateTime.UtcNow
+            };
+
+            // Cache with sliding expiration
+            var cacheOptions = new MemoryCacheEntryOptions
+            {
+                SlidingExpiration = _cacheDuration,
+                Size = 1 // Each prompt counts as 1 unit
+            };
+
+            _cache.Set(cacheKey, prompt, cacheOptions);
+
+            _logger.LogInformation(
+                "Loaded and cached prompt '{Name}' v{Version} from {FilePath}",
+                prompt.Metadata.Name,
+                prompt.Metadata.Version,
+                filePath);
+
+            return prompt;
+        }
+        finally
+        {
+            _cacheLock.Release();
+        }
     }
 
     /// <summary>
-    /// Loads all prompts from a directory recursively.
+    /// Loads all prompts from a directory recursively with parallel loading.
     /// </summary>
     public async Task<List<Prompt>> LoadPromptsFromDirectoryAsync(
         string directoryPath,
@@ -72,23 +109,43 @@ public class PromptLoader : IPromptLoader
             throw new DirectoryNotFoundException($"Prompt directory not found: {directoryPath}");
         }
 
+        var cacheKey = $"prompts:dir:{directoryPath}:{searchPattern}";
+
+        // Check if the entire directory result is cached
+        if (_cache.TryGetValue<List<Prompt>>(cacheKey, out var cachedPrompts) && cachedPrompts != null)
+        {
+            _logger.LogDebug("Prompts loaded from cache for directory: {DirectoryPath}", directoryPath);
+            return cachedPrompts;
+        }
+
         _logger.LogInformation("Loading prompts from directory {DirectoryPath}", directoryPath);
 
         var promptFiles = Directory.GetFiles(directoryPath, searchPattern, SearchOption.AllDirectories);
-        var prompts = new List<Prompt>();
 
-        foreach (var file in promptFiles)
+        // Parallel loading for better performance
+        var loadTasks = promptFiles.Select(async file =>
         {
             try
             {
-                var prompt = await LoadPromptAsync(file, cancellationToken);
-                prompts.Add(prompt);
+                return await LoadPromptAsync(file, cancellationToken);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to load prompt from {FilePath}", file);
+                return null;
             }
-        }
+        });
+
+        var results = await Task.WhenAll(loadTasks);
+        var prompts = results.Where(p => p != null).Cast<Prompt>().ToList();
+
+        // Cache the directory results
+        var cacheOptions = new MemoryCacheEntryOptions
+        {
+            SlidingExpiration = _cacheDuration,
+            Size = prompts.Count
+        };
+        _cache.Set(cacheKey, prompts, cacheOptions);
 
         _logger.LogInformation("Loaded {Count} prompts from {DirectoryPath}", prompts.Count, directoryPath);
 
@@ -101,10 +158,10 @@ public class PromptLoader : IPromptLoader
     /// <returns>Tuple of (metadata, content)</returns>
     private (PromptMetadata metadata, string content) ParsePromptFile(string fileContent)
     {
-        const string yamlDelimiter = "---";
+        const string YamlDelimiter = "---";
 
         // Check if file starts with YAML frontmatter
-        if (!fileContent.TrimStart().StartsWith(yamlDelimiter))
+        if (!fileContent.TrimStart().StartsWith(YamlDelimiter))
         {
             throw new InvalidOperationException("Prompt file must start with YAML frontmatter (---)")
 ;
@@ -120,7 +177,7 @@ public class PromptLoader : IPromptLoader
         {
             var trimmedLine = line.Trim();
 
-            if (trimmedLine == yamlDelimiter)
+            if (trimmedLine == YamlDelimiter)
             {
                 yamlBlockCount++;
                 if (yamlBlockCount == 1)
@@ -193,6 +250,8 @@ public class PromptLoader : IPromptLoader
         watcher.Changed += (sender, e) =>
         {
             _logger.LogInformation("Prompt file changed: {FilePath}", e.FullPath);
+            // Invalidate cache for this file
+            _cache.Remove($"prompt:{e.FullPath}");
             onChanged(e.FullPath);
         };
 
@@ -205,6 +264,8 @@ public class PromptLoader : IPromptLoader
         watcher.Deleted += (sender, e) =>
         {
             _logger.LogInformation("Prompt file deleted: {FilePath}", e.FullPath);
+            // Invalidate cache for this file
+            _cache.Remove($"prompt:{e.FullPath}");
             onDeleted(e.FullPath);
         };
 

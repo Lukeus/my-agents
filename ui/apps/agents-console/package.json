@@ -17,7 +17,8 @@
     "@agents/design-system": "workspace:*",
     "@agents/agent-domain": "workspace:*",
     "@agents/api-client": "workspace:*",
-    "@agents/layout-shell": "workspace:*"
+    "@agents/layout-shell": "workspace:*",
+    "@agents/shared": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.0",

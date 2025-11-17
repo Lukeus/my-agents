@@ -1,7 +1,7 @@
+using System.Text.Json;
 using Agents.Application.Core;
 using Agents.Application.Implementation;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Agents.API.Implementation.Controllers;
 
