@@ -67,7 +67,8 @@ The system interacts with the following external systems:
 C4Context
     title System Context - AI Agent Orchestration Framework with Dapr
     
-    Person(user, "Developer/User", "Interacts with agents via API")
+    Person(user, "Developer/User", "Interacts with system via web UI or API")
+    System(uiSystem, "Multi-App Frontend", "Vue.js applications with AppSwitcher navigation")
     System(agentSystem, "AI Agent Framework", "Multi-agent orchestration with Dapr")
     System_Ext(dapr, "Dapr Runtime", "Service mesh and building blocks")
     
@@ -79,7 +80,9 @@ C4Context
     System_Ext(redis, "Redis", "Local pub/sub and state via Dapr")
     System_Ext(appInsights, "Application Insights", "Observability and monitoring")
     
-    Rel(user, agentSystem, "Sends requests", "HTTPS/REST")
+    Rel(user, uiSystem, "Uses", "HTTPS")
+    Rel(uiSystem, agentSystem, "API calls", "HTTPS/REST")
+    Rel(user, agentSystem, "Direct API calls", "HTTPS/REST")
     Rel(agentSystem, dapr, "Uses building blocks", "HTTP/gRPC")
     Rel(dapr, serviceBus, "Pub/sub (prod)", "AMQP")
     Rel(dapr, redis, "Pub/sub & state (dev)", "Redis Protocol")
@@ -232,6 +235,54 @@ Presentation/
 ├── Agents.API.ServiceDesk/
 └── Agents.API.BimClassification/
 ```
+
+### 5. UI Layer (Frontend)
+
+**Purpose**: User-facing applications and interfaces
+
+**Components**:
+- Multi-App Frontend: Independent Vue.js applications
+- Shared Packages: Reusable UI components and utilities
+- Design System: Tailwind 4 tokens and Vue components
+- State Management: Pinia stores with domain models
+
+**Key Principles**:
+- Clean architecture in frontend (Domain → Application → Presentation)
+- Type-safe with TypeScript and Zod validation
+- Shared design system for consistency
+- Independent apps with shared navigation (AppSwitcher)
+
+**Example Structure**:
+```
+ui/
+├── apps/                     # Independent applications
+│   ├── agents-console/       # Global dashboard & orchestration
+│   │   ├── src/
+│   │   │   ├── domain/       # Domain types (from @agents/agent-domain)
+│   │   │   ├── application/  # Pinia stores, composables
+│   │   │   ├── infrastructure/ # API clients, local storage
+│   │   │   └── presentation/ # Pages, components
+│   │   └── package.json
+│   ├── test-planning-studio/ # Test planning & spec management
+│   ├── devops-agent-explorer/# DevOps automations
+│   └── notification-center/  # Notifications & alerting
+└── packages/                 # Shared libraries
+    ├── design-system/        # Tailwind 4 tokens + Vue components
+    │   ├── AppButton.vue
+    │   ├── AppModal.vue
+    │   ├── AppSwitcher.vue   # Multi-app navigation
+    │   └── index.ts
+    ├── agent-domain/         # TypeScript domain contracts
+    ├── api-client/           # API clients for backend
+    └── layout-shell/         # Shared layout & navigation
+```
+
+**AppSwitcher Navigation**:
+- Dropdown component in shared header for seamless app switching
+- Full keyboard navigation (arrow keys, Enter, Escape)
+- Accessible (ARIA labels, roles, keyboard focus management)
+- Smart URL handling (localhost ports in dev, relative paths in prod)
+- Zero inline styles - all styling via CSS custom properties
 
 ## Event-Driven Architecture
 
@@ -748,6 +799,30 @@ public class NotificationAgent : BaseAgent
 - Service discovery and load balancing
 - Cloud provider portability
 
+### Why Vue 3 + TypeScript?
+- Progressive framework with excellent developer experience
+- Composition API aligns with clean architecture principles
+- Strong TypeScript support with type inference
+- Smaller bundle size compared to alternatives
+- Excellent performance with reactivity system
+- Growing ecosystem with Vite and Pinia
+
+### Why Tailwind CSS 4?
+- Design tokens enable consistent theming across apps
+- Utility-first approach reduces CSS bloat
+- CSS custom properties for runtime theming
+- Excellent dark mode support
+- Fast development with IntelliSense
+- Monorepo-friendly with shared design system
+
+### Why pnpm + Turborepo?
+- Fast, efficient package management with content-addressed storage
+- Built-in workspace support for monorepos
+- Strict dependency resolution prevents phantom dependencies
+- Turborepo provides intelligent caching for builds
+- Parallel task execution across workspace packages
+- Consistent with modern frontend best practices
+
 ## Deployment Architecture
 
 ### Development Environment
@@ -842,7 +917,21 @@ Azure Services
 
 ## Further Reading
 
+### Backend Documentation
 - [Agent Development Guide](agent-development.md)
 - [Prompt Authoring Guide](prompt-authoring.md)
 - [Deployment Guide](deployment.md)
 - [Operations Runbook](operations.md)
+- [Aspire & Dapr Testing Guide](aspire-dapr-testing-guide.md)
+- [Troubleshooting Guide](troubleshooting.md)
+- [CI/CD Guide](cicd-guide.md)
+
+### Frontend Documentation
+- [UI Implementation Plan](ui-implementation-plan.md)
+- [UI Implementation Status](ui-implementation-status.md)
+- [UI README](../ui/README.md)
+
+### Specialized Topics
+- [BIM Classification Agent Implementation](bim-classification-agent-implementation-plan.md)
+- [BIM Classification Scaling](bim-classification-scaling.md)
+- [Error Handling Patterns](error_handling_patterns.md)

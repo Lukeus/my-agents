@@ -222,6 +222,47 @@ See dedicated deployment docs (linked below) for details.
 
 ---
 
+### UI Development (Frontend Apps)
+
+The framework includes a multi-app Vue.js frontend with shared packages.
+
+1. **Prerequisites**
+
+   * Node.js 20+
+   * pnpm (enabled via corepack)
+   * Backend APIs running (via Aspire or individually)
+
+2. **Enable pnpm**
+
+   ```powershell
+   corepack enable
+   corepack prepare pnpm@9.0.0 --activate
+   ```
+
+3. **Install and run**
+
+   ```powershell
+   cd ui
+   pnpm install
+   pnpm dev
+   ```
+
+4. **Access UI apps**
+
+   * Agents Console: `http://localhost:5173`
+   * Test Planning Studio: `http://localhost:5174`
+   * DevOps Explorer: `http://localhost:5175`
+   * Notification Center: `http://localhost:5176`
+
+**AppSwitcher Navigation:**
+* Use the app switcher dropdown in the header to navigate between applications
+* Full keyboard navigation support (arrow keys, Enter, Escape)
+* Seamless navigation preserves your workflow across apps
+
+See [`ui/README.md`](ui/README.md) for detailed UI development guide.
+
+---
+
 ## Architecture
 
 ### C4 Context Diagram
@@ -534,6 +575,19 @@ sequenceDiagram
   * OpenTelemetry-based observability
   * IaC for Azure provisioning
   * Kubernetes manifests for AKS deployment
+  * CORS configuration across all APIs
+  * Input sanitization and validation infrastructure
+  * Comprehensive unit and integration test coverage
+
+* **Enterprise UI (Multi-App Frontend)**
+  * **Agents Console**: Global dashboard with agent stats, run tracking, and settings
+  * **Test Planning Studio**: Test specification and planning management
+  * **DevOps Explorer**: DevOps automations and pipeline management
+  * **Notification Center**: Notifications and alerting interface
+  * **AppSwitcher**: Seamless navigation between applications with keyboard support
+  * **Design System**: Tailwind 4 with design tokens and reusable Vue components
+  * **Type-Safe**: Full TypeScript with Zod validation for API contracts
+  * **State Management**: Pinia stores with clean architecture patterns
 
 ---
 
@@ -568,6 +622,17 @@ sequenceDiagram
 * **FluentAssertions** – fluent, readable assertions
 * **Testcontainers** – integration tests against real containers (SQL, etc.)
 
+### Frontend (UI)
+
+* **Vue 3.5** – progressive JavaScript framework
+* **TypeScript 5.6** – type-safe JavaScript
+* **Tailwind CSS 4** – utility-first CSS with design tokens
+* **Vite** – fast build tool and dev server
+* **Pinia** – state management for Vue
+* **Zod** – TypeScript schema validation
+* **pnpm** – fast, efficient package manager
+* **Turborepo** – build system for monorepos
+
 ### Observability
 
 * **OpenTelemetry** – tracing and metrics
@@ -584,7 +649,7 @@ High-level layout:
 
 ```text
 my-agents/
-├── src/
+├── src/                             # Backend (.NET microservices)
 │   ├── Domain/                      # Domain layer (entities, events, value objects)
 │   │   ├── Agents.Domain.Core/
 │   │   └── Agents.Domain.*          # Service-specific domain models
@@ -601,21 +666,37 @@ my-agents/
 │   │   ├── Agents.Infrastructure.Prompts/       # Prompt loading from GitHub/local
 │   │   ├── Agents.Infrastructure.EventGrid/
 │   │   ├── Agents.Infrastructure.EventHub/
-│   │   └── Agents.Infrastructure.ServiceBus/
+│   │   ├── Agents.Infrastructure.ServiceBus/
+│   │   └── Agents.Infrastructure.Persistence.*/  # Data persistence (Redis, SQL, Cosmos)
 │   └── Presentation/                # API layer (ASP.NET Core endpoints)
+│       ├── Agents.API.Gateway/      # API Gateway with CORS & security
 │       ├── Agents.API.Notification/
 │       ├── Agents.API.DevOps/
 │       ├── Agents.API.TestPlanning/
 │       ├── Agents.API.Implementation/
 │       ├── Agents.API.ServiceDesk/
 │       └── Agents.API.BimClassification/
-├── AppHost/                         # .NET Aspire AppHost (if separated)
+├── ui/                              # Frontend (Vue.js monorepo)
+│   ├── apps/                        # Independent applications
+│   │   ├── agents-console/          # Global dashboard & orchestration
+│   │   ├── test-planning-studio/    # Test planning & spec management
+│   │   ├── devops-agent-explorer/   # DevOps automations
+│   │   └── notification-center/     # Notifications & alerting
+│   └── packages/                    # Shared libraries
+│       ├── design-system/           # Tailwind 4 tokens + Vue components
+│       ├── agent-domain/            # TypeScript domain contracts
+│       ├── api-client/              # API clients for backend
+│       └── layout-shell/            # Shared layout & AppSwitcher navigation
+├── AppHost/                         # .NET Aspire AppHost
+│   └── Agents.AppHost/
 ├── prompts/                         # Versioned prompt templates
 ├── tests/
 │   ├── Agents.Tests.Unit/           # Unit tests for domain & application
 │   └── Agents.Tests.Integration/    # Integration tests (Testcontainers, Dapr, persistence)
 ├── infrastructure/                  # IaC (Bicep/Terraform)
 ├── k8s/                             # Kubernetes manifests and overlays
+│   ├── base/
+│   └── overlays/
 └── docs/                            # Architecture, deployment, and ops documentation
 ```
 
@@ -790,15 +871,18 @@ A suggested phase view for this framework (adapt to match reality):
 
 | Phase   | Status                   | Description                                                 |
 | ------- | ------------------------ | ----------------------------------------------------------- |
-| Phase 1 | ✅ Complete / In Progress | Core domain and architecture foundations                    |
-| Phase 2 | ✅ Complete / In Progress | Event infrastructure (Dapr components, pub/sub patterns)    |
-| Phase 3 | ✅ Complete / In Progress | Prompt management system                                    |
-| Phase 4 | ✅ Complete / In Progress | Core agents implementation (Notification, DevOps, etc.)     |
-| Phase 5 | ✅ Complete / In Progress | API layer (REST, Swagger, health checks)                    |
-| Phase 6 | ✅ Complete / In Progress | Persistence integration (Cosmos/SQL, repositories, queries) |
-| Phase 7 | ✅ Complete / In Progress | IaC for Azure (Bicep/Terraform)                             |
-| Phase 8 | ✅ Complete / In Progress | Kubernetes deployment (AKS manifests, CI/CD hooks)          |
-| Phase 9 | ✅ Complete / In Progress | Observability (OpenTelemetry, dashboards)                   |
+| Phase 1 | ✅ Complete               | Core domain and architecture foundations                    |
+| Phase 2 | ✅ Complete               | Event infrastructure (Dapr components, pub/sub patterns)    |
+| Phase 3 | ✅ Complete               | Prompt management system                                    |
+| Phase 4 | ✅ Complete               | Core agents implementation (Notification, DevOps, etc.)     |
+| Phase 5 | ✅ Complete               | API layer (REST, Swagger, health checks, CORS)              |
+| Phase 6 | ✅ Complete               | Persistence integration (Redis, SQL, repositories)          |
+| Phase 7 | ✅ Complete               | Security enhancements (input validation, sanitization)      |
+| Phase 8 | ✅ Complete               | UI implementation (multi-app frontend with AppSwitcher)     |
+| Phase 9 | ✅ Complete               | IaC for Azure (Bicep/Terraform)                             |
+| Phase 10| ✅ Complete               | Kubernetes deployment (AKS manifests, CI/CD hooks)          |
+| Phase 11| ✅ Complete               | Observability (OpenTelemetry, dashboards)                   |
+| Phase 12| ✅ Complete               | Comprehensive testing (unit, integration, 80%+ coverage)    |
 
 Update this table as the project moves.
 
@@ -828,13 +912,28 @@ See `CONTRIBUTING.md` (if present) for detailed guidelines.
 
 ## Documentation
 
-Recommended doc files (some may already exist in `docs/`):
+### Backend Documentation
 
-* `docs/architecture.md` – deeper dive into design decisions
-* `docs/agent-development.md` – how to create/extend agents
-* `docs/prompt-authoring.md` – guidance for writing and versioning prompts
-* `docs/deployment.md` – detailed deployment instructions for Dev/Stage/Prod
-* `docs/operations.md` – operations runbook, alerts, and SLO suggestions
+* [`docs/architecture.md`](docs/architecture.md) – comprehensive architecture overview and design decisions
+* [`docs/agent-development.md`](docs/agent-development.md) – guide for creating and extending agents
+* [`docs/prompt-authoring.md`](docs/prompt-authoring.md) – guidance for writing and versioning prompts
+* [`docs/deployment.md`](docs/deployment.md) – detailed deployment instructions for Dev/Stage/Prod
+* [`docs/operations.md`](docs/operations.md) – operations runbook, alerts, and SLO suggestions
+* [`docs/aspire-dapr-testing-guide.md`](docs/aspire-dapr-testing-guide.md) – testing with Aspire and Dapr
+* [`docs/troubleshooting.md`](docs/troubleshooting.md) – common issues and solutions
+* [`docs/cicd-guide.md`](docs/cicd-guide.md) – CI/CD pipeline setup and best practices
+
+### Frontend Documentation
+
+* [`ui/README.md`](ui/README.md) – UI monorepo setup and development guide
+* [`docs/ui-implementation-plan.md`](docs/ui-implementation-plan.md) – UI architecture and implementation plan
+* [`docs/ui-implementation-status.md`](docs/ui-implementation-status.md) – current UI implementation status
+
+### Specialized Topics
+
+* [`docs/bim-classification-agent-implementation-plan.md`](docs/bim-classification-agent-implementation-plan.md) – BIM agent design
+* [`docs/bim-classification-scaling.md`](docs/bim-classification-scaling.md) – scaling for large datasets
+* [`docs/error_handling_patterns.md`](docs/error_handling_patterns.md) – error handling best practices
 
 ---
 
