@@ -106,7 +106,7 @@ export function useTestSpecs() {
    * Automatically rolls back on failure
    */
   const deleteSpec = async (id: string) => {
-    const spec = store.getSpecById(id);
+    const spec = store.getSpecById.value(id);
     const result = await store.deleteSpec(id);
     
     if (result) {
