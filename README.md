@@ -469,9 +469,10 @@ sequenceDiagram
     Agent->>Events: Publish(ClassificationSuggestedEvent)
     Agent-->>API: AgentResult<Suggestions>
     API-->>Client: 200 OK (+ classification suggestions)
-    
-    Note over Agent,DB: Suggestions are advisory only; a human must approve before applying to production data.
+ 
 ```
+
+**Note:** Agents suggestions are advisory only; a human must approve before applying to production data.
 
 ---
 
