@@ -7,7 +7,7 @@ const specId = route.params.id as string;
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto">
+  <div class="">
     <div class="mb-6">
       <AppButton variant="ghost" @click="$router.push('/specs')">← Back to Specs</AppButton>
     </div>

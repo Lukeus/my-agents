@@ -97,6 +97,108 @@ export class TestPlanningClient extends BaseClient {
   }
 
   /**
+   * Alias for listSpecs() for consistency
+   */
+  async listTestSpecs(): Promise<AgentResult<TestSpec[]>> {
+    try {
+      const specs = await this.listSpecs();
+      return {
+        isSuccess: true,
+        output: specs,
+        errorMessage: null,
+      };
+    } catch (error) {
+      return {
+        isSuccess: false,
+        output: null,
+        errorMessage: error instanceof Error ? error.message : 'Failed to fetch specs',
+      };
+    }
+  }
+
+  /**
+   * Get test spec by ID (wrapper with AgentResult)
+   */
+  async getTestSpec(id: string): Promise<AgentResult<TestSpec>> {
+    try {
+      const spec = await this.getSpecById(id);
+      return {
+        isSuccess: true,
+        output: spec,
+        errorMessage: null,
+      };
+    } catch (error) {
+      return {
+        isSuccess: false,
+        output: null,
+        errorMessage: error instanceof Error ? error.message : 'Failed to fetch spec',
+      };
+    }
+  }
+
+  /**
+   * Create test spec (wrapper with AgentResult)
+   */
+  async createTestSpec(spec: TestSpec): Promise<AgentResult<TestSpec>> {
+    try {
+      // Note: In a real implementation, this would POST to /api/testplanning/specs
+      // For now, we'll use generateSpec as a placeholder
+      const result = await this.generateSpec(spec.feature || '', spec.description || '');
+      return {
+        isSuccess: true,
+        output: result,
+        errorMessage: null,
+      };
+    } catch (error) {
+      return {
+        isSuccess: false,
+        output: null,
+        errorMessage: error instanceof Error ? error.message : 'Failed to create spec',
+      };
+    }
+  }
+
+  /**
+   * Update test spec (wrapper with AgentResult)
+   */
+  async updateTestSpec(id: string, spec: TestSpec): Promise<AgentResult<TestSpec>> {
+    try {
+      const updated = await this.updateSpec(id, spec);
+      return {
+        isSuccess: true,
+        output: updated,
+        errorMessage: null,
+      };
+    } catch (error) {
+      return {
+        isSuccess: false,
+        output: null,
+        errorMessage: error instanceof Error ? error.message : 'Failed to update spec',
+      };
+    }
+  }
+
+  /**
+   * Delete test spec (wrapper with AgentResult)
+   */
+  async deleteTestSpec(id: string): Promise<AgentResult<void>> {
+    try {
+      await this.deleteSpec(id);
+      return {
+        isSuccess: true,
+        output: undefined,
+        errorMessage: null,
+      };
+    } catch (error) {
+      return {
+        isSuccess: false,
+        output: undefined,
+        errorMessage: error instanceof Error ? error.message : 'Failed to delete spec',
+      };
+    }
+  }
+
+  /**
    * Update test spec
    * PUT /api/testplanning/specs/{id}
    */

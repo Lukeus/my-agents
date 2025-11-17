@@ -28,7 +28,7 @@ const healthColor = computed(() => {
 </script>
 
 <template>
-  <header class="flex h-16 items-center justify-between border-b border-[--color-border-subtle] bg-[--color-surface-elevated] px-6">
+  <div class="flex items-center justify-between w-full">
     <!-- Left: App title with switcher -->
     <div class="relative">
       <button
@@ -37,7 +37,7 @@ const healthColor = computed(() => {
       >
         <span class="text-xl">{{ currentApp.icon }}</span>
         <span class="text-lg font-semibold text-[--color-text-primary]">{{ currentApp.name }}</span>
-        <svg class="h-4 w-4 text-[--color-text-secondary]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="size-4 text-[--color-text-secondary]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -68,14 +68,14 @@ const healthColor = computed(() => {
     <div class="flex items-center gap-4">
       <!-- Health status -->
       <div class="flex items-center gap-2">
-        <div class="h-2 w-2 rounded-full" :class="healthColor"></div>
+        <div class="size-2 rounded-full" :class="healthColor"></div>
         <span class="text-sm text-[--color-text-secondary]">{{ healthStatus.message }}</span>
       </div>
 
       <!-- User menu placeholder -->
-      <div class="h-8 w-8 rounded-full bg-[--color-brand-500] flex items-center justify-center">
+      <div class="size-8 rounded-full bg-[--color-brand-500] flex items-center justify-center">
         <span class="text-sm font-medium text-white">U</span>
       </div>
     </div>
-  </header>
+  </div>
 </template>

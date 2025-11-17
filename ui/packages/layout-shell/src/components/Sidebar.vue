@@ -1,63 +1,70 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import type { NavItem } from './AppShell.vue';
 
 export interface SidebarProps {
-  collapsed?: boolean;
   navigationItems: NavItem[];
+  showCloseButton?: boolean;
 }
 
 const props = withDefaults(defineProps<SidebarProps>(), {
-  collapsed: false,
+  showCloseButton: false,
 });
 
 const emit = defineEmits<{
-  toggle: [];
+  close: [];
 }>();
 </script>
 
 <template>
-  <aside
-    class="flex flex-col border-r border-[--color-border-subtle] bg-[--color-surface-elevated] transition-all duration-200"
-    :class="collapsed ? 'w-16' : 'w-64'"
-  >
-    <!-- Sidebar header with toggle -->
-    <div class="flex h-16 items-center justify-between px-4 border-b border-[--color-border-subtle]">
-      <span v-if="!collapsed" class="text-sm font-medium text-[--color-text-secondary]">Navigation</span>
-      <button
-        class="rounded-[--radius-md] p-2 hover:bg-[--color-surface-hover] transition-colors"
-        @click="emit('toggle')"
-      >
-        <svg class="h-4 w-4 text-[--color-text-secondary]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            :d="collapsed ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7'"
-          />
-        </svg>
-      </button>
+  <!-- Single root with all Tailwind utilities -->
+  <div class="flex h-full w-full flex-col gap-y-5 overflow-y-auto px-6 pb-4">
+    
+    <!-- Brand -->
+    <div class="flex h-16 shrink-0 items-center">
+      <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-[--color-brand-600]">
+        <span class="text-xl font-bold text-white" aria-hidden="true">A</span>
+      </div>
+      <span class="ml-3 text-xl font-semibold text-[--color-text-primary]">Agents</span>
     </div>
 
-    <!-- Navigation items -->
-    <nav class="flex-1 space-y-1 p-2">
-      <router-link
-        v-for="item in navigationItems"
-        :key="item.route"
-        :to="item.route"
-        class="flex items-center gap-3 rounded-[--radius-md] px-3 py-2 text-sm transition-colors hover:bg-[--color-surface-hover]"
-        active-class="bg-[--color-brand-500]/20 text-[--color-brand-500]"
-      >
-        <span class="text-base">{{ item.icon }}</span>
-        <span v-if="!collapsed" class="text-[--color-text-primary]">{{ item.label }}</span>
-      </router-link>
+    <!-- Navigation -->
+    <nav class="flex flex-1 flex-col">
+      <ul role="list" class="flex flex-1 flex-col gap-y-7">
+        <li>
+          <ul role="list" class="-mx-2 space-y-1">
+            <li v-for="item in navigationItems" :key="item.route">
+              <router-link
+                :to="item.route"
+                :class="[
+                  item.isActive
+                    ? 'bg-[--color-surface] text-[--color-text-primary]'
+                    : 'text-[--color-text-secondary] hover:bg-[--color-surface-hover] hover:text-[--color-text-primary]',
+                  'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[--color-brand-500]',
+                ]"
+              >
+                <span class="text-xl" aria-hidden="true">{{ item.icon }}</span>
+                <span>{{ item.label }}</span>
+              </router-link>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </nav>
 
-    <!-- Sidebar footer -->
-    <div class="border-t border-[--color-border-subtle] p-4">
-      <div v-if="!collapsed" class="text-xs text-[--color-text-tertiary]">
-        Version 0.0.1
-      </div>
+    <!-- User profile -->
+    <div class="-mx-6 mt-auto">
+      <a
+        href="#"
+        class="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-[--color-text-primary] hover:bg-[--color-surface-hover] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[--color-brand-500]"
+      >
+        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[--color-brand-500]">
+          <span class="text-xs font-medium text-white">U</span>
+        </div>
+        <span class="sr-only">Your profile</span>
+        <span aria-hidden="true">User</span>
+      </a>
     </div>
-  </aside>
+    
+  </div>
 </template>
+

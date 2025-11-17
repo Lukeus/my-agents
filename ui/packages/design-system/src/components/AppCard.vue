@@ -1,11 +1,11 @@
 <script setup lang="ts">
 export interface AppCardProps {
-  hover?: boolean;
+  hoverable?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
 const props = withDefaults(defineProps<AppCardProps>(), {
-  hover: false,
+  hoverable: false,
   padding: 'md',
 });
 
@@ -20,7 +20,7 @@ const paddingClasses = {
 <template>
   <div
     :class="[
-      hover ? 'card-hover' : 'card',
+      hoverable ? 'card-hover' : 'card',
       paddingClasses[padding],
     ]"
   >

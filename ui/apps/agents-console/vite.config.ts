@@ -4,7 +4,16 @@ import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [
+    vue(),
+    tailwindcss({
+      content: [
+        './src/**/*.{vue,js,ts,jsx,tsx}',
+        '../../packages/layout-shell/src/**/*.{vue,js,ts,jsx,tsx}',
+        '../../packages/design-system/src/**/*.{vue,js,ts,jsx,tsx}',
+      ],
+    }),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

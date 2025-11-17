@@ -4,6 +4,144 @@
 
 Build an enterprise-grade, event-driven microservice framework using C# and Microsoft Semantic Kernel that enables multiple specialized AI agents to collaborate on complex workflows. The system must support local development with Ollama and production deployment on Azure Kubernetes Service (AKS) with Azure OpenAI, following clean architecture principles with all agent logic driven by prompt files.
 
+## Development with Warp Agents
+
+**Warp agents** serve as intelligent development assistants that enhance the my-agents development workflow by:
+
+### Warp Agent Capabilities
+
+1. **Code Generation & Editing**: Write and modify code across multiple files in the my-agents codebase
+2. **Error Resolution**: Fix C# compilation errors, test failures, and runtime issues based on stack traces
+3. **Terminal Workflows**: Execute shell commands (dotnet build, docker-compose, kubectl) and use output to guide next steps
+4. **Automatic Recovery**: Retry failed operations with adjustments (e.g., missing dependencies, configuration errors)
+5. **Tool Integration**: Learn and work with Azure CLI, kubectl, Dapr CLI, and other tools via public docs
+6. **Context Awareness**: Leverage Warp Drive, MCP servers, and Rules to understand project architecture and standards
+
+### Agent Autonomy & Profiles
+
+Configure agent behavior in `Settings > AI > Agents > Permissions`:
+
+- **Default Profile**: Balanced permissions for general development
+- **YOLO Mode**: Loose permissions for rapid prototyping and local development
+- **Production Mode**: Strict "Always Ask" permissions for deployments and infrastructure changes
+
+**Permission Levels**:
+- Reading files (access to .cs, .yaml, .bicep files)
+- Executing commands (dotnet, docker, kubectl, az)
+- Creating plans (breaking down complex agent implementations)
+- Calling MCP servers (GitHub, Azure resources)
+
+**Recommended Settings for My-Agents Development**:
+- File reads: "Let agent decide" (for navigating clean architecture layers)
+- Build commands: "Always allow" (dotnet build, dotnet test)
+- Deployment commands: "Always prompt" (kubectl apply, az deployment create)
+- Infrastructure changes: "Always prompt" (docker-compose, Dapr configuration)
+
+### Multi-Agent Development Workflow
+
+Warp supports running multiple agents simultaneously, ideal for:
+- One agent implementing a new domain agent (e.g., BIM Classification Agent)
+- Another agent writing corresponding unit tests
+- A third monitoring build output and fixing integration issues
+
+Track all active agents via the Agent Management Panel (top-right corner).
+
+### Integration with My-Agents Architecture
+
+Warp agents understand and respect the my-agents clean architecture:
+
+**Domain Layer Development**:
+```
+"Create a new domain entity for BIM classification in Agents.Domain.BimClassification 
+following clean architecture principles. Include value objects for UniformatCode and 
+OmniclassCode with validation."
+```
+
+**Application Layer Development**:
+```
+"Generate MediatR command handlers for ProcessBimElementCommand in 
+Agents.Application.BimClassification. Include FluentValidation validators and 
+ensure proper event publishing via IEventPublisher."
+```
+
+**Infrastructure Integration**:
+```
+"Implement Dapr pub/sub subscriber for bim.classification.requested events. 
+Use the existing DaprEventSubscriber base class and register in Program.cs."
+```
+
+**Testing Workflows**:
+```
+"Write xUnit tests for BimClassificationAgent using FluentAssertions. Mock 
+ISemanticKernelService and verify event publishing. Use the existing test 
+patterns from NotificationAgentTests."
+```
+
+### Warp Rules for My-Agents
+
+Create project-specific Warp Rules to enforce architecture:
+
+1. **Architecture Rule**: "Always follow clean architecture. Domain layer must not reference Infrastructure. Use dependency injection for cross-layer communication."
+2. **Testing Rule**: "All new agents require unit tests with >80% coverage. Use xUnit, FluentAssertions, and Moq following existing patterns."
+3. **Event-Driven Rule**: "Agent communication must use Dapr pub/sub. Never call agent APIs directly. Publish domain events for inter-agent workflows."
+4. **Prompt-Driven Rule**: "Agent behavior must be defined in YAML prompt files in /prompts/{agent-name}/. Never hard-code LLM prompts in C# code."
+5. **SQL Server Rule**: "Use SQL Server 17 for persistence. All database operations must use EF Core 9.0 with proper migrations."
+
+### Example Warp Prompts for Common Tasks
+
+**Creating a New Agent**:
+```
+Create a new agent following the my-agents architecture:
+1. Domain project: Agents.Domain.{AgentName}
+2. Application project: Agents.Application.{AgentName}
+3. API project: Agents.API.{AgentName}
+4. Follow existing agent patterns (NotificationAgent, DevOpsAgent)
+5. Include Dapr pub/sub configuration
+6. Add unit tests with FluentAssertions
+7. Create corresponding prompt files in /prompts/{agent-name}/
+```
+
+**Running Integration Tests**:
+```
+Run integration tests for BimClassificationAgent. If Testcontainers fails, 
+check Docker is running. Analyze test output and fix any failing assertions.
+```
+
+**Deploying to AKS**:
+```
+Deploy the updated ServiceDeskAgent to staging AKS cluster:
+1. Build Docker image with tag v1.2.0
+2. Push to Azure Container Registry
+3. Update Helm chart version
+4. Apply Kustomize staging overlay
+5. Verify pod health and check Application Insights for errors
+Prompt before executing any kubectl or az commands.
+```
+
+**UI Development (Vue 3 + TypeScript)**:
+```
+Fix the Tailwind 4 sidebar layout in ui/packages/layout-shell/src/components/AppShell.vue.
+The sidebar should be fixed at 288px width on desktop (lg breakpoint). Ensure all 
+classes compile by verifying the @source directive in tokens.css includes the 
+layout-shell package. Build both test-planning-studio and agents-console apps.
+```
+
+**Monorepo Management**:
+```
+Analyze the pnpm workspace structure in ui/. Check all package.json exports and 
+ensure TypeScript path aliases are configured correctly in vite.config.ts for all apps.
+Verify @agents/* imports resolve properly.
+```
+
+### Warp Agent Best Practices for My-Agents
+
+1. **Always verify architecture compliance**: Before implementing, ask Warp to review the clean architecture structure
+2. **Use existing patterns**: Reference existing agents (NotificationAgent, TestPlanningAgent) as templates
+3. **Test-driven approach**: Write tests first, then implementation
+4. **Incremental builds**: Build after each significant change to catch errors early
+5. **Context from Warp Drive**: Save architectural decisions, deployment procedures, and troubleshooting guides in Warp Drive for consistent agent responses
+6. **MCP integration**: Connect GitHub MCP server to manage issues, PRs, and project boards directly from Warp
+
 ## Current State
 
 **Directory**: `C:\Users\lukeu\source\repos\my-agents`
@@ -833,6 +971,13 @@ Presentation Layer → Application Layer → Domain Layer
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-11-11
-**Status**: Draft - Awaiting Approval
+**Document Version**: 1.1
+**Last Updated**: 2025-11-17
+**Status**: Active - Warp Agent Integration Added
+**Changes**:
+- Added "Development with Warp Agents" section
+- Included Warp agent capabilities, autonomy settings, and profiles
+- Documented integration patterns with my-agents clean architecture
+- Added example Warp prompts for common development tasks
+- Included UI development workflows for Vue 3 + Tailwind 4
+- Best practices for using Warp agents with the my-agents framework

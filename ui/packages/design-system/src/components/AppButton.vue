@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 
 export interface AppButtonProps {
-  variant?: 'primary' | 'ghost' | 'danger' | 'success';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   loading?: boolean;
@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<AppButtonProps>(), {
 const variantClasses = computed(() => {
   const variants = {
     primary: 'bg-[--color-brand-500] hover:bg-[--color-brand-600] text-white shadow-sm',
+    secondary: 'bg-[--color-surface-elevated] hover:bg-[--color-surface-hover] border border-[--color-border] text-[--color-text-primary] shadow-sm',
     ghost: 'bg-transparent border border-[--color-border-subtle] hover:bg-[--color-surface-elevated] text-[--color-text-primary]',
     danger: 'bg-[--color-danger-500] hover:bg-[--color-danger-600] text-white shadow-sm',
     success: 'bg-[--color-success-500] hover:bg-[--color-success-600] text-white shadow-sm',
