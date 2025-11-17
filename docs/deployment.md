@@ -93,6 +93,52 @@ Open your browser to: **http://localhost:15000**
 
 ---
 
+### 🎨 UI Development Server
+
+After starting the backend with Aspire, run the frontend apps:
+
+#### Step 1: Enable pnpm
+
+```powershell
+corepack enable
+corepack prepare pnpm@9.0.0 --activate
+```
+
+#### Step 2: Install Dependencies
+
+```powershell
+cd ui
+pnpm install
+```
+
+#### Step 3: Start Development Servers
+
+```powershell
+# Start all apps
+pnpm dev
+
+# Or start a specific app
+pnpm --filter @agents/agents-console dev
+```
+
+#### Step 4: Access UI Apps
+
+- **Agents Console**: http://localhost:5173
+- **Test Planning Studio**: http://localhost:5174
+- **DevOps Explorer**: http://localhost:5175
+- **Notification Center**: http://localhost:5176
+
+**What You Get:**
+- ✅ Multi-app frontend with AppSwitcher navigation
+- ✅ Hot module reloading for instant updates
+- ✅ TypeScript type-checking in real-time
+- ✅ Shared design system across all apps
+- ✅ Connected to backend APIs
+
+**For detailed UI development guide, see:** [UI README](../ui/README.md)
+
+---
+
 ### 🔧 Alternative: Manual Setup (Legacy)
 
 If you need to run services individually without Aspire:
@@ -361,6 +407,60 @@ foreach ($agent in $agents) {
     docker push $tag
 }
 ```
+
+### Step 5a: Build and Deploy UI Apps
+
+For production deployment, build the UI apps as static assets:
+
+```powershell
+# Navigate to UI directory
+cd ui
+
+# Install dependencies
+pnpm install
+
+# Build all apps for production
+pnpm build
+
+# Output will be in:
+# - ui/apps/agents-console/dist
+# - ui/apps/test-planning-studio/dist
+# - ui/apps/devops-agent-explorer/dist
+# - ui/apps/notification-center/dist
+```
+
+**Deployment Options:**
+
+1. **Azure Static Web Apps** (Recommended)
+   ```powershell
+   # Deploy agents-console
+   az staticwebapp create `
+     --name swa-agents-console `
+     --resource-group rg-agents-dev `
+     --location eastus `
+     --source ui/apps/agents-console/dist `
+     --branch main
+   ```
+
+2. **Azure Blob Storage + CDN**
+   ```powershell
+   # Upload to blob storage
+   az storage blob upload-batch `
+     --account-name stagentsui `
+     --destination '$web' `
+     --source ui/apps/agents-console/dist
+   ```
+
+3. **Docker/Nginx** (for self-hosted)
+   ```dockerfile
+   FROM nginx:alpine
+   COPY ui/apps/agents-console/dist /usr/share/nginx/html
+   EXPOSE 80
+   ```
+
+**Environment Configuration:**
+
+Update `ui/apps/*/src/config.ts` with production API endpoints before building.
 
 ### Step 6: Verify Azure Resources
 

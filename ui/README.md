@@ -170,7 +170,9 @@ pnpm install
 
 ## Documentation
 
+- [Main README](../README.md) - Project overview and getting started
 - [Implementation Plan](../docs/ui-implementation-plan.md)
+- [Implementation Status](../docs/ui-implementation-status.md)
 - [Backend Architecture](../docs/architecture.md)
 - [Agent Development Guide](../docs/agent-development.md)
 
