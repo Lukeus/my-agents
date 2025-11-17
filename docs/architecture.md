@@ -9,6 +9,8 @@ This document provides a comprehensive overview of the AI Orchestration Multi-Ag
 - [System Context](#system-context)
 - [Layer Structure](#layer-structure)
 - [Event-Driven Architecture](#event-driven-architecture)
+- [Warp Agents for Development](#warp-agents-for-development)
+- [Local Development with Aspire](#local-development-with-aspire)
 - [Agent Architecture](#agent-architecture)
 - [Data Flow](#data-flow)
 - [Design Patterns](#design-patterns)
@@ -16,7 +18,7 @@ This document provides a comprehensive overview of the AI Orchestration Multi-Ag
 
 ## Core Principles
 
-The framework is built on seven fundamental principles:
+The framework is built on eight fundamental principles:
 
 1. **Clean Architecture**: Strict separation of concerns with clear boundaries between Domain, Application, Infrastructure, and Presentation layers
 2. **Event-Driven**: Agents communicate asynchronously via Dapr pub/sub (backed by Redis locally, Azure Service Bus in production)
@@ -25,6 +27,7 @@ The framework is built on seven fundamental principles:
 5. **Environment Agnostic**: Seamless switching between Ollama (development) and Azure OpenAI (production) via configuration
 6. **Developer Experience First**: .NET Aspire provides unified local development with integrated observability
 7. **Cloud Native**: Designed for Kubernetes deployment with Dapr sidecars, horizontal scaling, and comprehensive observability
+8. **AI-Assisted Development**: Optimized for Warp AI agents that understand clean architecture, execute terminal workflows, and enforce coding standards
 
 ## Architecture Style
 
@@ -326,6 +329,187 @@ sequenceDiagram
     
     Note over TestAPI,NotifAPI: All service-to-service communication<br/>happens through Dapr sidecars<br/>using pub/sub pattern
 ```
+
+## Warp Agents for Development
+
+### Overview
+
+The my-agents framework is designed to work seamlessly with **Warp AI agents**, which provide intelligent development assistance throughout the entire software lifecycle. Warp agents understand the clean architecture structure, can execute complex terminal workflows, and help maintain coding standards.
+
+### Warp Agent Integration Points
+
+#### 1. Architecture-Aware Code Generation
+
+Warp agents understand the clean architecture layer structure:
+
+```
+"Create a new BimClassification agent:
+1. Domain layer: Entities (BimElement, Classification) and ValueObjects (UniformatCode)
+2. Application layer: Commands (ClassifyElementCommand), Queries (GetClassificationQuery)
+3. Infrastructure layer: Dapr pub/sub subscribers and SQL Server repositories
+4. Presentation layer: REST API with Swagger documentation
+Ensure no circular dependencies and follow existing agent patterns."
+```
+
+#### 2. Test-Driven Development Workflow
+
+Warp agents support TDD with the my-agents test suite:
+
+```
+"Write xUnit tests for BimClassificationAgent:
+- Mock ISemanticKernelService using Moq
+- Test ClassifyElementAsync with valid/invalid inputs
+- Verify Dapr pub/sub event publishing
+- Use FluentAssertions for readable assertions
+- Target >80% code coverage"
+```
+
+#### 3. Dapr & Aspire Orchestration
+
+Warp agents can manage the Aspire development environment:
+
+```
+"Start the Aspire AppHost and verify all services are healthy:
+1. Run: dotnet run --project src/AppHost/Agents.AppHost/Agents.AppHost.csproj
+2. Wait for all Dapr sidecars to be ready
+3. Check Redis, SQL Server, and Ollama containers
+4. Open Aspire Dashboard at http://localhost:15000
+5. Verify all 6 agents show green health status"
+```
+
+#### 4. Infrastructure as Code (Bicep)
+
+Warp agents understand Azure Bicep templates:
+
+```
+"Update the AKS Bicep module to add node auto-scaling:
+1. Edit infrastructure/bicep/modules/aks.bicep
+2. Add agentPoolProfile with enableAutoScaling: true
+3. Set minCount: 3 and maxCount: 10
+4. Validate with: az bicep build --file main.bicep
+5. Preview changes with what-if deployment
+"
+```
+
+#### 5. Multi-Agent Workflows
+
+Run multiple Warp agents simultaneously for complex tasks:
+
+- **Agent 1**: Implement new domain entity and application layer
+- **Agent 2**: Write comprehensive unit tests as implementation progresses
+- **Agent 3**: Monitor build output and fix compilation errors automatically
+
+Track all agents via the Warp Agent Management Panel.
+
+### Warp Agent Profiles for My-Agents
+
+#### Default Profile (Recommended)
+- **File reads**: "Let agent decide" - Navigate clean architecture layers freely
+- **Build commands**: "Always allow" - `dotnet build`, `dotnet test`, `dotnet run`
+- **Dapr commands**: "Always prompt" - `dapr run`, `dapr publish`
+- **Deployment**: "Always prompt" - `kubectl apply`, `az deployment create`
+
+#### YOLO Mode (Local Development)
+- **All commands**: "Always allow"
+- **Use case**: Rapid prototyping, local experimentation
+- **Warning**: Only use with local dev environment, never production
+
+#### Production Mode (Critical Environments)
+- **All commands**: "Always prompt"
+- **Infrastructure changes**: "Always prompt"
+- **Use case**: Staging/production deployments, infrastructure updates
+
+### Warp Rules for My-Agents
+
+Create these Warp Rules to enforce project standards:
+
+1. **Clean Architecture Rule**:
+   ```
+   Always follow clean architecture. Domain layer must not reference Infrastructure.
+   Application layer depends only on Domain. Infrastructure implements interfaces
+   from Domain/Application layers.
+   ```
+
+2. **Dapr Communication Rule**:
+   ```
+   All agent-to-agent communication must use Dapr pub/sub. Never call agent APIs
+   directly. Publish domain events via Dapr sidecar HTTP API on port 3500.
+   ```
+
+3. **Testing Standards Rule**:
+   ```
+   All new agents require unit tests with >80% coverage. Use xUnit, Moq, and
+   FluentAssertions. Follow existing test patterns from NotificationAgentTests.cs.
+   Integration tests must use Testcontainers for SQL Server and Redis.
+   ```
+
+4. **Prompt Management Rule**:
+   ```
+   Agent behavior must be defined in YAML prompt files under /prompts/{agent-name}/.
+   Never hard-code LLM prompts in C# code. Use IPromptLoader for all prompt access.
+   ```
+
+5. **SQL Server Persistence Rule**:
+   ```
+   Use SQL Server 17 for all persistence. All database operations must use EF Core 9.0
+   with proper migrations. Never use raw SQL without parameterization.
+   ```
+
+### Example Warp Prompts
+
+#### Create Complete Agent
+```
+Create a complete ServiceDesk agent:
+1. Domain: ServiceTicket entity, Priority value object, TicketTriagedEvent
+2. Application: ServiceDeskAgent class inheriting BaseAgent
+3. Application: TriageTicketCommand with FluentValidation
+4. Infrastructure: Dapr subscriber for ticket.created events
+5. Presentation: ServiceDeskController with POST /api/servicedesk/triage
+6. Tests: Unit tests for TriageAsync method with mocked dependencies
+7. Prompts: Create /prompts/servicedesk/ticket-triage.yaml
+8. Build solution and fix any compilation errors
+```
+
+#### Fix Failing Tests
+```
+Run dotnet test and analyze failures. For each failing test:
+1. Read the test code and understand the assertion
+2. Read the implementation being tested
+3. Identify the root cause (logic error, mock setup, assertion issue)
+4. Fix the implementation or test as appropriate
+5. Re-run tests until all pass
+6. Report summary of changes made
+```
+
+#### Deploy to Staging
+```
+Deploy updated BimClassificationAgent to staging AKS:
+1. Build: docker build -t acragents.azurecr.io/bimclassification-api:v1.3.0
+2. Push: docker push acragents.azurecr.io/bimclassification-api:v1.3.0
+3. Update: k8s/overlays/staging/kustomization.yaml with new image tag
+4. Apply: kubectl apply -k k8s/overlays/staging
+5. Verify: kubectl rollout status deployment/bimclassification-api -n agents-staging
+6. Check logs: kubectl logs -f deployment/bimclassification-api -n agents-staging
+7. Test health: curl https://staging.agents.example.com/api/bimclassification/health
+Prompt before executing any kubectl or docker push commands.
+```
+
+### MCP Integration
+
+Connect Warp to Model Context Protocol (MCP) servers for enhanced capabilities:
+
+- **GitHub MCP**: Manage issues, PRs, and project boards directly from Warp
+- **Azure MCP**: Query Azure resources, check deployment status, view metrics
+- **Custom MCP**: Create custom MCP server for my-agents specific operations
+
+### Best Practices
+
+1. **Use TODO lists**: For complex tasks, let Warp create a TODO list to track progress
+2. **Incremental builds**: Build after each significant change to catch errors early
+3. **Context from Warp Drive**: Save architectural decisions and patterns in Warp Drive
+4. **Multi-tab workflows**: Use separate terminal tabs for API, tests, and monitoring
+5. **Agent status tracking**: Monitor multiple Warp agents via the Management Panel
+6. **Permission profiles**: Switch profiles based on environment (dev vs prod)
 
 ## Local Development with Aspire
 

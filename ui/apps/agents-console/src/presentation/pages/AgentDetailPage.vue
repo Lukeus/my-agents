@@ -19,12 +19,12 @@ const goBack = () => {
     </div>
 
     <div class="mb-8">
-      <h1 class="text-4xl font-bold text-text-primary mb-2">{{ agentName }}</h1>
+      <h1 class="text-4xl font-bold text-[--color-text-primary] mb-2">{{ agentName }}</h1>
       <AppBadge variant="warning">Coming Soon</AppBadge>
     </div>
 
     <AppCard>
-      <p class="text-text-secondary">
+      <p class="text-[--color-text-secondary]">
         Detailed agent information, health metrics, and execution history will be displayed here.
       </p>
     </AppCard>

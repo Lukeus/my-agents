@@ -5,10 +5,10 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
-const currentApp = computed(() => ({
+const currentApp = {
   name: 'Test Planning Studio',
   icon: '🧪',
-}));
+};
 
 const availableApps = [
   { name: 'Agents Console', icon: '🤖', href: 'http://localhost:5173' },
@@ -23,11 +23,6 @@ const navigationItems = computed(() => [
   { label: 'Generate', icon: '✨', route: '/generate', isActive: route.path === '/generate' },
   { label: 'Coverage', icon: '📈', route: '/coverage', isActive: route.path === '/coverage' },
 ]);
-
-const healthStatus = computed(() => ({
-  status: 'healthy' as const,
-  message: 'Test Planning Agent operational',
-}));
 </script>
 
 <template>
@@ -35,7 +30,6 @@ const healthStatus = computed(() => ({
     :current-app="currentApp"
     :available-apps="availableApps"
     :navigation-items="navigationItems"
-    :health-status="healthStatus"
   >
     <router-view />
   </AppShell>

@@ -3,6 +3,9 @@
  * Shared layout components for my-agents applications
  */
 
+// Import CSS to add this package to Vite's build graph (for Tailwind scanning)
+import './index.css';
+
 // Layout Shells
 export { default as AppShell } from './components/AppShell.vue';
 export { default as StackedLayout } from './components/StackedLayout.vue';

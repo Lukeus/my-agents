@@ -23,11 +23,6 @@ const navigationItems = computed(() => [
   { label: 'Runs', icon: '▶️', route: '/runs', isActive: route.path.startsWith('/runs') },
   { label: 'Settings', icon: '⚙️', route: '/settings', isActive: route.path === '/settings' },
 ]);
-
-const healthStatus = computed(() => ({
-  status: 'healthy' as const,
-  message: 'All systems operational',
-}));
 </script>
 
 <template>
@@ -35,7 +30,6 @@ const healthStatus = computed(() => ({
     :current-app="currentApp"
     :available-apps="availableApps"
     :navigation-items="navigationItems"
-    :health-status="healthStatus"
   >
     <router-view />
   </AppShell>

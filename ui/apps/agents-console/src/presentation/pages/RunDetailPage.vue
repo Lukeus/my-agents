@@ -19,12 +19,12 @@ const goBack = () => {
     </div>
 
     <div class="mb-8">
-      <h1 class="text-4xl font-bold text-text-primary mb-2">Run #{{ runId }}</h1>
+      <h1 class="text-4xl font-bold text-[--color-text-primary] mb-2">Run #{{ runId }}</h1>
       <AppBadge variant="warning">Coming Soon</AppBadge>
     </div>
 
     <AppCard>
-      <p class="text-text-secondary">
+      <p class="text-[--color-text-secondary]">
         Detailed run information, logs, and execution metrics will be displayed here.
       </p>
     </AppCard>
