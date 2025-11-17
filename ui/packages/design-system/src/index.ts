@@ -13,9 +13,10 @@ import AppEmptyState from './components/AppEmptyState.vue';
 import AppModal from './components/AppModal.vue';
 import AppTextarea from './components/AppTextarea.vue';
 import AppSelect from './components/AppSelect.vue';
+import AppSwitcher from './components/AppSwitcher.vue';
 
 // Export components
-export { AppButton, AppCard, AppInput, AppBadge, AppSpinner, AppAlert, AppTable, AppEmptyState, AppModal, AppTextarea, AppSelect };
+export { AppButton, AppCard, AppInput, AppBadge, AppSpinner, AppAlert, AppTable, AppEmptyState, AppModal, AppTextarea, AppSelect, AppSwitcher };
 
 // Export types
 export type { AppButtonProps } from './components/AppButton.vue';
@@ -29,6 +30,7 @@ export type { AppEmptyStateProps } from './components/AppEmptyState.vue';
 export type { AppModalProps } from './components/AppModal.vue';
 export type { AppTextareaProps } from './components/AppTextarea.vue';
 export type { AppSelectProps, SelectOption } from './components/AppSelect.vue';
+export type { AppItem } from './components/AppSwitcher.vue';
 
 // Vue plugin for global registration
 export const designSystemPlugin = {
@@ -41,9 +43,9 @@ export const designSystemPlugin = {
     app.component('AppAlert', AppAlert);
     app.component('AppTable', AppTable);
     app.component('AppEmptyState', AppEmptyState);
-    app.component('AppModal', AppModal);
     app.component('AppTextarea', AppTextarea);
     app.component('AppSelect', AppSelect);
+    app.component('AppSwitcher', AppSwitcher);
   },
 };
 
