@@ -1,6 +1,7 @@
 using Agents.Application.Core;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Agents.Application.DevOps;
@@ -14,8 +15,9 @@ public class DevOpsAgent : BaseAgent
         ILLMProvider llmProvider,
         IPromptLoader promptLoader,
         IEventPublisher eventPublisher,
+        IInputSanitizer inputSanitizer,
         ILogger<DevOpsAgent> logger)
-        : base(llmProvider, promptLoader, eventPublisher, logger, "DevOpsAgent")
+        : base(llmProvider, promptLoader, eventPublisher, logger, inputSanitizer, "DevOpsAgent")
     {
     }
 

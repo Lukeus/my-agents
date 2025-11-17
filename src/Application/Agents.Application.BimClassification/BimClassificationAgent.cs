@@ -4,6 +4,7 @@ using Agents.Application.BimClassification.Responses;
 using Agents.Domain.BimClassification.Entities;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -19,8 +20,9 @@ public class BimClassificationAgent : BaseAgent
         ILLMProvider llmProvider,
         IPromptLoader promptLoader,
         IEventPublisher eventPublisher,
+        IInputSanitizer inputSanitizer,
         ILogger<BimClassificationAgent> logger)
-        : base(llmProvider, promptLoader, eventPublisher, logger, "BimClassificationAgent")
+        : base(llmProvider, promptLoader, eventPublisher, logger, inputSanitizer, "BimClassificationAgent")
     {
     }
 
@@ -68,14 +70,30 @@ public class BimClassificationAgent : BaseAgent
             // Parse and normalize to suggestion JSON
             var normalizedJson = NormalizeToSuggestionJson(rawResult);
 
-            // Deserialize to validate structure
-            var suggestion = JsonSerializer.Deserialize<BimClassificationSuggestion>(
+            // Deserialize to DTO to validate structure
+            var suggestionDto = JsonSerializer.Deserialize<Responses.BimClassificationSuggestionDto>(
                 normalizedJson);
 
-            if (suggestion == null)
+            if (suggestionDto == null)
             {
                 return AgentResult.Failure("Failed to parse LLM output into valid suggestion");
             }
+
+            // Map DTO to domain entity
+            var derivedItems = suggestionDto.DerivedItems.Select(d => new DerivedItemSuggestion
+            {
+                DerivedCommodityCode = d.DerivedCommodityCode,
+                DerivedPricingCode = d.DerivedPricingCode,
+                QuantityFormula = d.QuantityFormula,
+                QuantityUnit = d.QuantityUnit
+            });
+
+            var suggestion = new BimClassificationSuggestion(
+                suggestionDto.BimElementId,
+                suggestionDto.CommodityCode,
+                suggestionDto.PricingCode,
+                derivedItems,
+                suggestionDto.ReasoningSummary);
 
             // Publish event
             await PublishEventAsync(

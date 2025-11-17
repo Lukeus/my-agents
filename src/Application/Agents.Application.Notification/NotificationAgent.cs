@@ -4,6 +4,7 @@ using Agents.Domain.Notification.Entities;
 using Agents.Domain.Notification.Events;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Agents.Application.Notification;
@@ -20,8 +21,9 @@ public class NotificationAgent : BaseAgent
         IPromptLoader promptLoader,
         IEventPublisher eventPublisher,
         INotificationChannelFactory channelFactory,
+        IInputSanitizer inputSanitizer,
         ILogger<NotificationAgent> logger)
-        : base(llmProvider, promptLoader, eventPublisher, logger, "NotificationAgent")
+        : base(llmProvider, promptLoader, eventPublisher, logger, inputSanitizer, "NotificationAgent")
     {
         _channelFactory = channelFactory ?? throw new ArgumentNullException(nameof(channelFactory));
     }
@@ -126,10 +128,20 @@ public class NotificationAgent : BaseAgent
 /// <summary>
 /// Notification request model
 /// </summary>
-public record NotificationRequest
+public record NotificationRequest : Agents.Shared.Validation.INotificationRequest
 {
     public required string Channel { get; init; }
     public required string Recipient { get; init; }
     public required string Subject { get; init; }
     public required string Content { get; init; }
+}
+
+/// <summary>
+/// Validator for NotificationRequest with comprehensive security and business rules
+/// </summary>
+public class NotificationRequestValidator : Agents.Shared.Validation.NotificationRequestValidatorBase<NotificationRequest>
+{
+    public NotificationRequestValidator() : base()
+    {
+    }
 }

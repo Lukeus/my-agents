@@ -2,19 +2,24 @@ using Agents.Application.Core;
 using Agents.Application.DevOps;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
+using Agents.Tests.Unit.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
 using Moq;
 using System.Text.Json;
 using Xunit;
 
-namespace Agents.Tests.Unit;
+namespace Agents.Tests.Unit.DevOps;
 
 public class DevOpsAgentTests
 {
     private readonly Mock<ILLMProvider> _mockLLMProvider;
     private readonly Mock<IPromptLoader> _mockPromptLoader;
     private readonly Mock<IEventPublisher> _mockEventPublisher;
+    private readonly Mock<IInputSanitizer> _mockInputSanitizer;
     private readonly Mock<ILogger<DevOpsAgent>> _mockLogger;
     private readonly DevOpsAgent _agent;
 
@@ -23,12 +28,17 @@ public class DevOpsAgentTests
         _mockLLMProvider = new Mock<ILLMProvider>();
         _mockPromptLoader = new Mock<IPromptLoader>();
         _mockEventPublisher = new Mock<IEventPublisher>();
+        _mockInputSanitizer = new Mock<IInputSanitizer>();
         _mockLogger = new Mock<ILogger<DevOpsAgent>>();
+
+        // Setup sanitizer to pass through by default
+        _mockInputSanitizer.Setup(s => s.Sanitize(It.IsAny<string>())).Returns<string>(input => input);
 
         _agent = new DevOpsAgent(
             _mockLLMProvider.Object,
             _mockPromptLoader.Object,
             _mockEventPublisher.Object,
+            _mockInputSanitizer.Object,
             _mockLogger.Object);
     }
 
@@ -78,12 +88,21 @@ public class DevOpsAgentTests
     }
 
     [Theory]
-    [InlineData("create_issue")]
-    [InlineData("update_project")]
-    [InlineData("analyze_sprint")]
-    public async Task ExecuteAsync_WithValidActions_ShouldProcessSuccessfully(string action)
+    [InlineData("create_issue", "Issue created successfully")]
+    [InlineData("update_project", "Project updated")]
+    [InlineData("analyze_sprint", "Sprint analysis complete")]
+    public async Task ExecuteAsync_WithValidActions_ShouldProcessSuccessfully(string action, string expectedOutput)
     {
         // Arrange
+        var (kernel, mockChat) = SemanticKernelTestHelper.CreateMockKernel(
+            "{\"result\":\"success\",\"details\":\"Operation completed\"}");
+        SemanticKernelTestHelper.SetupMockLLMProvider(_mockLLMProvider, kernel);
+
+        // Setup prompt loader to return valid prompts without template variables
+        var prompt = SemanticKernelTestHelper.CreateMockPrompt("Analyze the DevOps request and provide recommendations.", $"devops-{action}");
+        _mockPromptLoader.Setup(p => p.LoadPromptAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(prompt);
+
         var request = new DevOpsRequest
         {
             Action = action,
@@ -101,7 +120,21 @@ public class DevOpsAgentTests
         // Act
         var result = await _agent.ExecuteAsync(input, context);
 
-        // Assert - May fail if prompts not found, but agent logic executes
+        // Assert
         result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Output.Should().Contain(expectedOutput);
+
+        // Verify LLM was invoked for actions that use it
+        if (action != "trigger_workflow")
+        {
+            mockChat.Verify(
+                c => c.GetChatMessageContentsAsync(
+                    It.IsAny<ChatHistory>(),
+                    It.IsAny<PromptExecutionSettings>(),
+                    It.IsAny<Kernel>(),
+                    It.IsAny<CancellationToken>()),
+                Times.AtLeastOnce);
+        }
     }
 }

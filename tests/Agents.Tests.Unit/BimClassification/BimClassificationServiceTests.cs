@@ -3,6 +3,7 @@ using Agents.Application.BimClassification;
 using Agents.Application.BimClassification.Services;
 using Agents.Domain.BimClassification.Entities;
 using Agents.Domain.BimClassification.Interfaces;
+using Agents.Shared.Security;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -27,12 +28,16 @@ public class BimClassificationServiceTests
         var mockLLMProvider = new Mock<Agents.Application.Core.ILLMProvider>();
         var mockPromptLoader = new Mock<Agents.Infrastructure.Prompts.Services.IPromptLoader>();
         var mockEventPublisher = new Mock<Agents.Domain.Core.Interfaces.IEventPublisher>();
+        var mockInputSanitizer = new Mock<IInputSanitizer>();
         var mockAgentLogger = new Mock<ILogger<BimClassificationAgent>>();
+
+        mockInputSanitizer.Setup(s => s.Sanitize(It.IsAny<string>())).Returns<string>(input => input);
 
         _agent = new BimClassificationAgent(
             mockLLMProvider.Object,
             mockPromptLoader.Object,
             mockEventPublisher.Object,
+            mockInputSanitizer.Object,
             mockAgentLogger.Object);
 
         _mockLogger = new Mock<ILogger<BimClassificationService>>();

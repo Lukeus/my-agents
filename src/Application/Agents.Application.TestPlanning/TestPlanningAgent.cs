@@ -1,6 +1,7 @@
 using Agents.Application.Core;
 using Agents.Domain.Core.Interfaces;
 using Agents.Infrastructure.Prompts.Services;
+using Agents.Shared.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Agents.Application.TestPlanning;
@@ -14,8 +15,9 @@ public class TestPlanningAgent : BaseAgent
         ILLMProvider llmProvider,
         IPromptLoader promptLoader,
         IEventPublisher eventPublisher,
+        IInputSanitizer inputSanitizer,
         ILogger<TestPlanningAgent> logger)
-        : base(llmProvider, promptLoader, eventPublisher, logger, "TestPlanningAgent")
+        : base(llmProvider, promptLoader, eventPublisher, logger, inputSanitizer, "TestPlanningAgent")
     {
     }
 

@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.67.1" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.AzureOpenAI" Version="1.67.1" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.67.1-alpha" />
+    <PackageReference Include="Polly" Version="8.6.4" />
   </ItemGroup>
 
   <PropertyGroup>

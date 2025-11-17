@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\Agents.Domain.Notification\Agents.Domain.Notification.csproj" />
     <ProjectReference Include="..\Agents.Application.Core\Agents.Application.Core.csproj" />
+    <ProjectReference Include="..\..\Shared\Agents.Shared.Validation\Agents.Shared.Validation.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
